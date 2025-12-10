@@ -13,7 +13,7 @@ const services = [
   },
   {
     title: 'Strength & Conditioning Support',
-    points: ['Foundations for young athletes', 'Power, speed, and robustness', 'Safe load management'],
+    points: ['Strength foundations for developing athletes', 'Power, speed, and robustness', 'Safe load management'],
   },
   {
     title: 'Mobile Home Visits',
@@ -26,6 +26,14 @@ const services = [
   {
     title: 'Education & Workshops',
     points: ['Warm-up routines', 'Recovery habits', 'Injury-prevention tips for teams'],
+  },
+  {
+    title: 'Performance testing & movement screening',
+    points: [
+      'Simple movement screens for young athletes',
+      'Baseline testing to track progress',
+      'Clear feedback for athletes, parents, and coaches',
+    ],
   },
 ];
 
@@ -61,3 +69,4 @@ export function ServicesSection() {
 }
 
 export default ServicesSection;
+

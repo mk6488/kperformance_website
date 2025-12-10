@@ -6,6 +6,11 @@ const tiers = [
   { duration: '45 minutes', price: '£45', notes: 'Great for focused areas or follow-ups.' },
   { duration: '60 minutes', price: '£55', notes: 'Balanced time for assessment + treatment.' },
   { duration: '75 minutes', price: '£65', notes: 'Extended session for complex needs.' },
+  {
+    duration: 'Junior athlete block (3 sessions)',
+    price: '£150',
+    notes: 'Ideal for building momentum with rehab or performance work over several weeks.',
+  },
 ];
 
 export function PricingSection() {
@@ -18,7 +23,7 @@ export function PricingSection() {
           subtitle="Mobile within Bristol. Travel fees may apply for areas further out — we’ll confirm together."
         />
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {tiers.map((tier) => (
             <Card key={tier.duration} className="h-full flex flex-col gap-3">
               <h3 className="text-xl font-semibold text-brand-charcoal">{tier.duration}</h3>
@@ -38,3 +43,4 @@ export function PricingSection() {
 }
 
 export default PricingSection;
+

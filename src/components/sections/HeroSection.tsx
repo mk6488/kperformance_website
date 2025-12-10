@@ -13,6 +13,10 @@ export function HeroSection() {
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">
               Soft Tissue Therapy • Sports Massage
             </p>
+            <p className="text-base text-white/90">
+              Hi, I&apos;m Mike — a soft tissue therapist and strength &amp; conditioning coach
+              supporting young athletes and active people around Bristol.
+            </p>
             <h1 className="text-4xl md:text-5xl font-semibold leading-tight">
               Soft Tissue Therapy &amp; Sports Massage in Bristol, specialising in young athletes
             </h1>
@@ -57,3 +61,4 @@ export function HeroSection() {
 }
 
 export default HeroSection;
+

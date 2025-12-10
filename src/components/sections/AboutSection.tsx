@@ -8,8 +8,8 @@ export function AboutSection() {
       <div className="flex flex-col gap-10">
         <SectionHeading
           eyebrow="About"
-          title="Hi, I'm Katie — soft tissue therapist and coach"
-          subtitle="Solo practitioner with Level 5 Soft Tissue Therapy and Level 4 S&C, supporting young athletes, runners, and active people around Bristol."
+          title="Hi, I’m Mike — soft tissue therapist and strength coach"
+          subtitle="Solo practitioner with Level 5 Soft Tissue Therapy and Level 4 S&C, supporting youth sport, runners, and active people around Bristol."
           align="left"
         />
 
@@ -21,9 +21,14 @@ export function AboutSection() {
           <div className="space-y-4">
             <Card>
               <p className="text-slate-700 leading-relaxed">
-                I blend hands-on treatment with movement coaching. Sessions are mobile, friendly, and
-                designed to help you feel confident about your body — whether you’re competing, just
-                starting out, or returning from injury.
+                I blend evidence-based soft tissue therapy with simple, effective movement coaching.
+                Sessions are mobile, friendly, and designed to help you feel confident in your body —
+                whether you’re competing, juggling sport around school and exams, or returning from
+                injury.
+              </p>
+              <p className="text-slate-700 leading-relaxed mt-3">
+                Experience spans youth sport, school and club programmes, and active adults who want to
+                stay robust without overcomplicating the plan.
               </p>
               <ul className="mt-4 space-y-2 text-slate-700">
                 <li>• Level 5 Soft Tissue Therapy</li>
@@ -36,7 +41,7 @@ export function AboutSection() {
               <p className="font-semibold text-brand-navy">Safeguarding & working with under-18s</p>
               <p className="text-slate-700">
                 DBS checked and safeguarding trained. Clear communication with parents/guardians and
-                coaches to keep sessions supportive and transparent.
+                coaches keeps sessions supportive and transparent.
               </p>
             </div>
           </div>
@@ -47,3 +52,4 @@ export function AboutSection() {
 }
 
 export default AboutSection;
+

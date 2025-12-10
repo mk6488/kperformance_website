@@ -53,7 +53,7 @@ export function ContactSection() {
                 <label className="flex flex-col gap-2 text-sm text-brand-charcoal">
                   Is this session for you or your child?
                   <select
-                    name="for"
+                    name="forWhom"
                     className="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
                   >
                     <option value="self">For me</option>
@@ -82,6 +82,19 @@ export function ContactSection() {
                 />
               </label>
 
+              <label className="flex items-start gap-2 text-sm text-brand-charcoal">
+                <input
+                  type="checkbox"
+                  required
+                  className="mt-1 h-4 w-4 rounded border border-slate-300 text-brand-navy focus:ring-brand-blue"
+                  name="consent"
+                />
+                <span>
+                  I consent to being contacted about my enquiry and understand my details will be handled
+                  in line with privacy best practice.
+                </span>
+              </label>
+
               <Button type="submit">Send message</Button>
             </form>
           </Card>
@@ -92,11 +105,20 @@ export function ContactSection() {
               I&apos;m happy to chat and answer quick questions. Share your sport, goals, and location
               and I&apos;ll reply with availability.
             </p>
-            <Button variant="secondary" className="bg-white/95 text-brand-navy hover:bg-white">
+            <Button
+              variant="whatsapp"
+              onClick={() => {
+                // TODO: replace 447000000000 with the real WhatsApp number
+                window.open(
+                  'https://wa.me/447000000000?text=Hi%20Mike,%20I%20found%20your%20website%20and%20would%20like%20to%20ask%20about%20soft%20tissue%20therapy.',
+                  '_blank',
+                );
+              }}
+            >
               Open WhatsApp
             </Button>
             <p className="text-sm text-white/75">
-              Placeholder link — update with your number when ready.
+              This button opens WhatsApp with a pre-filled message. Update the number when you’re ready.
             </p>
           </Card>
         </div>
@@ -106,3 +128,4 @@ export function ContactSection() {
 }
 
 export default ContactSection;
+

@@ -18,6 +18,12 @@ const people = [
     description: 'Reducing day-to-day discomfort from training, desk time, or busy schedules.',
     accent: 'border-t-4 border-brand-amber',
   },
+  {
+    title: 'Parents of young athletes',
+    description:
+      'Support for your child’s sport, with clear communication, safeguarding awareness, and age-appropriate loading.',
+    accent: 'border-t-4 border-brand-blue',
+  },
 ];
 
 export function WhoIHelpSection() {
@@ -29,7 +35,7 @@ export function WhoIHelpSection() {
           title="Tailored support for athletes and active people"
           subtitle="Whether you’re developing as a young athlete or balancing training with life, I adjust treatment and education to your context."
         />
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {people.map((item) => (
             <Card key={item.title} className={`${item.accent} h-full`}>
               <h3 className="text-xl font-semibold text-brand-charcoal mb-2">{item.title}</h3>
@@ -43,3 +49,4 @@ export function WhoIHelpSection() {
 }
 
 export default WhoIHelpSection;
+
