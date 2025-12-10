@@ -10,7 +10,7 @@ export function ContactSection() {
         <SectionHeading
           eyebrow="Contact"
           title="Book a session or ask a question"
-          subtitle="Fill in the form or drop a WhatsApp message. I’ll reply with availability and next steps."
+          subtitle="Whether you&apos;re an athlete, a parent, or simply dealing with pain, I&apos;d be happy to help. Send an enquiry and I&apos;ll reply with availability and next steps."
           align="left"
         />
 
@@ -78,7 +78,7 @@ export function ContactSection() {
                   name="message"
                   rows={4}
                   className="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
-                  placeholder="Tell me about your sport, goals, and any pain or injury."
+                  placeholder="Tell me about your sport, goals, and any pain or niggles you’re dealing with."
                 />
               </label>
 
@@ -91,19 +91,19 @@ export function ContactSection() {
                 />
                 <span>
                   I consent to being contacted about my enquiry and understand my details will be handled
-                  in line with privacy best practice.
+                  in line with good privacy practice.
                 </span>
               </label>
 
-              <Button type="submit">Send message</Button>
+              <Button type="submit">Send enquiry</Button>
             </form>
           </Card>
 
           <Card className="h-full space-y-3 bg-brand-navy text-white">
             <h3 className="text-xl font-semibold">Prefer WhatsApp?</h3>
             <p className="text-white/85">
-              I&apos;m happy to chat and answer quick questions. Share your sport, goals, and location
-              and I&apos;ll reply with availability.
+              I&apos;m happy to chat and answer quick questions. Share your sport, goals, and location and
+              I&apos;ll reply as soon as I can with some options.
             </p>
             <Button
               variant="whatsapp"
@@ -118,7 +118,8 @@ export function ContactSection() {
               Open WhatsApp
             </Button>
             <p className="text-sm text-white/75">
-              This button opens WhatsApp with a pre-filled message. Update the number when you’re ready.
+              This button opens WhatsApp with a pre-filled message. Update the number in the link when
+              you&apos;re ready to go live.
             </p>
           </Card>
         </div>

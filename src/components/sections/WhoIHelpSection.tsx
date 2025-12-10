@@ -5,23 +5,26 @@ import { SectionHeading } from '../ui/SectionHeading';
 const people = [
   {
     title: 'Youth & teen athletes',
-    description: 'Building confidence, supporting growth, and keeping training safe for young performers.',
+    description:
+      'Developing bodies need the right mix of hands-on care and age-appropriate strength foundations. Ideal for rowers, runners, footballers, dancers, swimmers, and school-sport athletes.',
     accent: 'border-t-4 border-brand-navy',
   },
   {
     title: 'Adult recreational athletes',
-    description: 'Balancing work, family, and sport with practical recovery and mobility strategies.',
+    description:
+      'Whether you train for health, competition, or enjoyment, I help you reduce pain, recover smarter, and move with confidence.',
     accent: 'border-t-4 border-brand-green',
   },
   {
     title: 'Active people with pain',
-    description: 'Reducing day-to-day discomfort from training, desk time, or busy schedules.',
+    description:
+      'Everyday aches, overuse injuries, and workplace tension. Soft tissue therapy and movement coaching can help you get back to feeling normal again.',
     accent: 'border-t-4 border-brand-amber',
   },
   {
     title: 'Parents of young athletes',
     description:
-      'Support for your child’s sport, with clear communication, safeguarding awareness, and age-appropriate loading.',
+      'Support for your child’s sport, with clear communication, safeguarding awareness, and age-appropriate loading so they can enjoy their sport and stay healthy.',
     accent: 'border-t-4 border-brand-blue',
   },
 ];
@@ -32,8 +35,8 @@ export function WhoIHelpSection() {
       <div className="flex flex-col gap-10">
         <SectionHeading
           eyebrow="Who I help"
-          title="Tailored support for athletes and active people"
-          subtitle="Whether you’re developing as a young athlete or balancing training with life, I adjust treatment and education to your context."
+          title="Supporting athletes, parents, and active people"
+          subtitle="Whether you&apos;re a teen in sport, a busy parent, or an active adult managing work and training, support is tailored to your context."
         />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {people.map((item) => (

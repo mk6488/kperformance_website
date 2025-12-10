@@ -18,11 +18,11 @@ export function HeroSection() {
               supporting young athletes and active people around Bristol.
             </p>
             <h1 className="text-4xl md:text-5xl font-semibold leading-tight">
-              Soft Tissue Therapy &amp; Sports Massage in Bristol, specialising in young athletes
+              Soft Tissue Therapy &amp; Sports Massage in Bristol
             </h1>
             <p className="text-lg text-white/85">
-              Mobile treatments focused on recovery, performance, and confidence for youth and adult
-              athletes. I come to you with tailored hands-on care and movement support.
+              Mobile treatment, movement coaching, and recovery support — brought directly to your home.
+              You don&apos;t need a clinic; you just need the right help, at the right time.
             </p>
           </div>
           <div className="flex flex-wrap gap-4">
@@ -39,8 +39,7 @@ export function HeroSection() {
             </Button>
           </div>
           <p className="text-sm text-white/80">
-            Mobile in and around Bristol • Safeguarding trained • Focused on young and developing
-            athletes
+            Great for teens in sport, adult athletes, and anyone managing pain or niggles.
           </p>
         </div>
 

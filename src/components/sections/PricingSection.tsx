@@ -3,13 +3,25 @@ import { Section } from '../ui/Section';
 import { SectionHeading } from '../ui/SectionHeading';
 
 const tiers = [
-  { duration: '45 minutes', price: '£45', notes: 'Great for focused areas or follow-ups.' },
-  { duration: '60 minutes', price: '£55', notes: 'Balanced time for assessment + treatment.' },
-  { duration: '75 minutes', price: '£65', notes: 'Extended session for complex needs.' },
+  {
+    duration: '45 minutes',
+    price: '£45',
+    notes: 'Great for targeted soft tissue work, quick tune-ups, or follow-up sessions.',
+  },
+  {
+    duration: '60 minutes',
+    price: '£55',
+    notes: 'Ideal for a full assessment, hands-on treatment, and movement coaching.',
+  },
+  {
+    duration: '75 minutes',
+    price: '£65',
+    notes: 'Recommended for more complex issues or multi-area treatment.',
+  },
   {
     duration: 'Junior athlete block (3 sessions)',
     price: '£150',
-    notes: 'Ideal for building momentum with rehab or performance work over several weeks.',
+    notes: 'Perfect for building momentum with rehab or performance development over several weeks.',
   },
 ];
 
@@ -34,8 +46,8 @@ export function PricingSection() {
         </div>
 
         <p className="text-sm text-slate-600">
-          Serving Bristol and nearby areas. I bring the treatment table and equipment; we can plan for
-          home, club, or pitch-side locations.
+          All sessions are delivered at your home. Travel within Bristol is included; small additional
+          fees may apply for locations outside the city.
         </p>
       </div>
     </Section>
