@@ -1,18 +1,27 @@
+import { Header } from './components/layout/Header';
+import { Footer } from './components/layout/Footer';
+import { HeroSection } from './components/sections/HeroSection';
+import { WhoIHelpSection } from './components/sections/WhoIHelpSection';
+import { ServicesSection } from './components/sections/ServicesSection';
+import { HowItWorksSection } from './components/sections/HowItWorksSection';
+import { AboutSection } from './components/sections/AboutSection';
+import { PricingSection } from './components/sections/PricingSection';
+import { ContactSection } from './components/sections/ContactSection';
+
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 via-slate-950 to-black text-slate-100 px-6">
-      <main className="max-w-3xl text-center space-y-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-          K Performance
-        </p>
-        <h1 className="text-3xl md:text-4xl font-semibold leading-tight">
-          Soft Tissue Therapy &amp; Performance Support
-        </h1>
-        <p className="text-base text-slate-300">
-          Tailored care to help athletes and active individuals move, recover, and
-          perform at their best. Full marketing page coming soon.
-        </p>
+    <div className="bg-brand-offWhite text-brand-charcoal">
+      <Header />
+      <main className="space-y-0">
+        <HeroSection />
+        <WhoIHelpSection />
+        <ServicesSection />
+        <HowItWorksSection />
+        <AboutSection />
+        <PricingSection />
+        <ContactSection />
       </main>
+      <Footer />
     </div>
   );
 }
