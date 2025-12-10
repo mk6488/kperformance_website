@@ -1,0 +1,114 @@
+####################################
+# Node / pnpm
+####################################
+node_modules/
+.pnpm-store/
+.pnp.*
+.pnpm-debug.log
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+####################################
+# Environment files
+####################################
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Do NOT ignore *.example env files
+!.env.example
+
+####################################
+# Next.js
+####################################
+.next/
+out/
+dist/
+.next-static/
+.next-types/
+.next/server/
+.next/cache/
+
+# Next.js generated types
+.next/types/
+
+####################################
+# Turborepo
+####################################
+turbo/
+.turbo/
+turbo.json.lock
+
+####################################
+# Firebase
+####################################
+# Firebase local emulators
+firebase-debug.log
+firestore-debug.log
+auth-debug.log
+storage-debug.log
+
+# Firebase cache & state
+.firebase/
+.cache/
+
+####################################
+# Build output (general)
+####################################
+build/
+coverage/
+*.tsbuildinfo
+
+####################################
+# macOS junk
+####################################
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+__MACOSX/
+
+####################################
+# IDE / Editor files
+####################################
+
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains family
+.idea/
+*.iml
+
+# Sublime
+*.sublime-workspace
+*.sublime-project
+
+####################################
+# Netlify
+####################################
+.netlify/
+.netlify/state
+
+####################################
+# Misc
+####################################
+*.swp
+*.temp
+*.tmp
+*.bak
+
+# Local debug
+debug/
+
