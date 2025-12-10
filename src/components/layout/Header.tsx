@@ -36,7 +36,7 @@ export function Header() {
               key={link.id}
               type="button"
               onClick={() => handleNavClick(link.id)}
-              className="hover:text-brand-blue transition-colors"
+              className="hover:text-brand-blue transition-colors cursor-pointer"
             >
               {link.label}
             </button>
@@ -70,7 +70,7 @@ export function Header() {
                 key={link.id}
                 type="button"
                 onClick={() => handleNavClick(link.id)}
-                className="text-left text-brand-charcoal hover:text-brand-blue transition-colors"
+                className="text-left text-brand-charcoal hover:text-brand-blue transition-colors cursor-pointer"
               >
                 {link.label}
               </button>
