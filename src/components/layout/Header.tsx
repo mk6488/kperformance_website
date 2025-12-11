@@ -28,7 +28,18 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-100">
       <div className="mx-auto flex items-center justify-between max-w-6xl px-4 md:px-6 lg:px-8 py-3">
-        <div className="text-lg font-semibold text-brand-navy">K Performance</div>
+        <div className="flex flex-col">
+          <button
+            type="button"
+            onClick={() => scrollToId('top')}
+            className="text-lg font-semibold tracking-tight text-brand-navy"
+          >
+            K Performance
+          </button>
+          <span className="mt-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-brand-navy/70 hidden sm:block">
+            Soft Tissue Therapy • Sports Massage
+          </span>
+        </div>
 
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-brand-charcoal">
           {navLinks.map((link) => (
@@ -84,3 +95,6 @@ export function Header() {
 }
 
 export default Header;
+
+
+
