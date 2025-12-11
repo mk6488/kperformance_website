@@ -16,8 +16,8 @@ export function HeroSection() {
       </div>
 
       <div className="relative">
-        <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-8 pt-24 pb-16 md:pt-32 md:pb-20">
-          <div className="space-y-6 max-w-2xl">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-8 min-h-[70vh] flex items-center pt-16 pb-12 md:pt-20 md:pb-16">
+          <div className="space-y-6 max-w-3xl">
             <div className="space-y-2">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">
                 Soft Tissue Therapy • Sports Massage
@@ -58,5 +58,6 @@ export function HeroSection() {
 }
 
 export default HeroSection;
+
 
 
