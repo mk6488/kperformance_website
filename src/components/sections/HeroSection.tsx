@@ -1,57 +1,55 @@
+import heroImage from '../../assets/hero.png';
 import { Button } from '../ui/Button';
 import { Section } from '../ui/Section';
 
 export function HeroSection() {
   return (
-    <Section
-      className="bg-gradient-to-tr from-brand-navy to-brand-blue text-white"
-      id="top"
-    >
-      <div className="grid items-center gap-10 md:grid-cols-2">
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">
-              Soft Tissue Therapy • Sports Massage
-            </p>
-            <p className="text-base text-white/90">
-              Hi, I&apos;m Mike — a soft tissue therapist and strength &amp; conditioning coach
-              supporting young athletes and active people around Bristol.
-            </p>
-            <h1 className="text-4xl md:text-5xl font-semibold leading-tight">
-              Soft Tissue Therapy &amp; Sports Massage in Bristol
-            </h1>
-            <p className="text-lg text-white/85">
-              Mobile treatment, movement coaching, and recovery support — brought directly to your home.
-              You don&apos;t need a clinic; you just need the right help, at the right time.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-4">
-            <Button onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
-              Book a session
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() =>
-                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
-              }
-            >
-              WhatsApp me
-            </Button>
-          </div>
-          <p className="text-sm text-white/80">
-            Great for teens in sport, adult athletes, and anyone managing pain or niggles.
-          </p>
-        </div>
+    <Section id="top" className="relative overflow-hidden bg-brand-navy text-white">
+      <div className="absolute inset-0">
+        <img
+          src={heroImage}
+          alt="Three teenage athletes sprinting on a football pitch during training"
+          className="h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-tr from-brand-navy/90 via-brand-navy/70 to-brand-blue/40" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-brand-navy/40" />
+      </div>
 
-        <div className="relative">
-          <div className="aspect-[4/3] rounded-2xl bg-white/10 border border-white/15 backdrop-blur flex items-center justify-center">
-            <div className="text-center px-6">
-              <p className="text-sm uppercase tracking-[0.18em] text-white/70">Future imagery</p>
-              <p className="text-lg font-semibold">Add athlete / treatment visuals here</p>
-              <p className="text-sm text-white/80 mt-2">
-                Placeholder panel for photography or brand illustration.
+      <div className="relative">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-8 py-20 md:py-28">
+          <div className="space-y-6 max-w-2xl">
+            <div className="space-y-2">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">
+                Soft Tissue Therapy • Sports Massage
+              </p>
+              <p className="text-base text-white/90">
+                Hi, I&apos;m Mike — a soft tissue therapist and strength &amp; conditioning coach
+                supporting young athletes and active people around Bristol.
+              </p>
+              <h1 className="text-4xl md:text-5xl font-semibold leading-tight">
+                Soft Tissue Therapy &amp; Sports Massage in Bristol
+              </h1>
+              <p className="text-lg text-white/85">
+                Mobile treatment, movement coaching, and recovery support — brought directly to your
+                home. You don&apos;t need a clinic; you just need the right help, at the right time.
               </p>
             </div>
+            <div className="flex flex-wrap gap-4">
+              <Button onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
+                Book a session
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+                }
+              >
+                WhatsApp me
+              </Button>
+            </div>
+            <p className="text-sm text-white/80">
+              Great for teens in sport, adult athletes, and anyone managing pain or niggles.
+            </p>
           </div>
         </div>
       </div>
@@ -60,4 +58,5 @@ export function HeroSection() {
 }
 
 export default HeroSection;
+
 
