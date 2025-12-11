@@ -110,7 +110,7 @@ export function ContactSection() {
               onClick={() => {
                 // TODO: replace 447000000000 with the real WhatsApp number
                 window.open(
-                  'https://wa.me/447000000000?text=Hi%20Mike,%20I%20found%20your%20website%20and%20would%20like%20to%20ask%20about%20soft%20tissue%20therapy.',
+                  'https://wa.me/44YOURNUMBERHERE?text=Hi%20Mike,%20I%20found%20your%20website%20and%20would%20like%20to%20ask%20about%20soft%20tissue%20therapy.',
                   '_blank',
                 );
               }}
