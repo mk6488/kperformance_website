@@ -21,6 +21,18 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <form name="contact" method="POST" data-netlify="true" hidden>
+      <input type="hidden" name="form-name" value="contact" />
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="tel" name="phone" />
+      <textarea name="message"></textarea>
+      <select name="forWhom">
+        <option value="self">For me</option>
+        <option value="child">For my child</option>
+      </select>
+      <input type="number" name="age" />
+    </form>
   </body>
 </html>
 
