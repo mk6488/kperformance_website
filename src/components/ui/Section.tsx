@@ -28,3 +28,6 @@ export function Section({ id, variant = 'default', className = '', children }: S
 }
 
 export default Section;
+
+
+

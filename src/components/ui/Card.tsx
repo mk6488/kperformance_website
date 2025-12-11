@@ -17,3 +17,6 @@ export function Card({ className = '', children }: CardProps) {
 }
 
 export default Card;
+
+
+
