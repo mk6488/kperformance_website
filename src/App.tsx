@@ -7,8 +7,23 @@ import { HowItWorksSection } from './components/sections/HowItWorksSection';
 import { AboutSection } from './components/sections/AboutSection';
 import { PricingSection } from './components/sections/PricingSection';
 import { ContactSection } from './components/sections/ContactSection';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 function App() {
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
+
+  if (pathname === '/privacy') {
+    return (
+      <div className="bg-brand-offWhite text-brand-charcoal">
+        <Header />
+        <main className="space-y-0">
+          <PrivacyPolicy />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-brand-offWhite text-brand-charcoal">
       <Header />

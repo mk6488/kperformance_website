@@ -11,6 +11,12 @@ export function Footer() {
         <p className="text-sm text-white/70">
           Mobile service available. Safeguarding trained and experienced with young athletes.
         </p>
+        <a
+          href="/privacy"
+          className="text-sm text-white/70 hover:text-white underline underline-offset-4"
+        >
+          Privacy Policy
+        </a>
       </div>
     </footer>
   );
