@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { IntakeStep, IntakeStepId, IntakeValues, defaultIntakeValues } from './types';
@@ -7,6 +7,7 @@ import StepProblem from './steps/StepProblem';
 import StepMedical from './steps/StepMedical';
 import StepLifestyle from './steps/StepLifestyle';
 import StepConsent from './steps/StepConsent';
+import useIntakeDraft from './useIntakeDraft';
 
 type Errors = Record<string, string>;
 
@@ -91,6 +92,14 @@ export default function IntakeWizard() {
   const [values, setValues] = useState<IntakeValues>(defaultIntakeValues);
   const [stepIndex, setStepIndex] = useState(0);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const { restoreAvailable, restoreDraft, clearDraft } = useIntakeDraft(values);
+  const [showRestoreBanner, setShowRestoreBanner] = useState(false);
+
+  useEffect(() => {
+    if (restoreAvailable) {
+      setShowRestoreBanner(true);
+    }
+  }, [restoreAvailable]);
 
   const step = steps[stepIndex];
 
@@ -133,8 +142,43 @@ export default function IntakeWizard() {
     onChange: handleChange,
   };
 
+  const handleResume = () => {
+    const draftValues = restoreDraft();
+    if (draftValues) {
+      setValues(draftValues);
+      setTouched({});
+      setStepIndex(0);
+    }
+    setShowRestoreBanner(false);
+  };
+
+  const handleStartAgain = () => {
+    clearDraft();
+    setValues(defaultIntakeValues);
+    setTouched({});
+    setStepIndex(0);
+    setShowRestoreBanner(false);
+  };
+
   return (
     <div className="space-y-4">
+      {showRestoreBanner ? (
+        <div className="rounded-lg border border-slate-200 bg-brand-offWhite px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-brand-charcoal space-y-1">
+            <p className="font-semibold text-brand-navy">You have a saved form from an earlier visit.</p>
+            <p className="text-slate-700">Would you like to continue where you left off?</p>
+          </div>
+          <div className="flex gap-3">
+            <Button type="button" onClick={handleResume}>
+              Resume form
+            </Button>
+            <Button type="button" variant="secondary" onClick={handleStartAgain}>
+              Start again
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex items-center justify-between text-sm text-slate-700">
         <span className="font-medium text-brand-charcoal">
           Step {stepIndex + 1} of {steps.length}
