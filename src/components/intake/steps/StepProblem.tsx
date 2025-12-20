@@ -12,8 +12,10 @@ export default function StepProblem({ values, errors, touched, onChange }: Props
 
   return (
     <div className="space-y-6">
-      <label className="flex flex-col gap-2 text-sm font-medium text-slate-800">
-        Main concern <span className="text-red-600">*</span>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-slate-800">
+          Main concern <span className="text-red-600">*</span>
+        </label>
         <textarea
           value={values.problem.mainConcern}
           onChange={(e) => onChange('problem.mainConcern', e.target.value)}
@@ -24,7 +26,7 @@ export default function StepProblem({ values, errors, touched, onChange }: Props
         {showError('problem.mainConcern') && (
           <p className="text-sm text-red-600">{errors['problem.mainConcern']}</p>
         )}
-      </label>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-800">

@@ -20,7 +20,10 @@ export default function StepConsent({ values, errors, touched, onChange }: Props
             onChange={(e) => onChange('consent.healthDataConsent', e.target.checked)}
             className="mt-1 h-4 w-4 rounded border border-slate-300 text-brand-navy focus:ring-brand-blue"
           />
-          <span>Consent to process health information for the purpose of assessment and treatment.</span>
+          <span>
+            Consent to process health information for the purpose of assessment and treatment{' '}
+            <span className="text-red-600">*</span>
+          </span>
         </label>
         {showError('consent.healthDataConsent') && (
           <p className="text-sm text-red-600">{errors['consent.healthDataConsent']}</p>
@@ -33,7 +36,9 @@ export default function StepConsent({ values, errors, touched, onChange }: Props
             onChange={(e) => onChange('consent.confirmTruthful', e.target.checked)}
             className="mt-1 h-4 w-4 rounded border border-slate-300 text-brand-navy focus:ring-brand-blue"
           />
-          <span>Information provided is accurate to the best of my knowledge.</span>
+          <span>
+            Information provided is accurate to the best of my knowledge <span className="text-red-600">*</span>
+          </span>
         </label>
         {showError('consent.confirmTruthful') && (
           <p className="text-sm text-red-600">{errors['consent.confirmTruthful']}</p>
