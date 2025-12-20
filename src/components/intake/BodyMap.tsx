@@ -36,26 +36,6 @@ export default function BodyMap({ markers, onChange }: Props) {
 
   const viewMarkers = useMemo(() => markers.filter((m) => m.view === view), [markers, view]);
 
-  const handleImageClick = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-
-    const next = [...markers, { view, x, y }];
-    onChange(next);
-  };
-
-  const handleRemoveMarker = (index: number) => {
-    const globalIndex = markers.findIndex(
-      (m, i) => m.view === view && i === viewMarkersIndexToGlobal(index, markers, view),
-    );
-    if (globalIndex >= 0) {
-      const next = [...markers];
-      next.splice(globalIndex, 1);
-      onChange(next);
-    }
-  };
-
   const viewMarkersIndexToGlobal = (viewIndex: number, allMarkers: Marker[], currentView: BodyView) => {
     let count = -1;
     for (let i = 0; i < allMarkers.length; i += 1) {
@@ -65,6 +45,24 @@ export default function BodyMap({ markers, onChange }: Props) {
       }
     }
     return -1;
+  };
+
+  const handleImageClick = (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+
+    const next = [...markers, { view, x, y }];
+    onChange(next);
+  };
+
+  const handleRemoveMarker = (viewIndex: number) => {
+    const globalIndex = viewMarkersIndexToGlobal(viewIndex, markers, view);
+    if (globalIndex === -1) return;
+
+    const next = [...markers];
+    next.splice(globalIndex, 1);
+    onChange(next);
   };
 
   const clearCurrentView = () => {
@@ -78,7 +76,11 @@ export default function BodyMap({ markers, onChange }: Props) {
           <button
             key={opt.id}
             type="button"
-            onClick={() => setView(opt.id)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setView(opt.id);
+            }}
             className={`rounded-full border px-3 py-1 text-sm font-medium transition-colors ${
               opt.id === view
                 ? 'border-brand-navy bg-brand-navy text-white'

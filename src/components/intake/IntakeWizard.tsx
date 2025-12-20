@@ -8,7 +8,9 @@ import StepBodyMap from './steps/StepBodyMap';
 import StepMedical from './steps/StepMedical';
 import StepLifestyle from './steps/StepLifestyle';
 import StepConsent from './steps/StepConsent';
+import StepReview from './steps/StepReview';
 import useIntakeDraft from './useIntakeDraft';
+import { submitIntake } from '../../lib/intakeApi';
 
 type Errors = Record<string, string>;
 
@@ -19,6 +21,7 @@ const steps: IntakeStep[] = [
   { id: 'medical', title: 'Medical', shortLabel: 'Medical' },
   { id: 'lifestyle', title: 'Lifestyle', shortLabel: 'Lifestyle' },
   { id: 'consent', title: 'Consent', shortLabel: 'Consent' },
+  { id: 'review', title: 'Review', shortLabel: 'Review' },
 ];
 
 function setByPath<T extends object>(obj: T, path: string, value: any): T {
@@ -96,6 +99,9 @@ export default function IntakeWizard() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const { restoreAvailable, restoreDraft, clearDraft } = useIntakeDraft(values);
   const [showRestoreBanner, setShowRestoreBanner] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState<{ intakeId: string } | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     if (restoreAvailable) {
@@ -135,6 +141,21 @@ export default function IntakeWizard() {
     setStepIndex((i) => Math.max(i - 1, 0));
   };
 
+  const handleSubmit = async () => {
+    setSubmitError(null);
+    setSubmitting(true);
+    try {
+      const result = await submitIntake(values);
+      setSubmitted(result);
+      clearDraft();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      setSubmitError('Something went wrong while submitting. Please try again or contact Mike.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const progress = ((stepIndex + 1) / steps.length) * 100;
 
   const stepProps = {
@@ -161,6 +182,24 @@ export default function IntakeWizard() {
     setStepIndex(0);
     setShowRestoreBanner(false);
   };
+
+  if (submitted) {
+    const ref = submitted.intakeId ? submitted.intakeId.slice(0, 8).toUpperCase() : 'REFERENCE';
+    return (
+      <div className="space-y-4">
+        <Card className="space-y-3">
+          <h2 className="text-xl font-semibold text-brand-navy">Thanks — your form has been submitted</h2>
+          <p className="text-slate-700">Mike will review this before your first session.</p>
+          <p className="text-sm text-slate-600">
+            Reference: <span className="font-semibold text-brand-navy">{ref}</span>
+          </p>
+          <p className="text-sm text-slate-600">
+            If you need to add anything, reply to your booking message or contact Mike.
+          </p>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -202,6 +241,7 @@ export default function IntakeWizard() {
         {step.id === 'medical' && <StepMedical {...stepProps} />}
         {step.id === 'lifestyle' && <StepLifestyle {...stepProps} />}
         {step.id === 'consent' && <StepConsent {...stepProps} />}
+        {step.id === 'review' && <StepReview values={values} />}
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
           <div className="flex gap-3">
@@ -214,14 +254,38 @@ export default function IntakeWizard() {
             >
               Back
             </Button>
-            <Button type="button" onClick={handleNext} className="px-5">
-              {stepIndex === steps.length - 1 ? 'Review & continue' : 'Next'}
-            </Button>
+            {step.id === 'review' ? (
+              <Button type="button" onClick={handleSubmit} className="px-5" disabled={submitting}>
+                {submitting ? 'Submitting…' : 'Submit form securely'}
+              </Button>
+            ) : (
+              <Button type="button" onClick={handleNext} className="px-5">
+                Next
+              </Button>
+            )}
           </div>
           <p className="text-sm text-slate-600">
-            Required fields are marked. Your answers help Mike prepare appropriately.
+            {step.id === 'review'
+              ? 'Use Back to make changes before submitting.'
+              : 'Required fields are marked. Your answers help Mike prepare appropriately.'}
           </p>
         </div>
+
+        {submitError && (
+          <div className="text-sm text-red-600 space-y-2">
+            <p>{submitError}</p>
+            <Button
+              type="button"
+              variant="secondary"
+              className="px-4"
+              onClick={() => {
+                window.open('https://wa.me/', '_blank');
+              }}
+            >
+              Message Mike on WhatsApp
+            </Button>
+          </div>
+        )}
       </Card>
     </div>
   );
