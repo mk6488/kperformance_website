@@ -211,7 +211,7 @@ export default function IntakeWizard() {
             >
               Back
             </Button>
-            <Button type="button" onClick={handleNext} disabled={!isStepValid} className="px-5">
+            <Button type="button" onClick={handleNext} className="px-5">
               {stepIndex === steps.length - 1 ? 'Review & continue' : 'Next'}
             </Button>
           </div>
