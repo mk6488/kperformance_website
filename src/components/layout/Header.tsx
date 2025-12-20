@@ -1,4 +1,4 @@
-import logoKCircle512 from '../../assets/logo-k-circle-512.png';
+import logoKCircle512 from '../../assets/logo-k-circle.png';
 import { useState } from 'react';
 import { Button } from '../ui/Button';
 
