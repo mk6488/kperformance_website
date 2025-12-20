@@ -12,3 +12,14 @@ VITE_FIREBASE_STORAGE_BUCKET=
 VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
 ```
+
+## Backend (Firebase Functions) setup
+
+- Install: `cd functions && npm install`
+- Local emulators (optional): `firebase emulators:start`
+- Deploy functions: `firebase deploy --only functions`
+
+Notes:
+- Functions deploy to `europe-west2`
+- Phase 6.2 will implement `submitIntake` logic
+- Set `.firebaserc` `projects.default` to your Firebase project ID before deploying
