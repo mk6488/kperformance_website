@@ -1,3 +1,4 @@
+import { logoKCircle512 } from '../../assets/logo-k-circle-512.png';
 import { useState } from 'react';
 import { Button } from '../ui/Button';
 
@@ -35,7 +36,7 @@ export function Header() {
             className="flex items-center gap-3"
           >
             <img
-              src="/logo-k-circle-512.png"
+              src={logoKCircle512}
               alt="K Performance logo"
               className="h-10 w-10 rounded-full"
             />
