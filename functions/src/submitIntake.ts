@@ -86,7 +86,7 @@ function validateAndSanitise(data: IntakePayload) {
   const redFlags = Array.isArray(medical.redFlags)
     ? medical.redFlags
         .map((f: unknown) => cap(trimOrEmpty(f), 280))
-        .filter((v): v is string => Boolean(v))
+        .filter((v: string): v is string => Boolean(v))
     : [];
 
   const activity = cap(trimOrEmpty(lifestyle.activity), 280);
@@ -108,7 +108,7 @@ function validateAndSanitise(data: IntakePayload) {
 
           return { view: view as 'front' | 'back' | 'left' | 'right', x, y };
         })
-        .filter((m): m is Marker => Boolean(m))
+        .filter((m: Marker | null): m is Marker => Boolean(m))
     : [];
 
   const consentHealth = toBool(consent.healthDataConsent);
