@@ -63,7 +63,7 @@ export function Header() {
             type="button"
             onClick={() => setIsOpen((prev) => !prev)}
             aria-label="Toggle navigation"
-            className="p-2 rounded-md border border-slate-200 text-brand-charcoal"
+            className="p-2 h-10 w-10 rounded-md border border-slate-200 text-brand-charcoal"
           >
             <span className="sr-only">Menu</span>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

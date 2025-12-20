@@ -16,7 +16,7 @@ const variantClasses: Record<SectionVariant, string> = {
 };
 
 export function Section({ id, variant = 'default', className = '', children }: SectionProps) {
-  const wrapperClasses = [variantClasses[variant], 'py-16 md:py-20', className]
+  const wrapperClasses = [variantClasses[variant], 'py-14 md:py-20', className]
     .filter(Boolean)
     .join(' ');
 

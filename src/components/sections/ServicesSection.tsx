@@ -56,13 +56,13 @@ const services = [
 export function ServicesSection() {
   return (
     <Section id="services">
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-8">
         <SectionHeading
           eyebrow="Services"
           title="Hands-on therapy, smart movement, clear guidance"
           subtitle="Mobile soft tissue therapy with clear communication. Sessions combine hands-on work, movement education, and simple take-home strategies."
         />
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => (
             <Card key={service.title} className="h-full flex flex-col gap-4">
               <div>

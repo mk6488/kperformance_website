@@ -29,7 +29,7 @@ export function ContactSection() {
 
   return (
     <Section id="contact" variant="muted">
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-8">
         <SectionHeading
           eyebrow="Contact"
           title="Book a session or ask a question"
@@ -37,7 +37,7 @@ export function ContactSection() {
           align="left"
         />
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
           <Card className="lg:col-span-2">
             {!submitted ? (
               <form
@@ -57,7 +57,7 @@ export function ContactSection() {
                       name="name"
                       type="text"
                       required
-                      className="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
+                      className="w-full rounded-md border border-slate-200 px-3 py-3 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
                     />
                   </label>
                   <label className="flex flex-col gap-2 text-sm text-brand-charcoal">
@@ -66,7 +66,7 @@ export function ContactSection() {
                       name="email"
                       type="email"
                       required
-                      className="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
+                      className="w-full rounded-md border border-slate-200 px-3 py-3 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
                     />
                   </label>
                   <label className="flex flex-col gap-2 text-sm text-brand-charcoal">
@@ -74,14 +74,14 @@ export function ContactSection() {
                     <input
                       name="phone"
                       type="tel"
-                      className="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
+                      className="w-full rounded-md border border-slate-200 px-3 py-3 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
                     />
                   </label>
                   <label className="flex flex-col gap-2 text-sm text-brand-charcoal">
                     Is this session for you or your child?
                     <select
                       name="forWhom"
-                      className="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
+                      className="w-full rounded-md border border-slate-200 px-3 py-3 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
                     >
                       <option value="self">For me</option>
                       <option value="child">For my child</option>
@@ -93,7 +93,7 @@ export function ContactSection() {
                     <input
                       name="child-age"
                       type="text"
-                      className="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
+                      className="w-full rounded-md border border-slate-200 px-3 py-3 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
                       placeholder="e.g. 15"
                     />
                   </label>
@@ -104,7 +104,7 @@ export function ContactSection() {
                   <textarea
                     name="message"
                     rows={4}
-                    className="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
+                    className="w-full rounded-md border border-slate-200 px-3 py-3 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
                     placeholder="Tell me about your sport, goals, and any pain or niggles you’re dealing with."
                   />
                 </label>
@@ -124,10 +124,12 @@ export function ContactSection() {
 
                 {error && <p className="text-sm text-red-600">{error}</p>}
 
-                <Button type="submit">Send enquiry</Button>
+                <Button type="submit" className="w-full sm:w-auto">
+                  Send enquiry
+                </Button>
               </form>
             ) : (
-              <div className="rounded-xl border border-brand-navy/20 bg-white p-8 shadow-sm">
+              <div className="rounded-xl border border-brand-navy/20 bg-white p-6 sm:p-8 shadow-sm">
                 <h3 className="text-xl font-semibold text-brand-navy">Thanks — your message has been sent</h3>
                 <p className="mt-2 text-slate-700">
                   I’ll be in touch shortly with availability and next steps.

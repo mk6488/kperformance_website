@@ -28,14 +28,14 @@ const tiers = [
 export function PricingSection() {
   return (
     <Section id="pricing">
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-8">
         <SectionHeading
           eyebrow="Pricing & locations"
           title="Simple, transparent pricing"
           subtitle="Mobile within Bristol. Travel fees may apply for areas further out — we’ll confirm together."
         />
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
           {tiers.map((tier) => (
             <Card key={tier.duration} className="h-full flex flex-col gap-3">
               <h3 className="text-xl font-semibold text-brand-charcoal">{tier.duration}</h3>

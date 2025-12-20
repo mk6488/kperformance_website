@@ -5,7 +5,7 @@ import { SectionHeading } from '../ui/SectionHeading';
 export function AboutSection() {
   return (
     <Section id="about">
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-8">
         <SectionHeading
           eyebrow="About"
           title="Hi, I’m Mike — soft tissue therapist and strength coach"
@@ -13,8 +13,8 @@ export function AboutSection() {
           align="left"
         />
 
-        <div className="grid gap-8 md:grid-cols-2 md:items-start">
-          <div className="rounded-2xl bg-brand-offWhite border border-slate-100 aspect-[4/3] flex items-center justify-center text-slate-500">
+        <div className="grid gap-6 md:grid-cols-2 md:items-start md:gap-8">
+          <div className="rounded-2xl bg-brand-offWhite border border-slate-100 aspect-[3/2] sm:aspect-[4/3] flex items-center justify-center text-slate-500">
             Imagery or practitioner photo placeholder
           </div>
 

@@ -16,23 +16,27 @@ export function HeroSection() {
       </div>
 
       <div className="relative">
-        <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-8 pt-16 pb-12 md:pt-20 md:pb-16">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-8 pt-14 pb-10 md:pt-20 md:pb-16">
           <div className="space-y-6 max-w-2xl">
             <div className="space-y-3">
-              <h1 className="text-4xl md:text-5xl font-semibold leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]">
                 Soft Tissue Therapy &amp; Sports Massage in Bristol
               </h1>
-              <p className="text-lg text-white/85">
+              <p className="text-base sm:text-lg text-white/85">
                 Mobile soft tissue therapy, movement coaching, and recovery support — brought directly to
                 your home.
               </p>
             </div>
-            <div className="flex flex-wrap gap-4">
-              <Button onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <Button
+                className="w-full sm:w-auto"
+                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              >
                 Book a session
               </Button>
               <Button
                 variant="secondary"
+                className="w-full sm:w-auto"
                 onClick={() =>
                   document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
                 }

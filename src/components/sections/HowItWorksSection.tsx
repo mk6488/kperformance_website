@@ -20,14 +20,14 @@ const steps = [
 export function HowItWorksSection() {
   return (
     <Section id="how-it-works" variant="muted">
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-8">
         <SectionHeading
           eyebrow="How it works"
           title="Simple steps from enquiry to support"
           subtitle="A friendly first chat, focused treatment, and ongoing guidance that fits around school, training, or work."
         />
 
-        <div className="flex flex-col gap-6 md:flex-row md:gap-8">
+        <div className="flex flex-col gap-5 md:flex-row md:gap-8">
           {steps.map((step, index) => (
             <Card key={step.title} className="flex-1 flex gap-4 items-start">
               <div className="h-10 w-10 rounded-full bg-brand-navy text-white flex items-center justify-center font-semibold">
