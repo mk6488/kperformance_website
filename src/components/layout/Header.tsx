@@ -63,6 +63,12 @@ export function Header() {
               {link.label}
             </button>
           ))}
+          <a
+            href="/intake"
+            className="hover:text-brand-blue transition-colors cursor-pointer"
+          >
+            Patient Form
+          </a>
           <Button onClick={() => handleNavClick('contact')}>Book a session</Button>
         </nav>
 
@@ -97,6 +103,12 @@ export function Header() {
                 {link.label}
               </button>
             ))}
+            <a
+              href="/intake"
+              className="text-left text-brand-charcoal hover:text-brand-blue transition-colors cursor-pointer"
+            >
+              Patient Form
+            </a>
             <Button onClick={() => handleNavClick('contact')}>Book a session</Button>
           </div>
         </div>

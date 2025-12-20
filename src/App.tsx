@@ -8,9 +8,22 @@ import { AboutSection } from './components/sections/AboutSection';
 import { PricingSection } from './components/sections/PricingSection';
 import { ContactSection } from './components/sections/ContactSection';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import IntakePage from './pages/IntakePage';
 
 function App() {
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
+
+  if (pathname === '/intake') {
+    return (
+      <div className="bg-brand-offWhite text-brand-charcoal">
+        <Header />
+        <main className="space-y-0">
+          <IntakePage />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (pathname === '/privacy') {
     return (
