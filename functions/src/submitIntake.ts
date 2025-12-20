@@ -84,7 +84,9 @@ function validateAndSanitise(data: IntakePayload) {
     });
   }
   const redFlags = Array.isArray(medical.redFlags)
-    ? medical.redFlags.map((f) => cap(trimOrEmpty(f), 280)).filter(Boolean)
+    ? medical.redFlags
+        .map((f: unknown) => cap(trimOrEmpty(f), 280))
+        .filter((v): v is string => Boolean(v))
     : [];
 
   const activity = cap(trimOrEmpty(lifestyle.activity), 280);
@@ -93,23 +95,21 @@ function validateAndSanitise(data: IntakePayload) {
   const stressScore = toNumberOrNull(lifestyle.stressScore);
   if (stressScore !== null && (stressScore < 0 || stressScore > 10)) errors.push('lifestyle.stressScore must be 0..10');
 
-  const markersRaw = Array.isArray(bodyMap.markers) ? bodyMap.markers : [];
-  const markers: Marker[] = markersRaw
-    .map((m: any) => ({
-      view: m.view,
-      x: Number(m.x),
-      y: Number(m.y),
-    }))
-    .filter(
-      (m) =>
-        (m.view === 'front' || m.view === 'back' || m.view === 'left' || m.view === 'right') &&
-        Number.isFinite(m.x) &&
-        Number.isFinite(m.y) &&
-        m.x >= 0 &&
-        m.x <= 1 &&
-        m.y >= 0 &&
-        m.y <= 1,
-    );
+  const markers: Marker[] = Array.isArray(bodyMap?.markers)
+    ? bodyMap.markers
+        .map((m: any) => {
+          const view = typeof m?.view === 'string' ? m.view : '';
+          const x = typeof m?.x === 'number' ? m.x : NaN;
+          const y = typeof m?.y === 'number' ? m.y : NaN;
+
+          if (!['front', 'back', 'left', 'right'].includes(view)) return null;
+          if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+          if (x < 0 || x > 1 || y < 0 || y > 1) return null;
+
+          return { view: view as 'front' | 'back' | 'left' | 'right', x, y };
+        })
+        .filter((m): m is Marker => Boolean(m))
+    : [];
 
   const consentHealth = toBool(consent.healthDataConsent);
   const consentTruthful = toBool(consent.confirmTruthful);
