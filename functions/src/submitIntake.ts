@@ -1,4 +1,5 @@
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { getApps, initializeApp } from 'firebase-admin/app';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
 type Marker = { view: 'front' | 'back' | 'left' | 'right'; x: number; y: number };
@@ -13,8 +14,6 @@ type IntakePayload = {
   submittedAtClientISO?: any;
   formVersion?: any;
 };
-
-const db = getFirestore();
 
 const trimOrEmpty = (v: any) => (typeof v === 'string' ? v.trim() : '');
 const cap = (v: string, max: number) => (v.length > max ? v.slice(0, max) : v);
@@ -185,6 +184,11 @@ export const submitIntake = onCall({ region: 'europe-west2' }, async (request) =
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Authentication required');
   }
+
+  if (!getApps().length) {
+    initializeApp();
+  }
+  const db = getFirestore();
 
   const uid = request.auth.uid;
   const data = request.data as IntakePayload;
