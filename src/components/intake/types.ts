@@ -43,6 +43,13 @@ export type IntakeValues = {
     sleepHours: string;
     stressScore: number | null;
   };
+  bodyMap: {
+    markers: Array<{
+      view: 'front' | 'back' | 'left' | 'right';
+      x: number;
+      y: number;
+    }>;
+  };
   consent: {
     healthDataConsent: boolean;
     contactPrefs: {
@@ -90,6 +97,9 @@ export const defaultIntakeValues: IntakeValues = {
     weeklyLoad: '',
     sleepHours: '',
     stressScore: null,
+  },
+  bodyMap: {
+    markers: [],
   },
   consent: {
     healthDataConsent: false,

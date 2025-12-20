@@ -4,6 +4,7 @@ import { Card } from '../ui/Card';
 import { IntakeStep, IntakeStepId, IntakeValues, defaultIntakeValues } from './types';
 import StepAbout from './steps/StepAbout';
 import StepProblem from './steps/StepProblem';
+import StepBodyMap from './steps/StepBodyMap';
 import StepMedical from './steps/StepMedical';
 import StepLifestyle from './steps/StepLifestyle';
 import StepConsent from './steps/StepConsent';
@@ -14,6 +15,7 @@ type Errors = Record<string, string>;
 const steps: IntakeStep[] = [
   { id: 'about', title: 'About you', shortLabel: 'About you' },
   { id: 'problem', title: 'Your issue', shortLabel: 'Issue' },
+  { id: 'bodyMap', title: 'Body map', shortLabel: 'Body map' },
   { id: 'medical', title: 'Medical', shortLabel: 'Medical' },
   { id: 'lifestyle', title: 'Lifestyle', shortLabel: 'Lifestyle' },
   { id: 'consent', title: 'Consent', shortLabel: 'Consent' },
@@ -196,6 +198,7 @@ export default function IntakeWizard() {
       <Card className="space-y-6">
         {step.id === 'about' && <StepAbout {...stepProps} />}
         {step.id === 'problem' && <StepProblem {...stepProps} />}
+        {step.id === 'bodyMap' && <StepBodyMap {...stepProps} />}
         {step.id === 'medical' && <StepMedical {...stepProps} />}
         {step.id === 'lifestyle' && <StepLifestyle {...stepProps} />}
         {step.id === 'consent' && <StepConsent {...stepProps} />}
