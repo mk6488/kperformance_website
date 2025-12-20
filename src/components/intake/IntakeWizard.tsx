@@ -113,8 +113,6 @@ export default function IntakeWizard() {
 
   const errors = useMemo(() => validateStep(step.id, values), [step.id, values]);
 
-  const isStepValid = useMemo(() => Object.keys(errors).length === 0, [errors]);
-
   const handleChange = (path: string, value: any) => {
     setValues((prev) => setByPath(prev, path, value));
   };
@@ -279,7 +277,7 @@ export default function IntakeWizard() {
               variant="secondary"
               className="px-4"
               onClick={() => {
-                window.open('https://wa.me/', '_blank');
+                window.open('https://www.whatsapp.com/', '_blank');
               }}
             >
               Message Mike on WhatsApp
