@@ -247,6 +247,15 @@ export default function IntakeDetail({ intakeId }: Props) {
       <Section id="admin-intake-detail" variant="muted">
         <div className="max-w-5xl mx-auto px-4 md:px-6 space-y-6">
           <SectionHeading title="Intake detail" subtitle={intakeId} align="left" />
+          <style>{`
+            @media print {
+              header, footer, button, .no-print { display: none !important; }
+              body { background: white; }
+              section { padding: 0 !important; }
+              .print-container { background: white !important; box-shadow: none !important; border: none !important; }
+              img { break-inside: avoid; }
+            }
+          `}</style>
           <div className="flex flex-wrap gap-3">
             <Button
               type="button"
@@ -269,6 +278,14 @@ export default function IntakeDetail({ intakeId }: Props) {
               Next
             </Button>
             {navLoading ? <p className="text-sm text-slate-600">Loading neighbours…</p> : null}
+            <Button
+              type="button"
+              variant="secondary"
+              className="no-print"
+              onClick={() => window.print()}
+            >
+              Print / Save as PDF
+            </Button>
           </div>
 
           <Card className="space-y-3">
