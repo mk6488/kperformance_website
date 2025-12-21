@@ -57,7 +57,7 @@ const views = [
 ];
 
 export default function IntakeDetail({ intakeId }: Props) {
-  const { user } = useAuthUser();
+  const { user, loading: authLoading } = useAuthUser();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<IntakeDoc | null>(null);
@@ -70,6 +70,12 @@ export default function IntakeDetail({ intakeId }: Props) {
   const [navLoading, setNavLoading] = useState(false);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      setError('Please sign in to view this intake.');
+      setLoading(false);
+      return;
+    }
     const load = async () => {
       setLoading(true);
       setError(null);
@@ -106,13 +112,17 @@ export default function IntakeDetail({ intakeId }: Props) {
           setError('Not found');
         }
       } catch (err: any) {
-        setError('Unable to load intake.');
+        if (err?.code === 'permission-denied') {
+          setError('Permission denied. Please ensure your admin account has access.');
+        } else {
+          setError('Unable to load intake.');
+        }
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [intakeId]);
+  }, [intakeId, user, authLoading]);
 
   useEffect(() => {
     const fetchNeighbors = async () => {
