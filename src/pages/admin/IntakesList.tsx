@@ -28,6 +28,8 @@ type IntakeItem = {
 
 const statusOptions = ['all', 'submitted', 'reviewed', 'needs_followup', 'archived'];
 const PAGE_SIZE = 25;
+const FILTER_STORAGE_KEY = 'admin-intakes-filter-v1';
+type QuickFilter = 'triage' | 'active' | 'archived' | 'all' | 'custom';
 
 export default function IntakesList() {
   const [loading, setLoading] = useState(true);
@@ -39,18 +41,61 @@ export default function IntakesList() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [under18Only, setUnder18Only] = useState(false);
+  const [quickFilter, setQuickFilter] = useState<QuickFilter>('triage');
+
+  useEffect(() => {
+    const saved = localStorage.getItem(FILTER_STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.quickFilter) setQuickFilter(parsed.quickFilter as QuickFilter);
+        if (parsed.status) setStatus(parsed.status as string);
+      } catch {
+        // ignore parse errors
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      FILTER_STORAGE_KEY,
+      JSON.stringify({
+        quickFilter,
+        status,
+      }),
+    );
+  }, [quickFilter, status]);
+
+  const effectiveStatuses = useMemo(() => {
+    switch (quickFilter) {
+      case 'triage':
+        return ['submitted', 'needs_followup'];
+      case 'active':
+        return ['submitted', 'needs_followup', 'reviewed'];
+      case 'archived':
+        return ['archived'];
+      case 'all':
+        return [];
+      case 'custom':
+      default:
+        return status === 'all' ? [] : [status];
+    }
+  }, [quickFilter, status]);
 
   const fetchPage = async (reset = false) => {
     setError(null);
     if (reset) {
       setLoading(true);
+      setLastDoc(null);
     }
     try {
       const db = getFirestore();
       const base = collection(db, 'intakes');
       const filters = [];
-      if (status !== 'all') {
-        filters.push(where('status', '==', status));
+      if (effectiveStatuses.length === 1) {
+        filters.push(where('status', '==', effectiveStatuses[0]));
+      } else if (effectiveStatuses.length > 1) {
+        filters.push(where('status', 'in', effectiveStatuses));
       }
       const order = orderBy('createdAt', 'desc');
       let q = query(base, ...filters, order, limit(PAGE_SIZE));
@@ -92,12 +137,13 @@ export default function IntakesList() {
 
   useEffect(() => {
     fetchPage(true);
-  }, [status]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quickFilter, status]);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     return intakes.filter((item) => {
-      if (status !== 'all' && item.status !== status) return false;
+      if (effectiveStatuses.length > 0 && (!item.status || !effectiveStatuses.includes(item.status))) return false;
       if (under18Only && item.under18 !== true) return false;
       if (term) {
         const name = item.clientName?.toLowerCase() || '';
@@ -106,7 +152,7 @@ export default function IntakesList() {
       }
       return true;
     });
-  }, [intakes, search, status, under18Only]);
+  }, [intakes, search, under18Only, effectiveStatuses]);
 
   const formatDateTime = (d?: Date) => {
     if (!d) return 'Unknown date';
@@ -135,7 +181,10 @@ export default function IntakesList() {
               <div className="flex flex-wrap gap-3 items-center">
                 <select
                   value={status}
-                  onChange={(e) => setStatus(e.target.value)}
+                  onChange={(e) => {
+                    setStatus(e.target.value);
+                    setQuickFilter('custom');
+                  }}
                   className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/40 focus:border-brand-blue/40"
                 >
                   {statusOptions.map((opt) => (
@@ -154,6 +203,28 @@ export default function IntakesList() {
                   Under-18 only
                 </label>
               </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'triage', label: 'Triage (submitted + needs follow-up)' },
+                { id: 'active', label: 'All active (incl. reviewed)' },
+                { id: 'archived', label: 'Archived' },
+                { id: 'all', label: 'All' },
+              ].map((f) => (
+                <Button
+                  key={f.id}
+                  type="button"
+                  variant={quickFilter === f.id ? 'primary' : 'secondary'}
+                  className="text-sm"
+                  onClick={() => {
+                    setQuickFilter(f.id as QuickFilter);
+                    setStatus('all');
+                  }}
+                >
+                  {f.label}
+                </Button>
+              ))}
             </div>
 
             {loading ? <p className="text-slate-700">Loading…</p> : null}
