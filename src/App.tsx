@@ -49,7 +49,9 @@ function App() {
       <div className="bg-brand-offWhite text-brand-charcoal">
         <Header />
         <main className="space-y-0">
-          <IntakesList />
+          <AdminRoute>
+            <IntakesList />
+          </AdminRoute>
         </main>
         <Footer />
       </div>
@@ -62,7 +64,9 @@ function App() {
       <div className="bg-brand-offWhite text-brand-charcoal">
         <Header />
         <main className="space-y-0">
-          <IntakeDetail intakeId={intakeId} />
+          <AdminRoute>
+            <IntakeDetail intakeId={intakeId} />
+          </AdminRoute>
         </main>
         <Footer />
       </div>
