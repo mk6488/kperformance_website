@@ -1,0 +1,173 @@
+import { useEffect, useMemo, useState } from 'react';
+import { collection, getDocs, getFirestore, orderBy, query } from 'firebase/firestore';
+import { Section } from '../../components/ui/Section';
+import { SectionHeading } from '../../components/ui/SectionHeading';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import AdminRoute from '../../components/intake/AdminRoute';
+
+type IntakeItem = {
+  id: string;
+  createdAt?: Date;
+  status?: string;
+  clientName?: string;
+  clientEmail?: string;
+  under18?: boolean | null;
+};
+
+const statusOptions = ['all', 'submitted', 'reviewed', 'needs_followup', 'archived'];
+
+export default function IntakesList() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [intakes, setIntakes] = useState<IntakeItem[]>([]);
+
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('all');
+  const [under18Only, setUnder18Only] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      setError(null);
+      setLoading(true);
+      try {
+        const db = getFirestore();
+        const q = query(collection(db, 'intakes'), orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+        const items: IntakeItem[] = [];
+        snap.forEach((doc) => {
+          const data = doc.data() as any;
+          const payload = data.payload || {};
+          const client = payload.client || {};
+          const createdAt =
+            data.createdAt && typeof data.createdAt.toDate === 'function'
+              ? data.createdAt.toDate()
+              : undefined;
+          items.push({
+            id: doc.id,
+            createdAt,
+            status: data.status,
+            clientName: client.fullName,
+            clientEmail: client.email,
+            under18: typeof client.under18 === 'boolean' ? client.under18 : null,
+          });
+        });
+        setIntakes(items);
+      } catch (err: any) {
+        setError('Unable to load intakes.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return intakes.filter((item) => {
+      if (status !== 'all' && item.status !== status) return false;
+      if (under18Only && item.under18 !== true) return false;
+      if (term) {
+        const name = item.clientName?.toLowerCase() || '';
+        const email = item.clientEmail?.toLowerCase() || '';
+        if (!name.includes(term) && !email.includes(term)) return false;
+      }
+      return true;
+    });
+  }, [intakes, search, status, under18Only]);
+
+  const formatDateTime = (d?: Date) => {
+    if (!d) return 'Unknown date';
+    return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+  };
+
+  return (
+    <AdminRoute>
+      <Section id="admin-intakes" variant="muted">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 space-y-6">
+          <SectionHeading
+            title="Intake submissions"
+            subtitle="Admin-only list of submitted intake forms."
+            align="left"
+          />
+
+          <Card className="space-y-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <input
+                type="search"
+                placeholder="Search name or email"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full sm:w-72 rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/40 focus:border-brand-blue/40"
+              />
+              <div className="flex flex-wrap gap-3 items-center">
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/40 focus:border-brand-blue/40"
+                >
+                  {statusOptions.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt === 'all' ? 'All statuses' : opt}
+                    </option>
+                  ))}
+                </select>
+                <label className="inline-flex items-center gap-2 text-sm text-slate-800">
+                  <input
+                    type="checkbox"
+                    checked={under18Only}
+                    onChange={(e) => setUnder18Only(e.target.checked)}
+                    className="h-4 w-4 rounded border border-slate-300 text-brand-navy focus:ring-brand-blue"
+                  />
+                  Under-18 only
+                </label>
+              </div>
+            </div>
+
+            {loading ? <p className="text-slate-700">Loading…</p> : null}
+            {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
+            {!loading && !error ? (
+              <div className="space-y-3">
+                {filtered.length === 0 ? (
+                  <p className="text-sm text-slate-600">No intakes found.</p>
+                ) : (
+                  filtered.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        window.location.href = `/admin/intakes/${item.id}`;
+                      }}
+                      className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-left shadow-sm hover:border-brand-blue transition-colors"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="space-y-1">
+                          <p className="font-semibold text-brand-charcoal">{item.clientName || 'Unknown name'}</p>
+                          <p className="text-sm text-slate-600">{item.clientEmail || 'No email'}</p>
+                          <p className="text-xs text-slate-500">{formatDateTime(item.createdAt)}</p>
+                        </div>
+                        <div className="text-right space-y-1">
+                          <span className="inline-flex items-center rounded-full bg-brand-navy/10 text-brand-navy px-3 py-1 text-xs font-semibold">
+                            {item.status || 'submitted'}
+                          </span>
+                          <p className="text-xs text-slate-600">
+                            {item.under18 === true
+                              ? 'Under 18'
+                              : item.under18 === false
+                              ? '18+'
+                              : 'Under-18: unknown'}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            ) : null}
+          </Card>
+        </div>
+      </Section>
+    </AdminRoute>
+  );
+}

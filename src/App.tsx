@@ -12,6 +12,8 @@ import IntakePage from './pages/IntakePage';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminApp from './pages/admin/AdminApp';
 import AdminRoute from './components/intake/AdminRoute';
+import IntakesList from './pages/admin/IntakesList';
+import IntakeDetail from './pages/admin/IntakeDetail';
 
 function App() {
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
@@ -36,6 +38,31 @@ function App() {
           <AdminRoute>
             <AdminApp />
           </AdminRoute>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (pathname === '/admin/intakes') {
+    return (
+      <div className="bg-brand-offWhite text-brand-charcoal">
+        <Header />
+        <main className="space-y-0">
+          <IntakesList />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (pathname.startsWith('/admin/intakes/')) {
+    const intakeId = pathname.replace('/admin/intakes/', '');
+    return (
+      <div className="bg-brand-offWhite text-brand-charcoal">
+        <Header />
+        <main className="space-y-0">
+          <IntakeDetail intakeId={intakeId} />
         </main>
         <Footer />
       </div>
