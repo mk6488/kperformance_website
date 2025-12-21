@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  arrayUnion,
+  addDoc,
   collection,
   doc,
   getDoc,
+  getDocs,
   getFirestore,
   orderBy,
   query,
@@ -39,6 +40,13 @@ type IntakeDoc = {
   reviewedByUid?: string;
 };
 
+type Note = {
+  id: string;
+  text: string;
+  createdAt?: Date;
+  createdByUid?: string;
+};
+
 const views = [
   { id: 'front', label: 'Front', img: bodyMapFront },
   { id: 'back', label: 'Back', img: bodyMapBack },
@@ -54,6 +62,7 @@ export default function IntakeDetail({ intakeId }: Props) {
   const [note, setNote] = useState('');
   const [savingNote, setSavingNote] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [notes, setNotes] = useState<Note[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -64,6 +73,30 @@ export default function IntakeDetail({ intakeId }: Props) {
         const snap = await getDoc(doc(db, 'intakes', intakeId));
         if (snap.exists()) {
           setData(snap.data() as IntakeDoc);
+          const legacy = (snap.data() as any).internalNotes || [];
+          const dbNotes = await getDocs(
+            query(collection(db, 'intakes', intakeId, 'internalNotes'), orderBy('createdAt', 'desc')),
+          );
+          const parsedSub: Note[] = dbNotes.docs.map((d) => {
+            const nd = d.data() as any;
+            return {
+              id: d.id,
+              text: nd.text || '',
+              createdByUid: nd.createdByUid,
+              createdAt: nd.createdAt?.toDate ? nd.createdAt.toDate() : undefined,
+            };
+          });
+          const parsedLegacy: Note[] = Array.isArray(legacy)
+            ? legacy
+                .map((n: any, idx: number) => ({
+                  id: n.id || `legacy-${idx}`,
+                  text: n.text || '',
+                  createdByUid: n.createdByUid,
+                  createdAt: n.createdAt?.toDate ? n.createdAt.toDate() : undefined,
+                }))
+                .reverse()
+            : [];
+          setNotes([...parsedSub, ...parsedLegacy]);
         } else {
           setError('Not found');
         }
@@ -95,7 +128,7 @@ export default function IntakeDetail({ intakeId }: Props) {
   const medical = data?.medical || {};
   const lifestyle = data?.lifestyle || {};
   const consent = data?.consent || {};
-  const internalNotes = Array.isArray(data?.internalNotes) ? [...data!.internalNotes].reverse() : [];
+  const internalNotes = notes;
 
   const ageText = useMemo(() => {
     if (!client.dob) return 'DOB not provided';
@@ -132,23 +165,29 @@ export default function IntakeDetail({ intakeId }: Props) {
     try {
       const db = getFirestore();
       const newNote = {
-        id: `${Date.now()}`,
         text: note.trim(),
         createdAt: serverTimestamp(),
         createdByUid: user.uid,
       };
-      await updateDoc(doc(db, 'intakes', intakeId), {
-        internalNotes: arrayUnion(newNote),
-      });
+      const noteRef = await addDoc(collection(db, 'intakes', intakeId, 'internalNotes'), newNote);
       setNote('');
       setData((prev) =>
         prev
           ? {
               ...prev,
-              internalNotes: [...(prev.internalNotes || []), { ...newNote, createdAt: new Date() }],
+              internalNotes: prev.internalNotes,
             }
           : prev,
       );
+      setNotes((prev) => [
+        {
+          id: noteRef.id,
+          text: newNote.text,
+          createdByUid: newNote.createdByUid,
+          createdAt: new Date(),
+        },
+        ...prev,
+      ]);
     } catch (err) {
       setError('Unable to add note.');
     } finally {
