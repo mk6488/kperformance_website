@@ -1,5 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { collection, getDocs, getFirestore, orderBy, query } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  getFirestore,
+  limit,
+  orderBy,
+  query,
+  startAfter,
+  where,
+  QueryDocumentSnapshot,
+  DocumentData,
+} from 'firebase/firestore';
 import { Section } from '../../components/ui/Section';
 import { SectionHeading } from '../../components/ui/SectionHeading';
 import { Card } from '../../components/ui/Card';
@@ -16,51 +27,72 @@ type IntakeItem = {
 };
 
 const statusOptions = ['all', 'submitted', 'reviewed', 'needs_followup', 'archived'];
+const PAGE_SIZE = 25;
 
 export default function IntakesList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [intakes, setIntakes] = useState<IntakeItem[]>([]);
+  const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [hasMore, setHasMore] = useState(false);
 
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [under18Only, setUnder18Only] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
-      setError(null);
+  const fetchPage = async (reset = false) => {
+    setError(null);
+    if (reset) {
       setLoading(true);
-      try {
-        const db = getFirestore();
-        const q = query(collection(db, 'intakes'), orderBy('createdAt', 'desc'));
-        const snap = await getDocs(q);
-        const items: IntakeItem[] = [];
-        snap.forEach((doc) => {
-          const data = doc.data() as any;
-          const payload = data.payload || {};
-          const client = payload.client || {};
-          const createdAt =
-            data.createdAt && typeof data.createdAt.toDate === 'function'
-              ? data.createdAt.toDate()
-              : undefined;
-          items.push({
-            id: doc.id,
-            createdAt,
-            status: data.status,
-            clientName: client.fullName,
-            clientEmail: client.email,
-            under18: typeof client.under18 === 'boolean' ? client.under18 : null,
-          });
-        });
-        setIntakes(items);
-      } catch (err: any) {
-        setError('Unable to load intakes.');
-      } finally {
-        setLoading(false);
+    }
+    try {
+      const db = getFirestore();
+      const base = collection(db, 'intakes');
+      const filters = [];
+      if (status !== 'all') {
+        filters.push(where('status', '==', status));
       }
-    };
-    load();
-  }, []);
+      const order = orderBy('createdAt', 'desc');
+      let q = query(base, ...filters, order, limit(PAGE_SIZE));
+      if (!reset && lastDoc) {
+        q = query(base, ...filters, order, startAfter(lastDoc), limit(PAGE_SIZE));
+      }
+      const snap = await getDocs(q);
+      const items: IntakeItem[] = [];
+      snap.forEach((doc) => {
+        const data = doc.data() as any;
+        const payload = data.payload || {};
+        const client = payload.client || {};
+        const createdAt =
+          data.createdAt && typeof data.createdAt.toDate === 'function'
+            ? data.createdAt.toDate()
+            : undefined;
+        items.push({
+          id: doc.id,
+          createdAt,
+          status: data.status,
+          clientName: client.fullName,
+          clientEmail: client.email,
+          under18: typeof client.under18 === 'boolean' ? client.under18 : null,
+        });
+      });
+      if (reset) {
+        setIntakes(items);
+      } else {
+        setIntakes((prev) => [...prev, ...items]);
+      }
+      setLastDoc(snap.docs[snap.docs.length - 1] || null);
+      setHasMore(snap.docs.length === PAGE_SIZE);
+    } catch (err: any) {
+      setError('Unable to load intakes.');
+    } finally {
+      if (reset) setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPage(true);
+  }, [status]);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -163,6 +195,21 @@ export default function IntakesList() {
                     </button>
                   ))
                 )}
+                <div className="flex items-center justify-between text-sm text-slate-700">
+                  <p>Loaded: {filtered.length}</p>
+                  {hasMore ? (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => fetchPage(false)}
+                      className="text-sm px-3"
+                    >
+                      Load more
+                    </Button>
+                  ) : (
+                    <p className="text-xs text-slate-500">No more results</p>
+                  )}
+                </div>
               </div>
             ) : null}
           </Card>

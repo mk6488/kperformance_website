@@ -18,6 +18,7 @@ VITE_FIREBASE_APP_ID=
 - Install: `cd functions && npm install`
 - Local emulators (optional): `firebase emulators:start`
 - Deploy functions: `firebase deploy --only functions`
+- Deploy rules: `firebase deploy --only firestore:rules`
 
 Notes:
 - Functions deploy to `europe-west2`
@@ -33,3 +34,5 @@ Notes:
 - Confirm no draft banner appears after a successful submit (draft cleared).
 - Verify no intake payload logs are emitted (keep logging to intakeId/uid only if needed).
 - Share the intake link only via direct message; do not add to public navigation.
+- Admin queries:
+  - If Firestore requests a composite index for `intakes` with `status` + `createdAt` (desc), create one at: `Collection: intakes`, Fields: `status` ASC, `createdAt` DESC.
