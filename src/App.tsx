@@ -9,9 +9,38 @@ import { PricingSection } from './components/sections/PricingSection';
 import { ContactSection } from './components/sections/ContactSection';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import IntakePage from './pages/IntakePage';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminApp from './pages/admin/AdminApp';
+import AdminRoute from './components/intake/AdminRoute';
 
 function App() {
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
+
+  if (pathname === '/admin/login') {
+    return (
+      <div className="bg-brand-offWhite text-brand-charcoal">
+        <Header />
+        <main className="space-y-0">
+          <AdminLogin />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (pathname === '/admin') {
+    return (
+      <div className="bg-brand-offWhite text-brand-charcoal">
+        <Header />
+        <main className="space-y-0">
+          <AdminRoute>
+            <AdminApp />
+          </AdminRoute>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (pathname === '/intake') {
     return (
