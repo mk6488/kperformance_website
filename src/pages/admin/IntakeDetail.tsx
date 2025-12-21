@@ -47,6 +47,7 @@ type Note = {
   text: string;
   createdAt?: Date;
   createdByUid?: string;
+  isLegacy?: boolean;
 };
 
 const views = [
@@ -130,6 +131,7 @@ export default function IntakeDetail({ intakeId }: Props) {
               text: nd.text || '',
               createdByUid: nd.createdByUid,
               createdAt: nd.createdAt?.toDate ? nd.createdAt.toDate() : undefined,
+              isLegacy: false,
             };
           });
           const parsedLegacy: Note[] = Array.isArray(legacy)
@@ -139,10 +141,16 @@ export default function IntakeDetail({ intakeId }: Props) {
                   text: n.text || '',
                   createdByUid: n.createdByUid,
                   createdAt: n.createdAt?.toDate ? n.createdAt.toDate() : undefined,
+                  isLegacy: true,
                 }))
                 .reverse()
             : [];
-          setNotes([...parsedSub, ...parsedLegacy]);
+          const merged = [...parsedSub, ...parsedLegacy].sort((a, b) => {
+            const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+            const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+            return bTime - aTime;
+          });
+          setNotes(merged);
         } else {
           setError('Not found');
         }
@@ -293,6 +301,7 @@ export default function IntakeDetail({ intakeId }: Props) {
           text: newNote.text,
           createdByUid: newNote.createdByUid,
           createdAt: new Date(),
+          isLegacy: false,
         },
         ...prev,
       ]);
@@ -521,6 +530,9 @@ export default function IntakeDetail({ intakeId }: Props) {
                       internalNotes.map((n, idx) => (
                         <div key={n.id || idx} className="rounded border border-slate-200 bg-white px-3 py-2">
                           <p className="text-sm text-brand-charcoal">{n.text}</p>
+                          {n.isLegacy ? (
+                            <p className="text-[11px] uppercase tracking-wide text-amber-700">Legacy note</p>
+                          ) : null}
                           <p className="text-xs text-slate-500">
                             By {n.createdByUid || 'unknown'} •{' '}
                             {n.createdAt?.toDate ? n.createdAt.toDate().toLocaleString() : 'pending'}
