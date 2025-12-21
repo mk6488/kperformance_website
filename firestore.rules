@@ -8,6 +8,12 @@ service cloud.firestore {
         exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
     }
 
+    // Allow authenticated users to read their own adminUsers doc (for allowlist check).
+    match /adminUsers/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
     // Intake documents: created by Cloud Functions (admin SDK). Clients must not
     // write directly. Only admins may read/update for review/status/notes.
     match /intakes/{docId} {
