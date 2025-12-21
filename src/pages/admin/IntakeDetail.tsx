@@ -4,9 +4,9 @@ import {
   collection,
   doc,
   getDoc,
-  getDocs,
   getFirestore,
   orderBy,
+  onSnapshot,
   query,
   serverTimestamp,
   updateDoc,
@@ -47,6 +47,7 @@ type Note = {
   text: string;
   createdAt?: Date;
   createdByUid?: string;
+  createdByEmail?: string | null;
   isLegacy?: boolean;
 };
 
@@ -66,6 +67,7 @@ export default function IntakeDetail({ intakeId }: Props) {
   const [savingNote, setSavingNote] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [legacyNotes, setLegacyNotes] = useState<Note[]>([]);
   const [prevId, setPrevId] = useState<string | null>(null);
   const [nextId, setNextId] = useState<string | null>(null);
   const [navLoading, setNavLoading] = useState(false);
@@ -121,19 +123,6 @@ export default function IntakeDetail({ intakeId }: Props) {
         if (snap.exists()) {
           setData(snap.data() as IntakeDoc);
           const legacy = (snap.data() as any).internalNotes || [];
-          const dbNotes = await getDocs(
-            query(collection(db, 'intakes', intakeId, 'internalNotes'), orderBy('createdAt', 'desc')),
-          );
-          const parsedSub: Note[] = dbNotes.docs.map((d) => {
-            const nd = d.data() as any;
-            return {
-              id: d.id,
-              text: nd.text || '',
-              createdByUid: nd.createdByUid,
-              createdAt: nd.createdAt?.toDate ? nd.createdAt.toDate() : undefined,
-              isLegacy: false,
-            };
-          });
           const parsedLegacy: Note[] = Array.isArray(legacy)
             ? legacy
                 .map((n: any, idx: number) => ({
@@ -145,12 +134,35 @@ export default function IntakeDetail({ intakeId }: Props) {
                 }))
                 .reverse()
             : [];
-          const merged = [...parsedSub, ...parsedLegacy].sort((a, b) => {
-            const aTime = a.createdAt ? a.createdAt.getTime() : 0;
-            const bTime = b.createdAt ? b.createdAt.getTime() : 0;
-            return bTime - aTime;
+          setLegacyNotes(parsedLegacy);
+          const notesQuery = query(
+            collection(db, 'intakes', intakeId, 'internalNotes'),
+            orderBy('createdAt', 'desc'),
+          );
+          const unsub = onSnapshot(notesQuery, (dbNotes) => {
+            const parsed: Note[] = dbNotes.docs.map((d) => {
+              const nd = d.data() as any;
+              const rawCreated = nd.createdAt;
+              const created =
+                rawCreated?.toDate?.() ||
+                (rawCreated instanceof Date ? rawCreated : rawCreated ? new Date(rawCreated) : undefined);
+              return {
+                id: d.id,
+                text: nd.text || '',
+                createdByUid: nd.createdByUid,
+                createdByEmail: nd.createdByEmail,
+                createdAt: created && !Number.isNaN(created.getTime()) ? created : undefined,
+                isLegacy: false,
+              };
+            });
+            const merged = [...parsed, ...parsedLegacy].sort((a, b) => {
+              const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+              const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+              return bTime - aTime;
+            });
+            setNotes(merged);
           });
-          setNotes(merged);
+          return () => unsub();
         } else {
           setError('Not found');
         }
@@ -257,6 +269,23 @@ export default function IntakeDetail({ intakeId }: Props) {
   const createdAtDisplay = formatDate(createdAtRaw);
   const submittedAtDisplay = formatDate(submittedAtClientISO);
 
+  const shortenUid = (uid?: string) => {
+    if (!uid) return 'unknown';
+    if (uid.length <= 12) return uid;
+    return `${uid.slice(0, 6)}…${uid.slice(-4)}`;
+  };
+
+  const formatNoteTimestamp = (d?: any) => {
+    if (!d) return 'Just now';
+    if (d?.toDate && typeof d.toDate === 'function') return d.toDate().toLocaleString();
+    if (d instanceof Date) return d.toLocaleString();
+    if (typeof d === 'string' || typeof d === 'number') {
+      const parsed = new Date(d);
+      return Number.isNaN(parsed.getTime()) ? String(d) : parsed.toLocaleString();
+    }
+    return 'Just now';
+  };
+
   const updateStatus = async (status: string) => {
     if (!user) return;
     setUpdatingStatus(true);
@@ -284,27 +313,10 @@ export default function IntakeDetail({ intakeId }: Props) {
         text: note.trim(),
         createdAt: serverTimestamp(),
         createdByUid: user.uid,
+        createdByEmail: user.email || null,
       };
-      const noteRef = await addDoc(collection(db, 'intakes', intakeId, 'internalNotes'), newNote);
+      await addDoc(collection(db, 'intakes', intakeId, 'internalNotes'), newNote);
       setNote('');
-      setData((prev) =>
-        prev
-          ? {
-              ...prev,
-              internalNotes: prev.internalNotes,
-            }
-          : prev,
-      );
-      setNotes((prev) => [
-        {
-          id: noteRef.id,
-          text: newNote.text,
-          createdByUid: newNote.createdByUid,
-          createdAt: new Date(),
-          isLegacy: false,
-        },
-        ...prev,
-      ]);
     } catch (err) {
       setError('Unable to add note.');
     } finally {
@@ -520,7 +532,7 @@ export default function IntakeDetail({ intakeId }: Props) {
                       placeholder="Add a note (visible to admins only)"
                     />
                     <Button type="button" onClick={addNote} disabled={savingNote || !note.trim()}>
-                      {savingNote ? 'Adding…' : 'Add note'}
+                      {savingNote ? 'Saving…' : 'Add note'}
                     </Button>
                   </div>
                   <div className="space-y-2">
@@ -529,13 +541,18 @@ export default function IntakeDetail({ intakeId }: Props) {
                     ) : (
                       internalNotes.map((n, idx) => (
                         <div key={n.id || idx} className="rounded border border-slate-200 bg-white px-3 py-2">
-                          <p className="text-sm text-brand-charcoal">{n.text}</p>
+                          <p className="text-sm text-brand-charcoal whitespace-pre-wrap break-words">{n.text}</p>
                           {n.isLegacy ? (
                             <p className="text-[11px] uppercase tracking-wide text-amber-700">Legacy note</p>
                           ) : null}
                           <p className="text-xs text-slate-500">
-                            By {n.createdByUid || 'unknown'} •{' '}
-                            {n.createdAt?.toDate ? n.createdAt.toDate().toLocaleString() : 'pending'}
+                            By{' '}
+                            {n.createdByUid && user && n.createdByUid === user.uid
+                              ? 'You'
+                              : n.createdByEmail
+                              ? n.createdByEmail
+                              : shortenUid(n.createdByUid)}{' '}
+                            • {formatNoteTimestamp(n.createdAt)}
                           </p>
                         </div>
                       ))
