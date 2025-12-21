@@ -21,6 +21,12 @@ service cloud.firestore {
       allow read, list: if isAdmin();
       allow update: if isAdmin(); // admins may update status/review fields/notes
     }
+
+    // Internal notes subcollection for intakes
+    match /intakes/{docId}/internalNotes/{noteId} {
+      allow create, read, list, update: if isAdmin();
+      allow delete: if false;
+    }
   }
 }
 
