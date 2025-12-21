@@ -10,6 +10,8 @@ import {
   query,
   serverTimestamp,
   updateDoc,
+  startAfter,
+  limit,
 } from 'firebase/firestore';
 import { Section } from '../../components/ui/Section';
 import { SectionHeading } from '../../components/ui/SectionHeading';
@@ -63,6 +65,9 @@ export default function IntakeDetail({ intakeId }: Props) {
   const [savingNote, setSavingNote] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [prevId, setPrevId] = useState<string | null>(null);
+  const [nextId, setNextId] = useState<string | null>(null);
+  const [navLoading, setNavLoading] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -108,6 +113,36 @@ export default function IntakeDetail({ intakeId }: Props) {
     };
     load();
   }, [intakeId]);
+
+  useEffect(() => {
+    const fetchNeighbors = async () => {
+      if (!data?.createdAt?.toDate) {
+        setPrevId(null);
+        setNextId(null);
+        return;
+      }
+      setNavLoading(true);
+      try {
+        const db = getFirestore();
+        const ts = data.createdAt;
+        // Next (older) in desc order
+        const nextSnap = await getDocs(
+          query(collection(db, 'intakes'), orderBy('createdAt', 'desc'), startAfter(ts), limit(1)),
+        );
+        const prevSnap = await getDocs(
+          query(collection(db, 'intakes'), orderBy('createdAt', 'asc'), startAfter(ts), limit(1)),
+        );
+        setNextId(nextSnap.docs[0]?.id || null);
+        setPrevId(prevSnap.docs[0]?.id || null);
+      } catch {
+        setPrevId(null);
+        setNextId(null);
+      } finally {
+        setNavLoading(false);
+      }
+    };
+    fetchNeighbors();
+  }, [data?.createdAt]);
 
   const markers = useMemo(() => {
     const raw = data?.bodyMap?.markers;
@@ -212,6 +247,29 @@ export default function IntakeDetail({ intakeId }: Props) {
       <Section id="admin-intake-detail" variant="muted">
         <div className="max-w-5xl mx-auto px-4 md:px-6 space-y-6">
           <SectionHeading title="Intake detail" subtitle={intakeId} align="left" />
+          <div className="flex flex-wrap gap-3">
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={navLoading || !prevId}
+              onClick={() => {
+                if (prevId) window.location.href = `/admin/intakes/${prevId}`;
+              }}
+            >
+              Previous
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={navLoading || !nextId}
+              onClick={() => {
+                if (nextId) window.location.href = `/admin/intakes/${nextId}`;
+              }}
+            >
+              Next
+            </Button>
+            {navLoading ? <p className="text-sm text-slate-600">Loading neighbours…</p> : null}
+          </div>
 
           <Card className="space-y-3">
             {loading && <p className="text-slate-700">Loading…</p>}
