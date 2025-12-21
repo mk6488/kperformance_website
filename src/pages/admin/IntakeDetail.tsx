@@ -195,6 +195,18 @@ export default function IntakeDetail({ intakeId }: Props) {
     }
   };
 
+  const summaryLocationText = useMemo(() => {
+    if (markers.length === 0) return '—';
+    const byView: Record<string, number> = {};
+    markers.forEach((m) => {
+      byView[m.view] = (byView[m.view] || 0) + 1;
+    });
+    return views
+      .map((v) => (byView[v.id] ? `${v.label}: ${byView[v.id]} marker${byView[v.id] > 1 ? 's' : ''}` : null))
+      .filter(Boolean)
+      .join(', ');
+  }, [markers]);
+
   return (
     <AdminRoute>
       <Section id="admin-intake-detail" variant="muted">
@@ -206,6 +218,39 @@ export default function IntakeDetail({ intakeId }: Props) {
             {error && <p className="text-sm text-red-600">{error}</p>}
             {!loading && !error && data && (
               <div className="space-y-6 text-sm text-slate-800">
+                <Card className="space-y-2">
+                  <p className="text-base font-semibold text-brand-navy">Quick summary</p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <p className="text-xs uppercase text-slate-500">Presenting problem</p>
+                      <p className="text-sm text-brand-charcoal">{problem.mainConcern || '—'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs uppercase text-slate-500">Body map</p>
+                      <p className="text-sm text-brand-charcoal">{summaryLocationText || '—'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs uppercase text-slate-500">Red flags</p>
+                      <p className="text-sm text-brand-charcoal">
+                        {(medical.redFlags || []).length > 0 ? (medical.redFlags || []).join(', ') : '—'}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs uppercase text-slate-500">Consent / Under 18</p>
+                      <p className="text-sm text-brand-charcoal">
+                        {consent.healthDataConsent ? 'Consent given' : 'Consent missing'} ·{' '}
+                        {client.under18 ? 'Under 18' : '18+ or not specified'}
+                      </p>
+                    </div>
+                    <div className="space-y-1 sm:col-span-2">
+                      <p className="text-xs uppercase text-slate-500">Contact</p>
+                      <p className="text-sm text-brand-charcoal">
+                        {client.fullName || '—'} · {client.email || '—'} · {client.phone || '—'}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
                     <p className="font-semibold text-brand-charcoal">{client.fullName || 'Unknown name'}</p>
