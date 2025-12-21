@@ -1,7 +1,20 @@
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Admin allowlist lives at adminUsers/{uid}. Only allow access when:
+    // - request.auth is present AND
+    // - a matching adminUsers/{uid} document exists (server-side populated).
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    }
+
+    // Intake documents: created by Cloud Functions (admin SDK). Clients must not
+    // write directly. Only admins may read/update for review/status/notes.
     match /intakes/{docId} {
-      allow read, write: if false;
+      allow create, update, delete: if false; // clients cannot write directly
+      allow read, list: if isAdmin();
+      allow update: if isAdmin(); // admins may update status/review fields/notes
     }
   }
 }
+
