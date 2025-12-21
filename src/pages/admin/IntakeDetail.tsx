@@ -69,6 +69,41 @@ export default function IntakeDetail({ intakeId }: Props) {
   const [nextId, setNextId] = useState<string | null>(null);
   const [navLoading, setNavLoading] = useState(false);
 
+  const getByPath = (obj: any, path: string) => {
+    if (!obj || !path) return undefined;
+    const parts = path.split('.').filter(Boolean);
+    let current: any = obj;
+    for (const part of parts) {
+      if (current && typeof current === 'object' && part in current) {
+        current = current[part];
+      } else {
+        return undefined;
+      }
+    }
+    return current;
+  };
+
+  const hasValue = (val: any) => {
+    if (val === null || val === undefined) return false;
+    if (typeof val === 'string') return val.trim().length > 0;
+    if (Array.isArray(val)) return val.length > 0;
+    if (val instanceof Date) return true;
+    if (typeof val === 'number') return true;
+    if (val && typeof val === 'object') return Object.keys(val).length > 0;
+    return Boolean(val);
+  };
+
+  const getIntakeValueWithMeta = (paths: string[]) => {
+    if (!data) return null;
+    for (const p of paths) {
+      const v = getByPath(data, p);
+      if (hasValue(v)) return { value: v, path: p };
+    }
+    return null;
+  };
+
+  const getIntakeValue = (paths: string[]) => getIntakeValueWithMeta(paths)?.value;
+
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
@@ -155,7 +190,13 @@ export default function IntakeDetail({ intakeId }: Props) {
   }, [data?.createdAt]);
 
   const markers = useMemo(() => {
-    const raw = data?.bodyMap?.markers;
+    const raw =
+      (getIntakeValue([
+        'payload.bodyMap.markers',
+        'payload.problem.bodyMap.markers',
+        'bodyMap.markers',
+        'problem.bodyMap.markers',
+      ]) as any) || [];
     return Array.isArray(raw)
       ? raw.filter(
           (m) =>
@@ -167,12 +208,23 @@ export default function IntakeDetail({ intakeId }: Props) {
       : [];
   }, [data]);
 
-  const createdAt = data?.createdAt?.toDate ? data.createdAt.toDate() : undefined;
-  const client = data?.client || {};
-  const problem = data?.problem || {};
-  const medical = data?.medical || {};
-  const lifestyle = data?.lifestyle || {};
-  const consent = data?.consent || {};
+  const client = (getIntakeValue(['payload.client', 'client', 'payload.data.client', 'data.client']) as any) || {};
+  const problem =
+    (getIntakeValue(['payload.problem', 'problem', 'payload.data.problem', 'data.problem']) as any) || {};
+  const medical =
+    (getIntakeValue(['payload.medical', 'medical', 'payload.data.medical', 'data.medical']) as any) || {};
+  const lifestyle =
+    (getIntakeValue(['payload.lifestyle', 'lifestyle', 'payload.data.lifestyle', 'data.lifestyle']) as any) || {};
+  const consent =
+    (getIntakeValue(['payload.consent', 'consent', 'payload.data.consent', 'data.consent']) as any) || {};
+  const submittedAtClientISO = getIntakeValue([
+    'payload.submittedAtClientISO',
+    'submittedAtClientISO',
+    'payload.data.submittedAtClientISO',
+    'data.submittedAtClientISO',
+  ]);
+  const createdAtRaw = getIntakeValue(['createdAt', 'payload.createdAt', 'data.createdAt']);
+  const payloadRootMeta = getIntakeValueWithMeta(['payload', 'data']);
   const internalNotes = notes;
 
   const ageText = useMemo(() => {
@@ -184,7 +236,18 @@ export default function IntakeDetail({ intakeId }: Props) {
     return `${client.dob} (${age} yrs)`;
   }, [client.dob]);
 
-  const formatDate = (d?: Date) => (d ? d.toLocaleString() : 'Unknown date');
+  const formatDate = (d: any) => {
+    if (!d) return 'Unknown date';
+    if (typeof d === 'string' || typeof d === 'number') {
+      const parsed = new Date(d);
+      return Number.isNaN(parsed.getTime()) ? String(d) : parsed.toLocaleString();
+    }
+    if (d.toDate && typeof d.toDate === 'function') return d.toDate().toLocaleString();
+    if (d instanceof Date) return d.toLocaleString();
+    return String(d);
+  };
+  const createdAtDisplay = formatDate(createdAtRaw);
+  const submittedAtDisplay = formatDate(submittedAtClientISO);
 
   const updateStatus = async (status: string) => {
     if (!user) return;
@@ -266,6 +329,18 @@ export default function IntakeDetail({ intakeId }: Props) {
               img { break-inside: avoid; }
             }
           `}</style>
+          {import.meta.env.DEV && data ? (
+            <Card className="bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
+              <p className="text-xs font-semibold">DEV debug</p>
+              <p className="text-xs">Doc keys: {Object.keys(data).join(', ') || 'none'}</p>
+              <p className="text-xs">
+                Payload root: {payloadRootMeta?.path || 'none'} keys:{' '}
+                {payloadRootMeta?.value && typeof payloadRootMeta.value === 'object'
+                  ? Object.keys(payloadRootMeta.value).join(', ') || 'none'
+                  : 'none'}
+              </p>
+            </Card>
+          ) : null}
           <div className="flex flex-wrap gap-3">
             <Button
               type="button"
@@ -345,7 +420,7 @@ export default function IntakeDetail({ intakeId }: Props) {
                   </div>
                   <div className="space-y-1">
                     <p>Status: {data.status || 'submitted'}</p>
-                    <p>Created: {formatDate(createdAt)}</p>
+                    <p>Created: {createdAtDisplay}</p>
                     <p>Reviewed by: {data.reviewedByUid || '—'}</p>
                   </div>
                 </div>
