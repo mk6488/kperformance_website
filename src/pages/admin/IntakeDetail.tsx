@@ -98,6 +98,7 @@ export default function IntakeDetail({ intakeId }: Props) {
   const [aiContent, setAiContent] = useState<string>('');
   const [aiError, setAiError] = useState<string | null>(null);
   const [savingNoteFromAI, setSavingNoteFromAI] = useState(false);
+  const [aiSuccess, setAiSuccess] = useState(false);
   const [prevId, setPrevId] = useState<string | null>(null);
   const [nextId, setNextId] = useState<string | null>(null);
   const [navLoading, setNavLoading] = useState(false);
@@ -408,6 +409,7 @@ export default function IntakeDetail({ intakeId }: Props) {
     if (!intakeId) return;
     setAiError(null);
     setAiGenerating(type);
+    setAiSuccess(false);
     try {
       const callable = httpsCallable(functions, 'generateIntakeAIReport');
       const res = await callable({ intakeId, reportType: type });
@@ -415,6 +417,8 @@ export default function IntakeDetail({ intakeId }: Props) {
       if (payload?.content) {
         setAiContent(payload.content);
         setSelectedReportId(payload.reportId || null);
+        setAiSuccess(true);
+        setTimeout(() => setAiSuccess(false), 2000);
       } else {
         setAiError('No content returned from AI');
       }
@@ -800,6 +804,7 @@ export default function IntakeDetail({ intakeId }: Props) {
 
                 <div className="space-y-3">
                   <h3 className="text-base font-semibold text-brand-navy">AI Assistant</h3>
+                  <p className="text-sm text-amber-700">AI-assisted draft — clinician review required.</p>
                   <div className="flex flex-wrap gap-2">
                     {[
                       { id: 'clinician_summary', label: 'Clinician summary' },
@@ -822,6 +827,7 @@ export default function IntakeDetail({ intakeId }: Props) {
                     ))}
                   </div>
                   {aiError ? <p className="text-sm text-red-600">{aiError}</p> : null}
+                    {aiSuccess ? <p className="text-sm text-green-700">Generated and saved.</p> : null}
                   {aiContent ? (
                     <Card className="space-y-2">
                       <div className="flex items-center gap-2">
@@ -831,6 +837,14 @@ export default function IntakeDetail({ intakeId }: Props) {
                         <Button type="button" variant="secondary" disabled={savingNoteFromAI} onClick={addNoteFromAI}>
                           {savingNoteFromAI ? 'Saving…' : 'Save to notes'}
                         </Button>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            disabled={updatingStatus}
+                            onClick={() => updateStatus('reviewed')}
+                          >
+                            Mark as reviewed
+                          </Button>
                         {copyMessage ? <span className="text-sm text-green-700">{copyMessage}</span> : null}
                       </div>
                       <pre className="whitespace-pre-wrap text-sm text-slate-800">{aiContent}</pre>
