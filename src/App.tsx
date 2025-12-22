@@ -58,6 +58,37 @@ function App() {
     );
   }
 
+  if (pathname === '/admin/clients') {
+    const ClientsList = require('./pages/admin/ClientsList').default;
+    return (
+      <div className="bg-brand-offWhite text-brand-charcoal">
+        <Header />
+        <main className="space-y-0">
+          <AdminRoute>
+            <ClientsList />
+          </AdminRoute>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (pathname.startsWith('/admin/clients/')) {
+    const ClientDetail = require('./pages/admin/ClientDetail').default;
+    const emailKey = decodeURIComponent(pathname.replace('/admin/clients/', ''));
+    return (
+      <div className="bg-brand-offWhite text-brand-charcoal">
+        <Header />
+        <main className="space-y-0">
+          <AdminRoute>
+            <ClientDetail emailKey={emailKey} />
+          </AdminRoute>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (pathname.startsWith('/admin/intakes/')) {
     const intakeId = pathname.replace('/admin/intakes/', '');
     return (

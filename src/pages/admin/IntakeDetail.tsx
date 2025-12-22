@@ -282,6 +282,9 @@ export default function IntakeDetail({ intakeId }: Props) {
     'payload.data.submittedAtClientISO',
     'data.submittedAtClientISO',
   ]);
+  const clientEmailLowerRaw = getIntakeValue(['emailLower', 'payload.emailLower', 'payload.client.email']);
+  const clientEmailLower =
+    typeof clientEmailLowerRaw === 'string' ? clientEmailLowerRaw.toLowerCase() : client.email?.toLowerCase();
   const createdAtRaw = getIntakeValue(['createdAt', 'payload.createdAt', 'data.createdAt']);
   const payloadRootMeta = getIntakeValueWithMeta(['payload', 'data']);
   const internalNotes = notes;
@@ -522,6 +525,18 @@ export default function IntakeDetail({ intakeId }: Props) {
                       <p className="text-sm text-brand-charcoal">
                         {client.fullName || '—'} · {client.email || '—'} · {client.phone || '—'}
                       </p>
+                      {clientEmailLower ? (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          className="mt-1 text-xs"
+                          onClick={() => {
+                            window.location.href = `/admin/clients/${encodeURIComponent(clientEmailLower)}`;
+                          }}
+                        >
+                          View client history
+                        </Button>
+                      ) : null}
                     </div>
                   </div>
                 </Card>
