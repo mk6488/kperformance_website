@@ -4,6 +4,7 @@ import { HttpsError, onCall } from 'firebase-functions/v2/https';
 type ReportType = 'clinician_summary' | 'treatment_plan' | 'followup_questions' | 'both';
 
 const MODEL = 'gpt-4o-mini';
+const PROMPT_VERSION = 'v1-lite-mode-controller';
 
 const systemPrompt = `
 You are "Soft Tissue Therapist Assistant", operating in Clinician Mode by default.
@@ -184,9 +185,11 @@ Keep headings as specified, concise, and actionable. If data is missing, note it
   }
 
   const reportDoc = {
-    reportType,
+    type: reportType,
+    reportType, // kept for backward compatibility
     mode: mode === 'patient' ? 'patient' : 'clinician',
     model: MODEL,
+    promptVersion: PROMPT_VERSION,
     content,
     createdAt: FieldValue.serverTimestamp(),
     createdByUid: uid,
@@ -196,7 +199,7 @@ Keep headings as specified, concise, and actionable. If data is missing, note it
   const reportRef = await db.collection('intakes').doc(intakeId).collection('aiReports').add(reportDoc);
 
   await db.collection('intakes').doc(intakeId).collection('audit').add({
-    type: 'ai_generated',
+    type: 'ai_report_generated',
     createdAt: FieldValue.serverTimestamp(),
     actorUid: uid,
     actorEmail: email,
