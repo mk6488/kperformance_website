@@ -4,7 +4,7 @@ import { HttpsError, onCall } from 'firebase-functions/v2/https';
 type ReportType = 'clinician_summary' | 'treatment_plan' | 'followup_questions' | 'both';
 
 const MODEL = 'gpt-4o-mini';
-const PROMPT_VERSION = 'v1-lite-mode-controller';
+const PROMPT_VERSION = 'v2-lite-mode-controller-minimised';
 
 const systemPrompt = `
 You are "Soft Tissue Therapist Assistant", operating in Clinician Mode by default.
@@ -27,8 +27,47 @@ Guidance:
 - If information is missing, state that it is missing rather than guessing.
 `.trim();
 
-function ensureString(v: any, fallback = '') {
-  return typeof v === 'string' ? v : fallback;
+const emailPattern = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+const urlPattern = /\bhttps?:\/\/\S+/gi;
+const phonePattern = /\b(?:0\d{9,10}|\+?\d{1,3}[-\s]?\d{2,4}[-\s]?\d{3,4}[-\s]?\d{3,4})\b/g;
+
+function scrubText(input: any): string {
+  if (typeof input !== 'string') return '';
+  return input.replace(emailPattern, '[redacted-email]').replace(urlPattern, '[redacted-url]').replace(phonePattern, '[redacted-phone]');
+}
+
+function ensureString(v: any) {
+  return typeof v === 'string' ? scrubText(v) : '';
+}
+
+function computeAgeYears(dob?: string): number | null {
+  if (!dob || typeof dob !== 'string') return null;
+  const parsed = new Date(dob);
+  if (Number.isNaN(parsed.getTime())) return null;
+  const diff = Date.now() - parsed.getTime();
+  const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+  if (years < 0 || years > 120) return null;
+  return years;
+}
+
+function scrubObject(obj: any): any {
+  if (Array.isArray(obj)) return obj.map((v) => scrubObject(v));
+  if (obj && typeof obj === 'object') {
+    const res: any = {};
+    Object.keys(obj).forEach((k) => {
+      res[k] = scrubObject(obj[k]);
+    });
+    return res;
+  }
+  if (typeof obj === 'string') return scrubText(obj);
+  return obj;
+}
+
+function containsIdentifiers(str: string) {
+  const email = new RegExp(emailPattern);
+  const url = new RegExp(urlPattern);
+  const phone = new RegExp(phonePattern);
+  return email.test(str) || url.test(str) || phone.test(str);
 }
 
 function minimiseContext(intake: any) {
@@ -40,12 +79,15 @@ function minimiseContext(intake: any) {
   const consent = payload.consent || {};
   const bodyMap = payload.bodyMap || payload?.problem?.bodyMap || {};
 
-  return {
+  const ageYears = typeof client.ageYears === 'number' ? client.ageYears : computeAgeYears(client.dob);
+
+  const ctx = {
     status: intake?.status || 'submitted',
     formVersion: intake?.formVersion || payload?.formVersion || 'unknown',
     client: {
+      label: 'client',
+      ageYears: ageYears ?? null,
       under18: client.under18 ?? null,
-      dob: client.dob || null,
     },
     problem: {
       mainConcern: ensureString(problem.mainConcern),
@@ -61,8 +103,8 @@ function minimiseContext(intake: any) {
       surgeries: ensureString(medical.surgeries),
       medications: ensureString(medical.medications),
       allergies: ensureString(medical.allergies),
-      redFlags: Array.isArray(medical.redFlags) ? medical.redFlags.slice(0, 12) : [],
-      checkboxes: typeof medical.checkboxes === 'object' ? medical.checkboxes : {},
+      redFlags: Array.isArray(medical.redFlags) ? scrubObject(medical.redFlags).slice(0, 12) : [],
+      checkboxes: typeof medical.checkboxes === 'object' ? scrubObject(medical.checkboxes) : {},
     },
     lifestyle: {
       activity: ensureString(lifestyle.activity),
@@ -73,6 +115,7 @@ function minimiseContext(intake: any) {
     consent: {
       healthDataConsent: !!consent.healthDataConsent,
       confirmTruthful: !!consent.confirmTruthful,
+      aiConsent: !!consent.aiConsent,
     },
     bodyMap: {
       markers: Array.isArray(bodyMap.markers)
@@ -84,10 +127,22 @@ function minimiseContext(intake: any) {
                 typeof m.x === 'number' &&
                 typeof m.y === 'number',
             )
-            .map((m: any) => ({ view: m.view, x: m.x, y: m.y, label: ensureString(m.label) }))
+            .map((m: any) => ({
+              view: m.view,
+              x: m.x,
+              y: m.y,
+              label: ensureString(m.label),
+            }))
         : [],
     },
   };
+
+  const scrubbed = scrubObject(ctx);
+  const json = JSON.stringify(scrubbed);
+  if (containsIdentifiers(json)) {
+    throw new HttpsError('failed-precondition', 'Context contains identifiable data; generation blocked.');
+  }
+  return scrubbed;
 }
 
 export const generateIntakeAIReport = onCall({ region: 'europe-west2' }, async (request) => {
@@ -145,7 +200,7 @@ Generate ${typeLabel} in ${modeLabel}.
 Use the intake context (already minimal and de-identified):
 ${JSON.stringify(context, null, 2)}
 
-Keep headings as specified, concise, and actionable. If data is missing, note it clearly.
+Keep headings as specified, concise, and actionable. If data is missing, note it clearly. Refer to the person only as "the client".
 `.trim();
 
   const body = {
@@ -208,3 +263,4 @@ Keep headings as specified, concise, and actionable. If data is missing, note it
 
   return { reportId: reportRef.id, content, model: MODEL };
 });
+
