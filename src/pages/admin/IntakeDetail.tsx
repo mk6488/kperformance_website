@@ -424,8 +424,10 @@ export default function IntakeDetail({ intakeId }: Props) {
       const code = err?.code || '';
       if (code === 'permission-denied') setAiError('You do not have permission to generate AI reports.');
       else if (code === 'failed-precondition')
-        setAiError('AI drafting requires client consent. This intake has no AI consent.');
-      else setAiError('Unable to generate AI report. Please try again.');
+        setAiError(err?.message || 'AI drafting requires client consent or quota is exceeded.');
+      else if (code === 'unauthenticated') setAiError('Invalid OpenAI API key.');
+      else if (code === 'resource-exhausted') setAiError('Rate limited. Try again in a moment.');
+      else setAiError(err?.message || 'Unable to generate AI report. Please try again.');
     } finally {
       setAiGenerating(null);
     }

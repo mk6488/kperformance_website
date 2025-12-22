@@ -244,8 +244,31 @@ Keep headings as specified, concise, and actionable. If data is missing, note it
   });
 
   if (!response.ok) {
-    const text = await response.text();
-    console.error('OpenAI error', text);
+    const status = response.status;
+    let code: string | undefined;
+    let message: string | undefined;
+    try {
+      const errJson: any = await response.json();
+      code = errJson?.error?.code;
+      message = errJson?.error?.message;
+      console.error('OpenAI error', { status, code, message });
+    } catch {
+      const text = await response.text();
+      console.error('OpenAI error', { status, text });
+    }
+
+    if (code === 'insufficient_quota') {
+      throw new HttpsError(
+        'failed-precondition',
+        'OpenAI API quota exceeded. Please check OpenAI billing/usage limits.',
+      );
+    }
+    if (status === 401) {
+      throw new HttpsError('unauthenticated', 'Invalid OpenAI API key.');
+    }
+    if (status === 429) {
+      throw new HttpsError('resource-exhausted', 'Rate limited. Try again in a moment.');
+    }
     throw new HttpsError('internal', 'AI generation failed');
   }
 
