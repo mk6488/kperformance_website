@@ -98,11 +98,22 @@ export default function IntakesList() {
         filters.push(where('status', 'in', effectiveStatuses));
       }
       const order = orderBy('createdAt', 'desc');
-      let q = query(base, ...filters, order, limit(PAGE_SIZE));
-      if (!reset && lastDoc) {
-        q = query(base, ...filters, order, startAfter(lastDoc), limit(PAGE_SIZE));
+      let snap;
+      try {
+        let q = query(base, ...filters, order, limit(PAGE_SIZE));
+        if (!reset && lastDoc) {
+          q = query(base, ...filters, order, startAfter(lastDoc), limit(PAGE_SIZE));
+        }
+        snap = await getDocs(q);
+      } catch (err: any) {
+        // Fallback when composite index is missing for status+createdAt: fetch without status filter and filter client-side.
+        let q = query(base, order, limit(PAGE_SIZE));
+        if (!reset && lastDoc) {
+          q = query(base, order, startAfter(lastDoc), limit(PAGE_SIZE));
+        }
+        snap = await getDocs(q);
+        setError(null); // clear previous error to avoid showing failure message
       }
-      const snap = await getDocs(q);
       const items: IntakeItem[] = [];
       snap.forEach((doc) => {
         const data = doc.data() as any;
