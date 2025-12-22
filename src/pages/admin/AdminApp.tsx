@@ -5,6 +5,7 @@ import { Card } from '../../components/ui/Card';
 import { SectionHeading } from '../../components/ui/SectionHeading';
 import { Button } from '../../components/ui/Button';
 import AdminRoute from '../../components/intake/AdminRoute';
+import { adminSignOut } from '../../lib/adminAuth';
 
 type IntakeItem = {
   id: string;
@@ -79,7 +80,20 @@ export default function AdminApp() {
     <AdminRoute>
       <Section id="admin" variant="muted">
         <div className="max-w-5xl mx-auto px-4 md:px-6 space-y-6">
-          <SectionHeading title="Admin dashboard" subtitle="Overview of intake submissions" align="left" />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <SectionHeading title="Admin dashboard" subtitle="Overview of intake submissions" align="left" />
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                adminSignOut().finally(() => {
+                  window.location.href = '/admin/login';
+                });
+              }}
+            >
+              Sign out
+            </Button>
+          </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card>
