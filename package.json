@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "seed:mock": "ts-node --esm scripts/seedMockIntakes.ts",
-    "cleanup:mock": "ts-node --esm scripts/cleanupMockIntakes.ts"
+    "seed:mock": "node --loader ts-node/esm scripts/seedMockIntakes.ts",
+    "cleanup:mock": "node --loader ts-node/esm scripts/cleanupMockIntakes.ts"
   },
   "dependencies": {
     "firebase": "^12.7.0",
