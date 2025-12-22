@@ -2,16 +2,35 @@ import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 import * as dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config({ path: '.env.local' });
 
 export function initAdmin() {
-  if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
-    throw new Error('Missing FIREBASE_SERVICE_ACCOUNT in .env.local');
+  const svcEnv = process.env.FIREBASE_SERVICE_ACCOUNT;
+  const svcFileEnv = process.env.FIREBASE_SERVICE_ACCOUNT_FILE;
+  let svcJson: string | undefined;
+
+  if (svcEnv) {
+    svcJson = svcEnv;
+  } else if (svcFileEnv) {
+    const filePath = path.isAbsolute(svcFileEnv)
+      ? svcFileEnv
+      : path.join(process.cwd(), svcFileEnv);
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`FIREBASE_SERVICE_ACCOUNT_FILE not found at ${filePath}`);
+    }
+    svcJson = fs.readFileSync(filePath, 'utf8');
+  } else {
+    throw new Error('Missing FIREBASE_SERVICE_ACCOUNT or FIREBASE_SERVICE_ACCOUNT_FILE in .env.local');
   }
+
+  const parsed = JSON.parse(svcJson);
+
   if (!getApps().length) {
     initializeApp({
-      credential: cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)),
+      credential: cert(parsed),
       projectId: process.env.FIREBASE_PROJECT_ID || undefined,
     });
   }
