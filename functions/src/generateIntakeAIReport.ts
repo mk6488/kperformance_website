@@ -30,6 +30,7 @@ Guidance:
 const emailPattern = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 const urlPattern = /\bhttps?:\/\/\S+/gi;
 const phonePattern = /\b(?:0\d{9,10}|\+?\d{1,3}[-\s]?\d{2,4}[-\s]?\d{3,4}[-\s]?\d{3,4})\b/g;
+const dobPattern = /\b(?:dob|dateofbirth|date_of_birth)\b/i;
 
 function scrubText(input: any): string {
   if (typeof input !== 'string') return '';
@@ -40,14 +41,22 @@ function ensureString(v: any) {
   return typeof v === 'string' ? scrubText(v) : '';
 }
 
-function computeAgeYears(dob?: string): number | null {
-  if (!dob || typeof dob !== 'string') return null;
-  const parsed = new Date(dob);
-  if (Number.isNaN(parsed.getTime())) return null;
-  const diff = Date.now() - parsed.getTime();
-  const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
-  if (years < 0 || years > 120) return null;
-  return years;
+function computeAgeYears(dobAny: any): number | null {
+  let d: Date | null = null;
+  if (dobAny?.toDate && typeof dobAny.toDate === 'function') {
+    d = dobAny.toDate();
+  } else if (typeof dobAny === 'string') {
+    d = new Date(dobAny);
+  }
+  if (!d || Number.isNaN(d.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) {
+    age--;
+  }
+  if (age < 0 || age > 120) return null;
+  return age;
 }
 
 function scrubObject(obj: any): any {
@@ -67,7 +76,8 @@ function containsIdentifiers(str: string) {
   const email = new RegExp(emailPattern);
   const url = new RegExp(urlPattern);
   const phone = new RegExp(phonePattern);
-  return email.test(str) || url.test(str) || phone.test(str);
+  const dob = new RegExp(dobPattern);
+  return email.test(str) || url.test(str) || phone.test(str) || dob.test(str);
 }
 
 function minimiseContext(intake: any) {
@@ -79,7 +89,11 @@ function minimiseContext(intake: any) {
   const consent = payload.consent || {};
   const bodyMap = payload.bodyMap || payload?.problem?.bodyMap || {};
 
-  const ageYears = typeof client.ageYears === 'number' ? client.ageYears : computeAgeYears(client.dob);
+  const ageYears =
+    typeof client.ageYears === 'number'
+      ? client.ageYears
+      : computeAgeYears(client.dob || intake?.dob || payload?.dob || payload?.client?.dob);
+  const under18 = typeof client.under18 === 'boolean' ? client.under18 : ageYears === null ? null : ageYears < 18;
 
   const ctx = {
     status: intake?.status || 'submitted',
@@ -87,7 +101,7 @@ function minimiseContext(intake: any) {
     client: {
       label: 'client',
       ageYears: ageYears ?? null,
-      under18: client.under18 ?? null,
+      under18,
     },
     problem: {
       mainConcern: ensureString(problem.mainConcern),
@@ -142,7 +156,7 @@ function minimiseContext(intake: any) {
   if (containsIdentifiers(json)) {
     throw new HttpsError('failed-precondition', 'Context contains identifiable data; generation blocked.');
   }
-  return scrubbed;
+  return { context: scrubbed, ageYears, under18 };
 }
 
 export const generateIntakeAIReport = onCall({ region: 'europe-west2' }, async (request) => {
@@ -178,11 +192,19 @@ export const generateIntakeAIReport = onCall({ region: 'europe-west2' }, async (
     throw new HttpsError('not-found', 'Intake not found.');
   }
   const intakeData = snap.data();
-  const context = minimiseContext(intakeData);
+  const { context, ageYears, under18 } = minimiseContext(intakeData);
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     throw new HttpsError('failed-precondition', 'OPENAI_API_KEY not configured.');
+  }
+
+  // Optional write-back of computed age/under18 (no DOB stored)
+  if (ageYears !== null || under18 !== null) {
+    const update: any = {};
+    if (ageYears !== null) update.ageYears = ageYears;
+    if (under18 !== null) update.under18 = under18;
+    await db.collection('intakes').doc(intakeId).set(update, { merge: true });
   }
 
   const modeLabel = mode === 'patient' ? 'Patient Mode' : 'Clinician Mode';
