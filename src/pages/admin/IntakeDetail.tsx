@@ -51,6 +51,15 @@ type Note = {
   isLegacy?: boolean;
 };
 
+type AuditEvent = {
+  id: string;
+  type: 'status_change' | 'note_added' | 'reviewed' | string;
+  createdAt?: Date;
+  actorUid?: string;
+  actorEmail?: string | null;
+  meta?: Record<string, any>;
+};
+
 const views = [
   { id: 'front', label: 'Front', img: bodyMapFront },
   { id: 'back', label: 'Back', img: bodyMapBack },
@@ -68,6 +77,7 @@ export default function IntakeDetail({ intakeId }: Props) {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const [legacyNotes, setLegacyNotes] = useState<Note[]>([]);
+  const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
   const [prevId, setPrevId] = useState<string | null>(null);
   const [nextId, setNextId] = useState<string | null>(null);
   const [navLoading, setNavLoading] = useState(false);
@@ -117,6 +127,8 @@ export default function IntakeDetail({ intakeId }: Props) {
     const load = async () => {
       setLoading(true);
       setError(null);
+      let unsubNotes: (() => void) | null = null;
+      let unsubAudit: (() => void) | null = null;
       try {
         const db = getFirestore();
         const snap = await getDoc(doc(db, 'intakes', intakeId));
@@ -135,11 +147,8 @@ export default function IntakeDetail({ intakeId }: Props) {
                 .reverse()
             : [];
           setLegacyNotes(parsedLegacy);
-          const notesQuery = query(
-            collection(db, 'intakes', intakeId, 'internalNotes'),
-            orderBy('createdAt', 'desc'),
-          );
-          const unsub = onSnapshot(notesQuery, (dbNotes) => {
+          const notesQuery = query(collection(db, 'intakes', intakeId, 'internalNotes'), orderBy('createdAt', 'desc'));
+          unsubNotes = onSnapshot(notesQuery, (dbNotes) => {
             const parsed: Note[] = dbNotes.docs.map((d) => {
               const nd = d.data() as any;
               const rawCreated = nd.createdAt;
@@ -162,7 +171,29 @@ export default function IntakeDetail({ intakeId }: Props) {
             });
             setNotes(merged);
           });
-          return () => unsub();
+          const auditQuery = query(collection(db, 'intakes', intakeId, 'audit'), orderBy('createdAt', 'desc'));
+          unsubAudit = onSnapshot(auditQuery, (dbEvents) => {
+            const parsed: AuditEvent[] = dbEvents.docs.map((d) => {
+              const ad = d.data() as any;
+              const rawCreated = ad.createdAt;
+              const created =
+                rawCreated?.toDate?.() ||
+                (rawCreated instanceof Date ? rawCreated : rawCreated ? new Date(rawCreated) : undefined);
+              return {
+                id: d.id,
+                type: ad.type,
+                actorUid: ad.actorUid,
+                actorEmail: ad.actorEmail,
+                meta: ad.meta,
+                createdAt: created && !Number.isNaN(created.getTime()) ? created : undefined,
+              };
+            });
+            setAuditEvents(parsed);
+          });
+          return () => {
+            if (unsubNotes) unsubNotes();
+            if (unsubAudit) unsubAudit();
+          };
         } else {
           setError('Not found');
         }
@@ -176,7 +207,13 @@ export default function IntakeDetail({ intakeId }: Props) {
         setLoading(false);
       }
     };
-    load();
+    let unsubscribe: (() => void) | null = null;
+    load().then((fn) => {
+      if (typeof fn === 'function') unsubscribe = fn;
+    });
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [intakeId, user, authLoading]);
 
   useEffect(() => {
@@ -291,12 +328,29 @@ export default function IntakeDetail({ intakeId }: Props) {
     setUpdatingStatus(true);
     try {
       const db = getFirestore();
+      const prevStatus = data?.status || 'submitted';
       await updateDoc(doc(db, 'intakes', intakeId), {
         status,
         reviewedAt: status === 'reviewed' ? serverTimestamp() : null,
         reviewedByUid: status === 'reviewed' ? user.uid : null,
       });
       setData((prev) => (prev ? { ...prev, status } : prev));
+      await addDoc(collection(db, 'intakes', intakeId, 'audit'), {
+        type: 'status_change',
+        createdAt: serverTimestamp(),
+        actorUid: user.uid,
+        actorEmail: user.email || null,
+        meta: { fromStatus: prevStatus, toStatus: status },
+      });
+      if (status === 'reviewed') {
+        await addDoc(collection(db, 'intakes', intakeId, 'audit'), {
+          type: 'reviewed',
+          createdAt: serverTimestamp(),
+          actorUid: user.uid,
+          actorEmail: user.email || null,
+          meta: { fromStatus: prevStatus, toStatus: status },
+        });
+      }
     } catch (err) {
       setError('Unable to update status.');
     } finally {
@@ -315,7 +369,14 @@ export default function IntakeDetail({ intakeId }: Props) {
         createdByUid: user.uid,
         createdByEmail: user.email || null,
       };
-      await addDoc(collection(db, 'intakes', intakeId, 'internalNotes'), newNote);
+      const noteRef = await addDoc(collection(db, 'intakes', intakeId, 'internalNotes'), newNote);
+      await addDoc(collection(db, 'intakes', intakeId, 'audit'), {
+        type: 'note_added',
+        createdAt: serverTimestamp(),
+        actorUid: user.uid,
+        actorEmail: user.email || null,
+        meta: { noteId: noteRef.id },
+      });
       setNote('');
     } catch (err) {
       setError('Unable to add note.');
@@ -519,6 +580,41 @@ export default function IntakeDetail({ intakeId }: Props) {
                       </div>
                     ))}
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-base font-semibold text-brand-navy">Activity</h3>
+                  {auditEvents.length === 0 ? (
+                    <p className="text-sm text-slate-600">No activity yet.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {auditEvents.map((ev) => {
+                        const actor =
+                          ev.actorUid && user && ev.actorUid === user.uid
+                            ? 'You'
+                            : ev.actorEmail || shortenUid(ev.actorUid);
+                        const ts = formatNoteTimestamp(ev.createdAt);
+                        let text = '';
+                        if (ev.type === 'status_change') {
+                          const fromStatus = ev.meta?.fromStatus || 'unknown';
+                          const toStatus = ev.meta?.toStatus || 'unknown';
+                          text = `${actor} changed status from ${fromStatus} → ${toStatus}`;
+                        } else if (ev.type === 'note_added') {
+                          text = `${actor} added a note`;
+                        } else if (ev.type === 'reviewed') {
+                          text = `${actor} marked this as reviewed`;
+                        } else {
+                          text = `${actor} did ${ev.type || 'an action'}`;
+                        }
+                        return (
+                          <div key={ev.id} className="rounded border border-slate-200 bg-white px-3 py-2">
+                            <p className="text-sm text-brand-charcoal">{text}</p>
+                            <p className="text-xs text-slate-500">{ts}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">

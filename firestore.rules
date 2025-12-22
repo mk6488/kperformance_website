@@ -27,6 +27,12 @@ service cloud.firestore {
       allow create, read, list, update: if isAdmin();
       allow delete: if false;
     }
+
+    // Audit trail for admin actions on intakes
+    match /intakes/{docId}/audit/{eventId} {
+      allow create, read, list: if isAdmin();
+      allow update, delete: if false;
+    }
   }
 }
 
