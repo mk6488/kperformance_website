@@ -23,6 +23,7 @@ import bodyMapFront from '../../assets/bodyMapFront.png';
 import bodyMapBack from '../../assets/bodyMapBack.png';
 import bodyMapLeft from '../../assets/bodyMapLeft.png';
 import bodyMapRight from '../../assets/bodyMapRight.png';
+import { followUpTemplates, fillTemplate } from '../../lib/followUpTemplates';
 
 type Props = {
   intakeId: string;
@@ -78,6 +79,7 @@ export default function IntakeDetail({ intakeId }: Props) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [legacyNotes, setLegacyNotes] = useState<Note[]>([]);
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
+  const [copyMessage, setCopyMessage] = useState<string | null>(null);
   const [prevId, setPrevId] = useState<string | null>(null);
   const [nextId, setNextId] = useState<string | null>(null);
   const [navLoading, setNavLoading] = useState(false);
@@ -283,6 +285,10 @@ export default function IntakeDetail({ intakeId }: Props) {
   const createdAtRaw = getIntakeValue(['createdAt', 'payload.createdAt', 'data.createdAt']);
   const payloadRootMeta = getIntakeValueWithMeta(['payload', 'data']);
   const internalNotes = notes;
+  const replacements = {
+    name: client.fullName || '',
+    email: client.email || '',
+  };
 
   const ageText = useMemo(() => {
     if (!client.dob) return 'DOB not provided';
@@ -310,6 +316,33 @@ export default function IntakeDetail({ intakeId }: Props) {
     if (!uid) return 'unknown';
     if (uid.length <= 12) return uid;
     return `${uid.slice(0, 6)}…${uid.slice(-4)}`;
+  };
+
+  const copyFollowUp = async (templateId: keyof typeof followUpTemplates) => {
+    const t = followUpTemplates[templateId];
+    if (!t) return;
+    const body = fillTemplate(t.body, replacements);
+    const subject = fillTemplate(t.subject, replacements);
+    try {
+      await navigator.clipboard.writeText(body);
+      setCopyMessage(`Copied: ${t.label}`);
+      setTimeout(() => setCopyMessage(null), 1500);
+    } catch {
+      setCopyMessage('Unable to copy');
+      setTimeout(() => setCopyMessage(null), 1500);
+    }
+    if (t.setStatus) {
+      updateStatus(t.setStatus);
+    }
+    return { body, subject };
+  };
+
+  const makeMailto = (subject: string, body: string, to?: string) => {
+    const params = new URLSearchParams({
+      subject,
+      body,
+    }).toString();
+    return `mailto:${to || ''}?${params}`;
   };
 
   const formatNoteTimestamp = (d?: any) => {
@@ -579,6 +612,57 @@ export default function IntakeDetail({ intakeId }: Props) {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-base font-semibold text-brand-navy">Follow-up</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {(['requestMoreInfo', 'notSuitable', 'readyToBook'] as Array<
+                      keyof typeof followUpTemplates
+                    >).map((id) => {
+                      const t = followUpTemplates[id];
+                      const { label } = t;
+                      return (
+                        <Button
+                          key={id}
+                          type="button"
+                          variant="secondary"
+                          className="text-sm"
+                          onClick={async () => {
+                            const filled = await copyFollowUp(id);
+                            if (filled) {
+                              // noop; copyFollowUp handles status and toast
+                            }
+                          }}
+                        >
+                          {label}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  {copyMessage ? <p className="text-sm text-green-700">{copyMessage}</p> : null}
+                  <p className="text-xs text-slate-600">
+                    Templates copy to clipboard; status updates apply automatically when relevant. Optionally open your
+                    email client after copying.
+                  </p>
+                  <div className="grid sm:grid-cols-3 gap-2 text-xs">
+                    {(['requestMoreInfo', 'notSuitable', 'readyToBook'] as Array<
+                      keyof typeof followUpTemplates
+                    >).map((id) => {
+                      const t = followUpTemplates[id];
+                      const body = fillTemplate(t.body, replacements);
+                      const subject = fillTemplate(t.subject, replacements);
+                      return (
+                        <a
+                          key={`${id}-mailto`}
+                          href={makeMailto(subject, body, client.email)}
+                          className="text-brand-blue hover:underline"
+                        >
+                          Open email: {t.label}
+                        </a>
+                      );
+                    })}
                   </div>
                 </div>
 
