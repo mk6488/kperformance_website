@@ -13,14 +13,13 @@ import {
   startAfter,
   limit,
 } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
 import { Section } from '../../components/ui/Section';
 import { SectionHeading } from '../../components/ui/SectionHeading';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import AdminRoute from '../../components/intake/AdminRoute';
 import { useAuthUser } from '../../lib/adminAuth';
-import { functions } from '../../lib/firebase';
+import { generateIntakeAIReport, ReportType } from '../../lib/aiApi';
 import bodyMapFront from '../../assets/bodyMapFront.png';
 import bodyMapBack from '../../assets/bodyMapBack.png';
 import bodyMapLeft from '../../assets/bodyMapLeft.png';
@@ -406,15 +405,13 @@ export default function IntakeDetail({ intakeId }: Props) {
     return 'Just now';
   };
 
-  const handleGenerateAI = async (type: 'clinician_summary' | 'treatment_plan' | 'followup_questions' | 'both') => {
+  const handleGenerateAI = async (type: ReportType) => {
     if (!intakeId) return;
     setAiError(null);
     setAiGenerating(type);
     setAiSuccess(false);
     try {
-      const callable = httpsCallable(functions, 'generateIntakeAIReport');
-      const res = await callable({ intakeId, reportType: type });
-      const payload = (res.data || {}) as any;
+      const payload = await generateIntakeAIReport({ intakeId, reportType: type });
       if (payload?.content) {
         setAiContent(payload.content);
         setSelectedReportId(payload.reportId || null);
@@ -424,7 +421,11 @@ export default function IntakeDetail({ intakeId }: Props) {
         setAiError('No content returned from AI');
       }
     } catch (err: any) {
-      setAiError('Unable to generate AI report');
+      const code = err?.code || '';
+      if (code === 'permission-denied') setAiError('You do not have permission to generate AI reports.');
+      else if (code === 'failed-precondition')
+        setAiError('AI drafting requires client consent. This intake has no AI consent.');
+      else setAiError('Unable to generate AI report. Please try again.');
     } finally {
       setAiGenerating(null);
     }
@@ -438,12 +439,16 @@ export default function IntakeDetail({ intakeId }: Props) {
   };
 
   const addNoteFromAI = async () => {
-    if (!aiContent.trim() || !user) return;
+    if (!user) return;
     setSavingNoteFromAI(true);
     try {
       const db = getFirestore();
+      const text =
+        selectedReportId && aiReports.find((r) => r.id === selectedReportId)
+          ? `AI report saved (id: ${selectedReportId}). Review in AI Assistant panel.`
+          : 'AI report saved. Review in AI Assistant panel.';
       const newNote = {
-        text: aiContent.trim(),
+        text,
         createdAt: serverTimestamp(),
         createdByUid: user.uid,
         createdByEmail: (user as any)?.email || null,
