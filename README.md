@@ -49,3 +49,15 @@ Notes:
   - Archive first (`status=archived`, sets `archivedAt`, `archivedByUid`); archive date is surfaced in the admin UI.
   - Optional purge action is feature-flagged off by default; enable only when policies are confirmed and apply to archived items older than the cutoff.
   - To remove admin access, delete the admin’s document in `adminUsers/{uid}` and sign them out.
+
+## AI assistant (admin-only)
+- Backend callable: `generateIntakeAIReport` (Firebase Functions, region `europe-west2`).
+- Env vars (Functions): `OPENAI_API_KEY` (kept server-side; never exposed to the client).
+- Security model:
+  - Callable requires Firebase Auth and allowlist (`adminUsers/{uid}`).
+  - Only admins can read/write `intakes/{id}/aiReports/*` (rules enforced).
+  - Minimal PHI sent to the model (no names/emails; clinical fields only).
+- Storage:
+  - AI outputs saved under `intakes/{id}/aiReports/{reportId}` with metadata and logged to `audit` as `ai_generated`.
+- Consent note:
+  - Intended for internal clinician use; review before sharing any output with patients.

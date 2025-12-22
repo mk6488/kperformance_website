@@ -13,12 +13,14 @@ import {
   startAfter,
   limit,
 } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import { Section } from '../../components/ui/Section';
 import { SectionHeading } from '../../components/ui/SectionHeading';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import AdminRoute from '../../components/intake/AdminRoute';
 import { useAuthUser } from '../../lib/adminAuth';
+import { functions } from '../../lib/firebase';
 import bodyMapFront from '../../assets/bodyMapFront.png';
 import bodyMapBack from '../../assets/bodyMapBack.png';
 import bodyMapLeft from '../../assets/bodyMapLeft.png';
@@ -61,6 +63,16 @@ type AuditEvent = {
   meta?: Record<string, any>;
 };
 
+type AIReport = {
+  id: string;
+  reportType: string;
+  content: string;
+  createdAt?: Date;
+  model?: string;
+  createdByUid?: string;
+  createdByEmail?: string | null;
+};
+
 const views = [
   { id: 'front', label: 'Front', img: bodyMapFront },
   { id: 'back', label: 'Back', img: bodyMapBack },
@@ -80,6 +92,12 @@ export default function IntakeDetail({ intakeId }: Props) {
   const [legacyNotes, setLegacyNotes] = useState<Note[]>([]);
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
+  const [aiReports, setAiReports] = useState<AIReport[]>([]);
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+  const [aiGenerating, setAiGenerating] = useState<string | null>(null);
+  const [aiContent, setAiContent] = useState<string>('');
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [savingNoteFromAI, setSavingNoteFromAI] = useState(false);
   const [prevId, setPrevId] = useState<string | null>(null);
   const [nextId, setNextId] = useState<string | null>(null);
   const [navLoading, setNavLoading] = useState(false);
@@ -131,6 +149,7 @@ export default function IntakeDetail({ intakeId }: Props) {
       setError(null);
       let unsubNotes: (() => void) | null = null;
       let unsubAudit: (() => void) | null = null;
+      let unsubAi: (() => void) | null = null;
       try {
         const db = getFirestore();
         const snap = await getDoc(doc(db, 'intakes', intakeId));
@@ -192,9 +211,34 @@ export default function IntakeDetail({ intakeId }: Props) {
             });
             setAuditEvents(parsed);
           });
+          const aiQuery = query(collection(db, 'intakes', intakeId, 'aiReports'), orderBy('createdAt', 'desc'));
+          unsubAi = onSnapshot(aiQuery, (dbAi) => {
+            const parsed: AIReport[] = dbAi.docs.map((d) => {
+              const rd = d.data() as any;
+              const rawCreated = rd.createdAt;
+              const created =
+                rawCreated?.toDate?.() ||
+                (rawCreated instanceof Date ? rawCreated : rawCreated ? new Date(rawCreated) : undefined);
+              return {
+                id: d.id,
+                reportType: rd.reportType || 'unknown',
+                content: rd.content || '',
+                model: rd.model,
+                createdByUid: rd.createdByUid,
+                createdByEmail: rd.createdByEmail,
+                createdAt: created && !Number.isNaN(created.getTime()) ? created : undefined,
+              };
+            });
+            setAiReports(parsed);
+            if (!selectedReportId && parsed.length > 0) {
+              setSelectedReportId(parsed[0].id);
+              setAiContent(parsed[0].content);
+            }
+          });
           return () => {
             if (unsubNotes) unsubNotes();
             if (unsubAudit) unsubAudit();
+            if (unsubAi) unsubAi();
           };
         } else {
           setError('Not found');
@@ -358,6 +402,53 @@ export default function IntakeDetail({ intakeId }: Props) {
       return Number.isNaN(parsed.getTime()) ? String(d) : parsed.toLocaleString();
     }
     return 'Just now';
+  };
+
+  const handleGenerateAI = async (type: 'clinician_summary' | 'treatment_plan' | 'followup_questions' | 'both') => {
+    if (!intakeId) return;
+    setAiError(null);
+    setAiGenerating(type);
+    try {
+      const callable = httpsCallable(functions, 'generateIntakeAIReport');
+      const res = await callable({ intakeId, reportType: type });
+      const payload = (res.data || {}) as any;
+      if (payload?.content) {
+        setAiContent(payload.content);
+        setSelectedReportId(payload.reportId || null);
+      } else {
+        setAiError('No content returned from AI');
+      }
+    } catch (err: any) {
+      setAiError('Unable to generate AI report');
+    } finally {
+      setAiGenerating(null);
+    }
+  };
+
+  const handleCopyAI = async () => {
+    if (!aiContent) return;
+    await navigator.clipboard.writeText(aiContent);
+    setCopyMessage('Copied');
+    setTimeout(() => setCopyMessage(null), 1200);
+  };
+
+  const addNoteFromAI = async () => {
+    if (!aiContent.trim() || !user) return;
+    setSavingNoteFromAI(true);
+    try {
+      const db = getFirestore();
+      const newNote = {
+        text: aiContent.trim(),
+        createdAt: serverTimestamp(),
+        createdByUid: user.uid,
+        createdByEmail: (user as any)?.email || null,
+      };
+      await addDoc(collection(db, 'intakes', intakeId, 'internalNotes'), newNote);
+    } catch (err) {
+      setError('Unable to save AI report to notes.');
+    } finally {
+      setSavingNoteFromAI(false);
+    }
   };
   const toDate = (d: any) => {
     if (!d) return undefined;
@@ -704,6 +795,76 @@ export default function IntakeDetail({ intakeId }: Props) {
                         </a>
                       );
                     })}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-base font-semibold text-brand-navy">AI Assistant</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { id: 'clinician_summary', label: 'Clinician summary' },
+                      { id: 'treatment_plan', label: 'Treatment plan' },
+                      { id: 'followup_questions', label: 'Follow-up questions' },
+                      { id: 'both', label: 'Summary + plan' },
+                    ].map((b) => (
+                      <Button
+                        key={b.id}
+                        type="button"
+                        variant={aiGenerating === b.id ? 'primary' : 'secondary'}
+                        className="text-sm"
+                        disabled={!!aiGenerating}
+                        onClick={() =>
+                          handleGenerateAI(b.id as 'clinician_summary' | 'treatment_plan' | 'followup_questions' | 'both')
+                        }
+                      >
+                        {aiGenerating === b.id ? 'Generating…' : b.label}
+                      </Button>
+                    ))}
+                  </div>
+                  {aiError ? <p className="text-sm text-red-600">{aiError}</p> : null}
+                  {aiContent ? (
+                    <Card className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Button type="button" variant="secondary" onClick={handleCopyAI}>
+                          Copy
+                        </Button>
+                        <Button type="button" variant="secondary" disabled={savingNoteFromAI} onClick={addNoteFromAI}>
+                          {savingNoteFromAI ? 'Saving…' : 'Save to notes'}
+                        </Button>
+                        {copyMessage ? <span className="text-sm text-green-700">{copyMessage}</span> : null}
+                      </div>
+                      <pre className="whitespace-pre-wrap text-sm text-slate-800">{aiContent}</pre>
+                    </Card>
+                  ) : null}
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-brand-charcoal">Saved AI reports</p>
+                    {aiReports.length === 0 ? (
+                      <p className="text-sm text-slate-600">No AI reports yet.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {aiReports.map((r) => (
+                          <button
+                            key={r.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedReportId(r.id);
+                              setAiContent(r.content);
+                            }}
+                            className={`w-full rounded border px-3 py-2 text-left ${
+                              selectedReportId === r.id ? 'border-brand-blue bg-brand-blue/5' : 'border-slate-200 bg-white'
+                            }`}
+                          >
+                            <div className="flex justify-between text-sm text-brand-charcoal">
+                              <span>{r.reportType}</span>
+                              <span className="text-xs text-slate-600">
+                                {r.createdAt ? r.createdAt.toLocaleString() : 'pending'}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-600 truncate">{r.content.slice(0, 140)}</p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
