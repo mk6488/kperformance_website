@@ -112,6 +112,7 @@ function validateAndSanitise(data: IntakePayload) {
 
   const consentHealth = toBool(consent.healthDataConsent);
   const consentTruthful = toBool(consent.confirmTruthful);
+  const consentAi = toBool(consent.aiConsent);
   if (!consentHealth) errors.push('consent.healthDataConsent must be true');
   if (!consentTruthful) errors.push('consent.confirmTruthful must be true');
 
@@ -174,6 +175,7 @@ function validateAndSanitise(data: IntakePayload) {
       healthDataConsent: consentHealth,
       confirmTruthful: consentTruthful,
       contactPrefs,
+      aiConsent: consentAi,
     },
     submittedAtClientISO,
     formVersion,
@@ -217,3 +219,4 @@ export const submitIntake = onCall({ region: 'europe-west2' }, async (request) =
     throw new HttpsError('internal', 'Unable to save intake');
   }
 });
+
