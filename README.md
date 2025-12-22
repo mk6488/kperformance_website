@@ -56,8 +56,13 @@ Notes:
 - Security model:
   - Callable requires Firebase Auth and allowlist (`adminUsers/{uid}`).
   - Only admins can read/write `intakes/{id}/aiReports/*` (rules enforced).
-  - Minimal PHI sent to the model (no names/emails; clinical fields only).
+  - Minimal PHI sent to the model (no names/emails/phones/DOB; only anonymised clinical fields, ageYears + under18).
+  - Consent required: intake must have `consent.aiDraftConsent === true`; admin UI disables generation otherwise.
 - Storage:
   - AI outputs saved under `intakes/{id}/aiReports/{reportId}` with metadata and logged to `audit` as `ai_generated`.
 - Consent note:
   - Intended for internal clinician use; review before sharing any output with patients.
+- Admin UX:
+  - “AI-assisted draft — clinician review required” banner shown.
+  - No aiReports content stored in localStorage; loaded live from Firestore.
+
