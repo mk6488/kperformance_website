@@ -128,3 +128,4 @@ export default function BodyMap({ markers, onChange }: Props) {
     </div>
   );
 }
+

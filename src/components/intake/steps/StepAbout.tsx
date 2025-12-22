@@ -142,3 +142,4 @@ export default function StepAbout({ values, errors, touched, onChange }: Props) 
     </div>
   );
 }
+

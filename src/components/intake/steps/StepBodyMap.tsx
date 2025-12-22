@@ -22,3 +22,4 @@ export default function StepBodyMap({ values, onChange }: Props) {
     </div>
   );
 }
+

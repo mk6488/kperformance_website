@@ -116,3 +116,4 @@ export default function StepMedical({ values, onChange }: Props) {
     </div>
   );
 }
+

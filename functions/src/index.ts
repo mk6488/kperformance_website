@@ -1,21 +1,12 @@
-import { initializeApp } from 'firebase-admin/app';
-import { submitIntake } from './submitIntake';
-import { generateIntakeAIReport } from './generateIntakeAIReport';
-
-// Load OPENAI_API_KEY from runtime config if not already set
-const openaiKeyFromConfig = (() => {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const functions = require('firebase-functions') as any;
-    return functions?.config?.().openai?.key as string | undefined;
-  } catch {
-    return undefined;
-  }
-})();
-
-process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY || openaiKeyFromConfig;
+import { initializeApp } from "firebase-admin/app";
+import { submitIntake } from "./submitIntake";
+import { generateIntakeAIReport } from "./generateIntakeAIReport";
 
 initializeApp();
 
-export { submitIntake, generateIntakeAIReport };
+// Optional safety check at deploy/runtime:
+if (!process.env.OPENAI_API_KEY) {
+  console.warn("OPENAI_API_KEY is not set (functions/.env not loaded?)");
+}
 
+export { submitIntake, generateIntakeAIReport };

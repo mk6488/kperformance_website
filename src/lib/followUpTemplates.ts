@@ -65,3 +65,4 @@ K Performance`,
 export function fillTemplate(template: string, replacements: Record<string, string | undefined>) {
   return template.replace(/\{\{(\w+)\}\}/g, (_, key) => replacements[key] || '');
 }
+

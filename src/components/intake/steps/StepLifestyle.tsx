@@ -61,3 +61,4 @@ export default function StepLifestyle({ values, onChange }: Props) {
     </div>
   );
 }
+

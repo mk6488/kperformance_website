@@ -61,3 +61,4 @@ export async function adminSignIn(email: string, password: string) {
 export function adminSignOut() {
   return signOut(auth);
 }
+
