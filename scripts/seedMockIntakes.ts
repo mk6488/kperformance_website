@@ -228,6 +228,7 @@ async function main() {
         createdAt: SERVER_TIME,
         createdByUid: adminUser.uid,
         createdByEmail: adminEmail,
+        testData: true,
       });
 
       await intakeRef.collection('audit').add({
@@ -236,6 +237,7 @@ async function main() {
         actorUid: adminUser.uid,
         actorEmail: adminEmail,
         meta: { fromStatus: 'submitted', toStatus: status },
+        testData: true,
       });
 
       if (status === 'reviewed') {
@@ -245,6 +247,7 @@ async function main() {
           actorUid: adminUser.uid,
           actorEmail: adminEmail,
           meta: {},
+          testData: true,
         });
       }
 

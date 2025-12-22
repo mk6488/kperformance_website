@@ -30,13 +30,13 @@ async function deleteSubcollection(db: Firestore, parentRef: DocumentReference, 
 async function main() {
   const { db } = initAdmin();
 
-  console.log(`Cleaning up all intakes marked testData or *@${TEST_DOMAIN}...`);
+  console.log(`Cleaning up all intakes marked testData=true...`);
 
   let last: QueryDocumentSnapshot | null = null;
   let totalDeleted = 0;
 
   while (true) {
-    let q = db.collection('intakes').orderBy('emailLower').limit(200);
+    let q = db.collection('intakes').where('testData', '==', true).orderBy('createdAt').limit(200);
     if (last) q = q.startAfter(last);
 
     const snap = await q.get();
@@ -44,11 +44,7 @@ async function main() {
 
     last = snap.docs[snap.docs.length - 1];
 
-    const targets = snap.docs.filter((d) => {
-      const emailLower = (d.get('emailLower') || d.get('email') || '').toString().toLowerCase();
-      const isTestData = d.get('testData') === true;
-      return isTestData || emailLower.endsWith(`@${TEST_DOMAIN}`);
-    });
+    const targets = snap.docs;
 
     for (const d of targets) {
       const ref = d.ref;
