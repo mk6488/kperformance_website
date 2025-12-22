@@ -36,3 +36,16 @@ Notes:
 - Share the intake link only via direct message; do not add to public navigation.
 - Admin queries:
   - If Firestore requests a composite index for `intakes` with `status` + `createdAt` (desc), create one at: `Collection: intakes`, Fields: `status` ASC, `createdAt` DESC.
+
+## Admin data model & retention (GDPR-aware)
+- Storage locations:
+  - `intakes` collection (per submission; includes payload, status, submittedAt metadata, archivedAt/archivedByUid)
+  - `intakes/{id}/internalNotes` subcollection (admin-only notes)
+  - `intakes/{id}/audit` subcollection (admin-only audit trail of status changes, note additions, reviewed events)
+- Admin access model:
+  - Only allowlisted admins (`adminUsers/{uid}`) can read/write intakes, notes, and audit subcollections.
+  - No public reads of intakes; client submissions go through the callable Cloud Function (Admin SDK), so rules do not affect writes.
+- Retention guidance (recommended):
+  - Archive first (`status=archived`, sets `archivedAt`, `archivedByUid`); archive date is surfaced in the admin UI.
+  - Optional purge action is feature-flagged off by default; enable only when policies are confirmed and apply to archived items older than the cutoff.
+  - To remove admin access, delete the admin’s document in `adminUsers/{uid}` and sign them out.

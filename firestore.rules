@@ -17,9 +17,9 @@ service cloud.firestore {
     // Intake documents: created by Cloud Functions (admin SDK). Clients must not
     // write directly. Only admins may read/update for review/status/notes.
     match /intakes/{docId} {
-      allow create, update, delete: if false; // clients cannot write directly
+      allow create: if false; // client writes blocked; server uses Admin SDK
       allow read, list: if isAdmin();
-      allow update: if isAdmin(); // admins may update status/review fields/notes
+      allow update, delete: if isAdmin(); // admins may update status/review fields/notes
     }
 
     // Internal notes subcollection for intakes

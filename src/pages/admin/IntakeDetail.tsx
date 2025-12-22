@@ -286,6 +286,7 @@ export default function IntakeDetail({ intakeId }: Props) {
   const clientEmailLower =
     typeof clientEmailLowerRaw === 'string' ? clientEmailLowerRaw.toLowerCase() : client.email?.toLowerCase();
   const createdAtRaw = getIntakeValue(['createdAt', 'payload.createdAt', 'data.createdAt']);
+  const archivedAtRaw = getIntakeValue(['archivedAt', 'data.archivedAt']);
   const payloadRootMeta = getIntakeValueWithMeta(['payload', 'data']);
   const internalNotes = notes;
   const replacements = {
@@ -358,6 +359,24 @@ export default function IntakeDetail({ intakeId }: Props) {
     }
     return 'Just now';
   };
+  const toDate = (d: any) => {
+    if (!d) return undefined;
+    if (d?.toDate && typeof d.toDate === 'function') return d.toDate();
+    if (d instanceof Date) return d;
+    if (typeof d === 'string' || typeof d === 'number') {
+      const parsed = new Date(d);
+      return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+    }
+    return undefined;
+  };
+  const createdAtDate = toDate(createdAtRaw);
+  const PURGE_ENABLED = false;
+  const PURGE_CUTOFF_DAYS = 90;
+  const canPurge =
+    data?.status === 'archived' &&
+    createdAtDate &&
+    Date.now() - createdAtDate.getTime() > PURGE_CUTOFF_DAYS * 24 * 60 * 60 * 1000 &&
+    PURGE_ENABLED;
 
   const updateStatus = async (status: string) => {
     if (!user) return;
@@ -369,6 +388,8 @@ export default function IntakeDetail({ intakeId }: Props) {
         status,
         reviewedAt: status === 'reviewed' ? serverTimestamp() : null,
         reviewedByUid: status === 'reviewed' ? user.uid : null,
+        archivedAt: status === 'archived' ? serverTimestamp() : null,
+        archivedByUid: status === 'archived' ? user.uid : null,
       });
       setData((prev) => (prev ? { ...prev, status } : prev));
       await addDoc(collection(db, 'intakes', intakeId, 'audit'), {
@@ -447,18 +468,6 @@ export default function IntakeDetail({ intakeId }: Props) {
               img { break-inside: avoid; }
             }
           `}</style>
-          {import.meta.env.DEV && data ? (
-            <Card className="bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
-              <p className="text-xs font-semibold">DEV debug</p>
-              <p className="text-xs">Doc keys: {Object.keys(data).join(', ') || 'none'}</p>
-              <p className="text-xs">
-                Payload root: {payloadRootMeta?.path || 'none'} keys:{' '}
-                {payloadRootMeta?.value && typeof payloadRootMeta.value === 'object'
-                  ? Object.keys(payloadRootMeta.value).join(', ') || 'none'
-                  : 'none'}
-              </p>
-            </Card>
-          ) : null}
           <div className="flex flex-wrap gap-3">
             <Button
               type="button"
@@ -552,6 +561,11 @@ export default function IntakeDetail({ intakeId }: Props) {
                     <p>Status: {data.status || 'submitted'}</p>
                     <p>Created: {createdAtDisplay}</p>
                     <p>Reviewed by: {data.reviewedByUid || '—'}</p>
+                    {data.status === 'archived' ? (
+                      <p className="text-sm text-amber-700">
+                        Archived on {formatNoteTimestamp(archivedAtRaw)} by {data.archivedByUid || 'unknown'}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
 
@@ -564,6 +578,18 @@ export default function IntakeDetail({ intakeId }: Props) {
                   </Button>
                   <Button type="button" variant="secondary" disabled={updatingStatus} onClick={() => updateStatus('archived')}>
                     Archive
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={!canPurge}
+                    title="Purge is disabled by default; enable the feature flag to allow"
+                    onClick={() => {
+                      if (!canPurge) return;
+                      alert('Purge is disabled by default. Enable PURGE_ENABLED to proceed.');
+                    }}
+                  >
+                    Purge (disabled)
                   </Button>
                 </div>
 
