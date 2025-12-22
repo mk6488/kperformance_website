@@ -32,6 +32,19 @@ export default function StepConsent({ values, errors, touched, onChange }: Props
         <label className="inline-flex items-start gap-3 text-sm font-medium text-slate-800">
           <input
             type="checkbox"
+            checked={values.consent.aiDraftConsent}
+            onChange={(e) => onChange('consent.aiDraftConsent', e.target.checked)}
+            className="mt-1 h-4 w-4 rounded border border-slate-300 text-brand-navy focus:ring-brand-blue"
+          />
+          <span>
+            I consent to my information being processed using AI-assisted tools to support clinical note drafting. A
+            clinician will review all outputs.
+          </span>
+        </label>
+
+        <label className="inline-flex items-start gap-3 text-sm font-medium text-slate-800">
+          <input
+            type="checkbox"
             checked={values.consent.confirmTruthful}
             onChange={(e) => onChange('consent.confirmTruthful', e.target.checked)}
             className="mt-1 h-4 w-4 rounded border border-slate-300 text-brand-navy focus:ring-brand-blue"

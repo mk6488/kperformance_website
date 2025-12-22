@@ -338,6 +338,7 @@ export default function IntakeDetail({ intakeId }: Props) {
     name: client.fullName || '',
     email: client.email || '',
   };
+  const aiAllowed = !!consent.aiDraftConsent;
 
   const ageText = useMemo(() => {
     if (!client.dob) return 'DOB not provided';
@@ -817,7 +818,7 @@ export default function IntakeDetail({ intakeId }: Props) {
                         type="button"
                         variant={aiGenerating === b.id ? 'primary' : 'secondary'}
                         className="text-sm"
-                        disabled={!!aiGenerating}
+                        disabled={!!aiGenerating || !aiAllowed}
                         onClick={() =>
                           handleGenerateAI(b.id as 'clinician_summary' | 'treatment_plan' | 'followup_questions' | 'both')
                         }
@@ -826,6 +827,11 @@ export default function IntakeDetail({ intakeId }: Props) {
                       </Button>
                     ))}
                   </div>
+                  {!aiAllowed ? (
+                    <p className="text-sm text-amber-700">
+                      AI generation is disabled because client AI consent was not provided.
+                    </p>
+                  ) : null}
                   {aiError ? <p className="text-sm text-red-600">{aiError}</p> : null}
                     {aiSuccess ? <p className="text-sm text-green-700">Generated and saved.</p> : null}
                   {aiContent ? (
@@ -963,3 +969,4 @@ export default function IntakeDetail({ intakeId }: Props) {
     </AdminRoute>
   );
 }
+

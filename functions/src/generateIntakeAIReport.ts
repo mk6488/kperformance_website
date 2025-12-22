@@ -129,7 +129,7 @@ function minimiseContext(intake: any) {
     consent: {
       healthDataConsent: !!consent.healthDataConsent,
       confirmTruthful: !!consent.confirmTruthful,
-      aiConsent: !!consent.aiConsent,
+      aiDraftConsent: !!consent.aiDraftConsent,
     },
     bodyMap: {
       markers: Array.isArray(bodyMap.markers)

@@ -58,6 +58,7 @@ export type IntakeValues = {
       phone: boolean;
     };
     confirmTruthful: boolean;
+    aiDraftConsent: boolean;
   };
   meta: {
     formVersion: 'intake-v2';
@@ -112,6 +113,7 @@ export const defaultIntakeValues: IntakeValues = {
       phone: false,
     },
     confirmTruthful: false,
+    aiDraftConsent: false,
   },
   meta: {
     formVersion: 'intake-v2',
