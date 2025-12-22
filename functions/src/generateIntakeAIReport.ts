@@ -249,11 +249,23 @@ Keep headings as specified, concise, and actionable. If data is missing, note it
     throw new HttpsError('internal', 'AI generation failed');
   }
 
-  const data = await response.json();
+  const data: any = await response.json();
   const content: string =
-    data.output_text ||
-    data?.output?.[0]?.content?.map((c: any) => c.text).join('\n') ||
-    data?.choices?.[0]?.message?.content?.map?.((c: any) => c.text).join('\n') ||
+    data?.output_text ||
+    (Array.isArray(data?.output)
+      ? data.output
+          .map((item: any) => (item?.content ? item.content.map((c: any) => c?.text || '').join('\n') : ''))
+          .join('\n')
+      : '') ||
+    (Array.isArray(data?.choices)
+      ? data.choices
+          .map((choice: any) =>
+            Array.isArray(choice?.message?.content)
+              ? choice.message.content.map((c: any) => c?.text || '').join('\n')
+              : choice?.message?.content || '',
+          )
+          .join('\n')
+      : '') ||
     data?.choices?.[0]?.message?.content ||
     '';
 
