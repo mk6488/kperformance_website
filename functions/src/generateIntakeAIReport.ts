@@ -318,6 +318,8 @@ Keep headings as specified, concise, and actionable. If data is missing, note it
     meta: { reportId: reportRef.id, reportType, model: MODEL },
   });
 
+  console.log('AI report generated', { intakeId, reportType, promptVersion: PROMPT_VERSION, model: MODEL });
+
   return { reportId: reportRef.id, content, model: MODEL };
 });
 
