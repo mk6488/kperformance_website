@@ -330,7 +330,24 @@ Keep headings concise, UK English, and actionable. If data is missing, note it c
     mapError();
   };
 
-  const data: any = await doFetch();
+  let data: any;
+  try {
+    data = await doFetch();
+  } catch (err) {
+    // Roll back reservation on failure
+    await db.runTransaction(async (txn) => {
+      const snap = await txn.get(usageRef);
+      if (!snap.exists) return;
+      const data = snap.data() as any;
+      const pendingCount = typeof data?.pendingCount === 'number' ? data.pendingCount : 0;
+      txn.set(
+        usageRef,
+        { pendingCount: Math.max(0, pendingCount - 1) },
+        { merge: true },
+      );
+    });
+    throw err;
+  }
   const usage = data?.usage || null;
   const inputTokens = usage?.prompt_tokens ?? usage?.input_tokens ?? null;
   const outputTokens = usage?.completion_tokens ?? usage?.output_tokens ?? null;
@@ -379,9 +396,38 @@ Keep headings concise, UK English, and actionable. If data is missing, note it c
     createdByEmail: email,
   };
 
-  // Usage limits and cost controls (per admin, per day) using actual estimated cost
+  // Reservation: enforce cooldown/daily caps before calling OpenAI (no spend if blocked)
+  const provisionalCost = EST_COST_PER_CALL_USD;
   const todayKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD UTC
   const usageRef = db.collection('adminUsage').doc(uid).collection('days').doc(todayKey);
+  await db.runTransaction(async (txn) => {
+    const snap = await txn.get(usageRef);
+    const data = snap.exists ? (snap.data() as any) : {};
+    const now = Date.now();
+    const lastCallAt = data?.lastCallAt?.toDate ? data.lastCallAt.toDate() : null;
+    const pendingCount = typeof data?.pendingCount === 'number' ? data.pendingCount : 0;
+    const count = typeof data?.count === 'number' ? data.count : 0;
+    const estCostSoFar = typeof data?.estCostUsd === 'number' ? data.estCostUsd : 0;
+
+    if (lastCallAt && now - lastCallAt.getTime() < COOLDOWN_MS) {
+      throw new HttpsError('failed-precondition', 'Please wait before generating another report (cooldown).');
+    }
+    if (count + pendingCount >= DAILY_CAP_DEFAULT) {
+      throw new HttpsError('resource-exhausted', 'Daily AI generation limit reached. Try again tomorrow.');
+    }
+    if (estCostSoFar + provisionalCost > DAILY_SPEND_CAP_USD) {
+      throw new HttpsError('resource-exhausted', 'Daily AI spend limit reached. Try again tomorrow.');
+    }
+
+    txn.set(
+      usageRef,
+      {
+        pendingCount: pendingCount + 1,
+        lastCallAttemptAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true },
+    );
+  });
   await db.runTransaction(async (txn) => {
     const snap = await txn.get(usageRef);
     const data = snap.exists ? (snap.data() as any) : {};
@@ -422,6 +468,49 @@ Keep headings concise, UK English, and actionable. If data is missing, note it c
   });
 
   const reportRef = await db.collection('intakes').doc(intakeId).collection('aiReports').add(reportDoc);
+
+  // Finalise usage: commit actual cost and counts, drop reservation
+  await db.runTransaction(async (txn) => {
+    const snap = await txn.get(usageRef);
+    const data = snap.exists ? (snap.data() as any) : {};
+    const count = typeof data?.count === 'number' ? data.count : 0;
+    const estCostSoFar = typeof data?.estCostUsd === 'number' ? data.estCostUsd : 0;
+    const pendingCount = typeof data?.pendingCount === 'number' ? data.pendingCount : 0;
+    const byType = typeof data?.byType === 'object' && data.byType ? data.byType : {};
+
+    const costThisCall = estCost ?? EST_COST_PER_CALL_USD;
+    const nextCount = count + 1;
+    const nextCost = estCostSoFar + costThisCall;
+
+    // Ensure limits still respected (in case real cost pushes over)
+    if (nextCount > DAILY_CAP_DEFAULT || nextCost > DAILY_SPEND_CAP_USD) {
+      txn.set(
+        usageRef,
+        {
+          pendingCount: Math.max(0, pendingCount - 1),
+        },
+        { merge: true },
+      );
+      throw new HttpsError('resource-exhausted', 'Daily AI limit reached after generation.');
+    }
+
+    const nextByType = {
+      ...byType,
+      [reportType]: (byType[reportType] || 0) + 1,
+    };
+
+    txn.set(
+      usageRef,
+      {
+        count: nextCount,
+        estCostUsd: nextCost,
+        pendingCount: Math.max(0, pendingCount - 1),
+        lastCallAt: FieldValue.serverTimestamp(),
+        byType: nextByType,
+      },
+      { merge: true },
+    );
+  });
 
   await db.collection('intakes').doc(intakeId).collection('audit').add({
     type: 'ai_report_generated',
