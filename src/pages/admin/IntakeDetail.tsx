@@ -658,8 +658,6 @@ export default function IntakeDetail({ intakeId }: Props) {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
                     <p className="font-semibold text-brand-charcoal">{client.fullName || 'Unknown name'}</p>
-                    <p>{client.email || 'No email'}</p>
-                    <p>{client.phone || 'No phone'}</p>
                     <p>{ageText}</p>
                   </div>
                   <div className="space-y-1">
@@ -852,14 +850,6 @@ export default function IntakeDetail({ intakeId }: Props) {
                                   </Button>
                                   <Button type="button" variant="secondary" disabled={savingNoteFromAI} onClick={addNoteFromAI}>
                                     {savingNoteFromAI ? 'Saving…' : 'Save to notes'}
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="secondary"
-                                    disabled={updatingStatus}
-                                    onClick={() => updateStatus('reviewed')}
-                                  >
-                                    Mark as reviewed
                                   </Button>
                                   {copyMessage ? <span className="text-sm text-green-700">{copyMessage}</span> : null}
                                 </div>
