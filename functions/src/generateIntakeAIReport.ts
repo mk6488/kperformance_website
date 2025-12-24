@@ -31,6 +31,12 @@ Guidance:
 - Base outputs solely on provided intake context. Do not invent identifiers or appointments.
 - Be cautious with red flags; suggest escalation only when warranted.
 - If information is missing, state that it is missing rather than guessing.
+- UK English only.
+
+Output policy:
+- Default to concise bullet points, avoid generic filler.
+- For treatment plans, max 8 bullets per subsection.
+- Always include a short "Referral triggers" section.
 `.trim();
 
 const emailPattern = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
@@ -223,12 +229,42 @@ export const generateIntakeAIReport = onCall({ region: 'europe-west2' }, async (
       ? 'Follow-up questions'
       : 'Clinical summary + treatment plan';
 
+  const perReportInstruction = (() => {
+    if (reportType === 'clinician_summary') {
+      return [
+        'Presenting Snapshot',
+        'Working Hypothesis',
+        'Plan (concise next steps)',
+        'Referral triggers',
+      ];
+    }
+    if (reportType === 'treatment_plan') {
+      return [
+        'Session 1 structure',
+        '3–5 Home items',
+        'Reassess plan',
+        'Referral triggers',
+      ];
+    }
+    if (reportType === 'followup_questions') {
+      return [
+        'Safety questions (2–3)',
+        'Clarifying questions (2–4)',
+        'Goals/expectations questions (2–3)',
+      ];
+    }
+    return [];
+  })();
+
   const userPrompt = `
 Generate ${typeLabel} in ${modeLabel}.
 Use the intake context (already minimal and de-identified):
 ${JSON.stringify(context, null, 2)}
 
-Keep headings as specified, concise, and actionable. If data is missing, note it clearly. Refer to the person only as "the client".
+Instruction block for this report:
+${perReportInstruction.map((p) => `- ${p}`).join('\n')}
+
+Keep headings concise, UK English, and actionable. If data is missing, note it clearly. Refer to the person only as "the client".
 `.trim();
 
   const body = {
@@ -237,7 +273,9 @@ Keep headings as specified, concise, and actionable. If data is missing, note it
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ],
-    max_output_tokens: 800,
+    max_output_tokens:
+      reportType === 'treatment_plan' ? 900 : reportType === 'both' ? 1100 : reportType === 'followup_questions' ? 800 : 900,
+    temperature: 0.25,
   };
 
   const doFetch = async (attempt = 0): Promise<any> => {
