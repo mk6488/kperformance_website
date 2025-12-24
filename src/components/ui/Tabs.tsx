@@ -18,14 +18,16 @@ export function Tabs({ tabs, defaultTabId }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-2">
         {tabs.map((t) => (
           <button
             key={t.id}
             type="button"
             onClick={() => setActive(t.id)}
-            className={`rounded-md px-3 py-2 text-sm font-medium ${
-              active === t.id ? 'bg-brand-navy text-white' : 'bg-white text-brand-navy border border-slate-200'
+            className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              active === t.id
+                ? 'bg-white text-brand-navy border border-slate-200 shadow-sm'
+                : 'bg-transparent text-brand-navy/80 hover:text-brand-navy'
             }`}
           >
             {t.label}
