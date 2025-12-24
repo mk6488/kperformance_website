@@ -13,28 +13,23 @@ const DAILY_SPEND_CAP_USD = 5; // configurable ceiling; adjust as needed
 const MAX_RETRIES = 2;
 
 const systemPrompt = `
-You are "Soft Tissue Therapist Assistant", operating in Clinician Mode by default.
+You are "Soft Tissue Therapist Assistant" (Clinician Mode by default). Follow MODE CONTROLLER (Lite+), Safety, and Output rules exactly. UK English only.
 
 MODE CONTROLLER (Lite+):
 - Clinician Mode: concise, professional, clinical phrasing; audience is the treating clinician.
 - Patient Mode: plain-language, reassuring; audience is the patient. Use only if explicitly requested.
 - If not specified, stay in Clinician Mode.
 
-Required output structure (adjust headings to match report type):
-1) Clinical summary
-2) Key risks / red flags (note if none apparent)
-3) Treatment plan / next steps
-4) Follow-up questions
-5) Safety / referral flags
-
-Guidance:
+Safety:
 - Base outputs solely on provided intake context. Do not invent identifiers or appointments.
 - Be cautious with red flags; suggest escalation only when warranted.
 - If information is missing, state that it is missing rather than guessing.
-- UK English only.
+- Refer to the person only as "the client."
 
-Output policy:
-- Default to concise bullet points, avoid generic filler.
+Output formats:
+- Default to concise bullet points; avoid generic filler.
+- Do not repeat the same intake facts in multiple sections.
+- If information is missing, state one assumption (e.g., "Assuming no red flags…").
 - For treatment plans, max 8 bullets per subsection.
 - Always include a short "Referral triggers" section.
 `.trim();
@@ -232,25 +227,20 @@ export const generateIntakeAIReport = onCall({ region: 'europe-west2' }, async (
   const perReportInstruction = (() => {
     if (reportType === 'clinician_summary') {
       return [
-        'Presenting Snapshot',
-        'Working Hypothesis',
-        'Plan (concise next steps)',
-        'Referral triggers',
+        'Headings exactly: Presenting Snapshot / Working Hypothesis / Plan / Referral Triggers',
+        'Keep bullets concise; no repetition across sections.',
       ];
     }
     if (reportType === 'treatment_plan') {
       return [
-        'Session 1 structure',
-        '3–5 Home items',
-        'Reassess plan',
-        'Referral triggers',
+        'Headings exactly: Session 1 Structure / Home Items / Reassess / Referral Triggers',
+        'Home Items: 3–5 bullets. Max 8 bullets per subsection.',
       ];
     }
     if (reportType === 'followup_questions') {
       return [
-        'Safety questions (2–3)',
-        'Clarifying questions (2–4)',
-        'Goals/expectations questions (2–3)',
+        'Headings exactly: Safety / Clarifying / Goals',
+        'Provide 6–10 total questions split across those headings.',
       ];
     }
     return [];
@@ -264,7 +254,7 @@ ${JSON.stringify(context, null, 2)}
 Instruction block for this report:
 ${perReportInstruction.map((p) => `- ${p}`).join('\n')}
 
-Keep headings concise, UK English, and actionable. If data is missing, note it clearly. Refer to the person only as "the client".
+Keep headings exactly as specified above, concise bullets, UK English, and actionable. If data is missing, state one assumption (e.g., "Assuming no red flags…"). Do not repeat the same facts across sections.
 `.trim();
 
   const body = {
