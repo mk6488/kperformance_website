@@ -1,5 +1,6 @@
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
+import { estimateCostUsd } from './pricing';
 
 type ReportType = 'clinician_summary' | 'treatment_plan' | 'followup_questions' | 'both';
 
@@ -7,7 +8,7 @@ const MODEL = 'gpt-4o-mini';
 const PROMPT_VERSION = 'v2-lite-mode-controller-minimised';
 const COOLDOWN_MS = 30_000;
 const DAILY_CAP_DEFAULT = 50;
-const EST_COST_PER_CALL_USD = 0.001; // conservative estimate per call
+const EST_COST_PER_CALL_USD = 0.001; // fallback conservative estimate per call
 const DAILY_SPEND_CAP_USD = 5; // configurable ceiling; adjust as needed
 
 const systemPrompt = `
@@ -203,47 +204,6 @@ export const generateIntakeAIReport = onCall({ region: 'europe-west2' }, async (
     throw new HttpsError('failed-precondition', 'OPENAI_API_KEY not configured.');
   }
 
-  // Usage limits and cost controls (per admin, per day)
-  const todayKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD UTC
-  const usageRef = db.collection('adminUsage').doc(uid).collection('days').doc(todayKey);
-  await db.runTransaction(async (txn) => {
-    const snap = await txn.get(usageRef);
-    const data = snap.exists ? (snap.data() as any) : {};
-    const now = Date.now();
-    const lastCallAt = data?.lastCallAt?.toDate ? data.lastCallAt.toDate() : null;
-    if (lastCallAt && now - lastCallAt.getTime() < COOLDOWN_MS) {
-      throw new HttpsError('failed-precondition', 'Please wait before generating another report (cooldown).');
-    }
-    const count = typeof data?.count === 'number' ? data.count : 0;
-    const estCost = typeof data?.estCostUsd === 'number' ? data.estCostUsd : 0;
-    const byType = typeof data?.byType === 'object' && data.byType ? data.byType : {};
-
-    const nextCount = count + 1;
-    const nextCost = estCost + EST_COST_PER_CALL_USD;
-    if (nextCount > DAILY_CAP_DEFAULT) {
-      throw new HttpsError('resource-exhausted', 'Daily AI generation limit reached. Try again tomorrow.');
-    }
-    if (nextCost > DAILY_SPEND_CAP_USD) {
-      throw new HttpsError('resource-exhausted', 'Daily AI spend limit reached. Try again tomorrow.');
-    }
-
-    const nextByType = {
-      ...byType,
-      [reportType]: (byType[reportType] || 0) + 1,
-    };
-
-    txn.set(
-      usageRef,
-      {
-        count: nextCount,
-        estCostUsd: nextCost,
-        lastCallAt: FieldValue.serverTimestamp(),
-        byType: nextByType,
-      },
-      { merge: true },
-    );
-  });
-
   // Optional write-back of computed age/under18 (no DOB stored)
   if (ageYears !== null || under18 !== null) {
     const update: any = {};
@@ -318,6 +278,13 @@ Keep headings as specified, concise, and actionable. If data is missing, note it
   }
 
   const data: any = await response.json();
+  const usage = data?.usage || null;
+  const inputTokens = usage?.prompt_tokens ?? usage?.input_tokens ?? null;
+  const outputTokens = usage?.completion_tokens ?? usage?.output_tokens ?? null;
+  const totalTokens = usage?.total_tokens ?? (typeof inputTokens === 'number' && typeof outputTokens === 'number'
+    ? inputTokens + outputTokens
+    : null);
+  const estCost = estimateCostUsd(MODEL, inputTokens, outputTokens) ?? EST_COST_PER_CALL_USD;
   const content: string =
     data?.output_text ||
     (Array.isArray(data?.output)
@@ -347,11 +314,59 @@ Keep headings as specified, concise, and actionable. If data is missing, note it
     mode: mode === 'patient' ? 'patient' : 'clinician',
     model: MODEL,
     promptVersion: PROMPT_VERSION,
+    usage: {
+      inputTokens: inputTokens ?? null,
+      outputTokens: outputTokens ?? null,
+      totalTokens: totalTokens ?? null,
+    },
+    estCostUsd: estCost ?? null,
     content,
     createdAt: FieldValue.serverTimestamp(),
     createdByUid: uid,
     createdByEmail: email,
   };
+
+  // Usage limits and cost controls (per admin, per day) using actual estimated cost
+  const todayKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD UTC
+  const usageRef = db.collection('adminUsage').doc(uid).collection('days').doc(todayKey);
+  await db.runTransaction(async (txn) => {
+    const snap = await txn.get(usageRef);
+    const data = snap.exists ? (snap.data() as any) : {};
+    const now = Date.now();
+    const lastCallAt = data?.lastCallAt?.toDate ? data.lastCallAt.toDate() : null;
+    if (lastCallAt && now - lastCallAt.getTime() < COOLDOWN_MS) {
+      throw new HttpsError('failed-precondition', 'Please wait before generating another report (cooldown).');
+    }
+    const count = typeof data?.count === 'number' ? data.count : 0;
+    const estCostSoFar = typeof data?.estCostUsd === 'number' ? data.estCostUsd : 0;
+    const byType = typeof data?.byType === 'object' && data.byType ? data.byType : {};
+
+    const costThisCall = estCost ?? EST_COST_PER_CALL_USD;
+    const nextCount = count + 1;
+    const nextCost = estCostSoFar + costThisCall;
+    if (nextCount > DAILY_CAP_DEFAULT) {
+      throw new HttpsError('resource-exhausted', 'Daily AI generation limit reached. Try again tomorrow.');
+    }
+    if (nextCost > DAILY_SPEND_CAP_USD) {
+      throw new HttpsError('resource-exhausted', 'Daily AI spend limit reached. Try again tomorrow.');
+    }
+
+    const nextByType = {
+      ...byType,
+      [reportType]: (byType[reportType] || 0) + 1,
+    };
+
+    txn.set(
+      usageRef,
+      {
+        count: nextCount,
+        estCostUsd: nextCost,
+        lastCallAt: FieldValue.serverTimestamp(),
+        byType: nextByType,
+      },
+      { merge: true },
+    );
+  });
 
   const reportRef = await db.collection('intakes').doc(intakeId).collection('aiReports').add(reportDoc);
 
