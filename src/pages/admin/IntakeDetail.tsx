@@ -24,6 +24,8 @@ import { generateIntakeAIReport, ReportType } from '../../lib/aiApi';
 import { Tabs } from '../../components/ui/Tabs';
 import { CollapsibleSection } from '../../components/ui/CollapsibleSection';
 import { IntakeNotes } from './intake-detail/IntakeNotes';
+import { IntakeFollowUp } from './components/IntakeFollowUp';
+import { IntakeAI } from './components/IntakeAI';
 import bodyMapFront from '../../assets/bodyMapFront.png';
 import bodyMapBack from '../../assets/bodyMapBack.png';
 import bodyMapLeft from '../../assets/bodyMapLeft.png';
@@ -66,7 +68,7 @@ type AuditEvent = {
   meta?: Record<string, any>;
 };
 
-type AIReport = {
+export type AIReport = {
   id: string;
   reportType: string;
   content: string;
@@ -674,28 +676,18 @@ export default function IntakeDetail({ intakeId }: Props) {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                  <Button type="button" variant="secondary" disabled={updatingStatus} onClick={() => updateStatus('reviewed')}>
-                    Mark reviewed
-                  </Button>
-                  <Button type="button" variant="secondary" disabled={updatingStatus} onClick={() => updateStatus('needs_followup')}>
-                    Needs follow-up
-                  </Button>
-                  <Button type="button" variant="secondary" disabled={updatingStatus} onClick={() => updateStatus('archived')}>
-                    Archive
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={!canPurge}
-                    title="Purge is disabled by default; enable the feature flag to allow"
-                    onClick={() => {
-                      if (!canPurge) return;
-                      alert('Purge is disabled by default. Enable PURGE_ENABLED to proceed.');
-                    }}
+                <div className="flex flex-wrap items-center gap-3">
+                  <p className="text-sm text-slate-700">Status: {data.status || 'submitted'}</p>
+                  <select
+                    className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+                    value={data.status || 'submitted'}
+                    onChange={(e) => updateStatus(e.target.value)}
+                    disabled={updatingStatus}
                   >
-                    Purge (disabled)
-                  </Button>
+                    <option value="reviewed">reviewed</option>
+                    <option value="needs_followup">needs_followup</option>
+                    <option value="archived">archived</option>
+                  </select>
                 </div>
 
                 <div className="space-y-3">
@@ -783,140 +775,39 @@ export default function IntakeDetail({ intakeId }: Props) {
                         id: 'ai',
                         label: 'AI Assistant',
                         content: (
-                          <div className="space-y-3">
-                            <h3 className="text-base font-semibold text-brand-navy">AI Assistant</h3>
-                            <p className="text-sm text-amber-700">AI-assisted draft — clinician review required.</p>
-                            <div className="flex flex-wrap gap-2">
-                              {[
-                                { id: 'clinician_summary', label: 'Clinician summary' },
-                                { id: 'treatment_plan', label: 'Treatment plan' },
-                                { id: 'followup_questions', label: 'Follow-up questions' },
-                                { id: 'both', label: 'Summary + plan' },
-                              ].map((b) => (
-                                <Button
-                                  key={b.id}
-                                  type="button"
-                                  variant={aiGenerating === b.id ? 'primary' : 'secondary'}
-                                  className="text-sm"
-                                  disabled={!!aiGenerating || !aiAllowed}
-                                  onClick={() =>
-                                    handleGenerateAI(
-                                      b.id as 'clinician_summary' | 'treatment_plan' | 'followup_questions' | 'both',
-                                    )
-                                  }
-                                >
-                                  {aiGenerating === b.id ? 'Generating…' : b.label}
-                                </Button>
-                              ))}
-                            </div>
-                            {!aiAllowed ? (
-                              <p className="text-sm text-amber-700">
-                                AI generation is disabled because client AI consent was not provided.
-                              </p>
-                            ) : null}
-                            {aiError ? <p className="text-sm text-red-600">{aiError}</p> : null}
-                            {aiSuccess ? <p className="text-sm text-green-700">Generated and saved.</p> : null}
-                            {aiContent ? (
-                              <Card className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <Button type="button" variant="secondary" onClick={handleCopyAI}>
-                                    Copy
-                                  </Button>
-                                  <Button type="button" variant="secondary" disabled={savingNoteFromAI} onClick={addNoteFromAI}>
-                                    {savingNoteFromAI ? 'Saving…' : 'Save to notes'}
-                                  </Button>
-                                  {copyMessage ? <span className="text-sm text-green-700">{copyMessage}</span> : null}
-                                </div>
-                                <pre className="whitespace-pre-wrap text-sm text-slate-800">{aiContent}</pre>
-                              </Card>
-                            ) : null}
-                            <div className="space-y-2">
-                              <p className="text-sm font-semibold text-brand-charcoal">Saved AI reports</p>
-                              {aiReports.length === 0 ? (
-                                <p className="text-sm text-slate-600">No AI reports yet.</p>
-                              ) : (
-                                <div className="space-y-2">
-                                  {aiReports.map((r) => (
-                                    <button
-                                      key={r.id}
-                                      type="button"
-                                      onClick={() => {
-                                        setSelectedReportId(r.id);
-                                        setAiContent(r.content);
-                                      }}
-                                      className={`w-full rounded border px-3 py-2 text-left ${
-                                        selectedReportId === r.id ? 'border-brand-blue bg-brand-blue/5' : 'border-slate-200 bg-white'
-                                      }`}
-                                    >
-                                      <div className="flex justify-between text-sm text-brand-charcoal">
-                                        <span>{r.reportType}</span>
-                                        <span className="text-xs text-slate-600">
-                                          {r.createdAt ? r.createdAt.toLocaleString() : 'pending'}
-                                        </span>
-                                      </div>
-                                      <p className="text-xs text-slate-600 truncate">{r.content.slice(0, 140)}</p>
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
+                          <IntakeAI
+                            aiAllowed={aiAllowed}
+                            aiGenerating={aiGenerating}
+                            aiError={aiError}
+                            aiSuccess={aiSuccess}
+                            aiContent={aiContent}
+                            aiReports={aiReports}
+                            selectedReportId={selectedReportId}
+                            setSelectedReportId={setSelectedReportId}
+                            setAiContent={setAiContent}
+                            handleGenerateAI={handleGenerateAI}
+                            handleCopyAI={handleCopyAI}
+                            addNoteFromAI={addNoteFromAI}
+                            savingNoteFromAI={savingNoteFromAI}
+                            updatingStatus={updatingStatus}
+                            updateStatus={updateStatus}
+                            copyMessage={copyMessage}
+                          />
                         ),
                       },
                       {
                         id: 'followup',
                         label: 'Follow-up',
                         content: (
-                          <div className="space-y-3">
-                            <h3 className="text-base font-semibold text-brand-navy">Follow-up</h3>
-                            <div className="flex flex-wrap gap-2">
-                              {(['requestMoreInfo', 'notSuitable', 'readyToBook'] as Array<keyof typeof followUpTemplates>).map(
-                                (id) => {
-                                  const t = followUpTemplates[id];
-                                  const { label } = t;
-                                  return (
-                                    <Button
-                                      key={id}
-                                      type="button"
-                                      variant="secondary"
-                                      className="text-sm"
-                                      onClick={async () => {
-                                        const filled = await copyFollowUp(id);
-                                        if (filled) {
-                                          // noop; copyFollowUp handles status and toast
-                                        }
-                                      }}
-                                    >
-                                      {label}
-                                    </Button>
-                                  );
-                                },
-                              )}
-                            </div>
-                            {copyMessage ? <p className="text-sm text-green-700">{copyMessage}</p> : null}
-                            <p className="text-xs text-slate-600">
-                              Templates copy to clipboard; status updates apply automatically when relevant. Optionally open your
-                              email client after copying.
-                            </p>
-                            <div className="grid sm:grid-cols-3 gap-2 text-xs">
-                              {(['requestMoreInfo', 'notSuitable', 'readyToBook'] as Array<keyof typeof followUpTemplates>).map(
-                                (id) => {
-                                  const t = followUpTemplates[id];
-                                  const body = fillTemplate(t.body, replacements);
-                                  const subject = fillTemplate(t.subject, replacements);
-                                  return (
-                                    <a
-                                      key={`${id}-mailto`}
-                                      href={makeMailto(subject, body, client.email)}
-                                      className="text-brand-blue hover:underline"
-                                    >
-                                      Open email: {t.label}
-                                    </a>
-                                  );
-                                },
-                              )}
-                            </div>
-                          </div>
+                          <IntakeFollowUp
+                            followUpTemplates={followUpTemplates as any}
+                            copyMessage={copyMessage}
+                            replacements={replacements}
+                            clientEmail={client.email}
+                            copyFollowUp={copyFollowUp as any}
+                            fillTemplate={fillTemplate}
+                            makeMailto={makeMailto}
+                          />
                         ),
                       },
                       {
@@ -962,6 +853,21 @@ export default function IntakeDetail({ intakeId }: Props) {
                     ]}
                   />
                 </div>
+
+                <CollapsibleSection title="Danger zone" defaultOpen={false}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={!canPurge}
+                    title="Purge is disabled by default; enable the feature flag to allow"
+                    onClick={() => {
+                      if (!canPurge) return;
+                      alert('Purge is disabled by default. Enable PURGE_ENABLED to proceed.');
+                    }}
+                  >
+                    Purge (disabled)
+                  </Button>
+                </CollapsibleSection>
               </div>
             )}
           </Card>
