@@ -10,6 +10,7 @@ const COOLDOWN_MS = 30_000;
 const DAILY_CAP_DEFAULT = 50;
 const EST_COST_PER_CALL_USD = 0.001; // fallback conservative estimate per call
 const DAILY_SPEND_CAP_USD = 5; // configurable ceiling; adjust as needed
+const MAX_RETRIES = 2;
 
 const systemPrompt = `
 You are "Soft Tissue Therapist Assistant", operating in Clinician Mode by default.
@@ -239,16 +240,20 @@ Keep headings as specified, concise, and actionable. If data is missing, note it
     max_output_tokens: 800,
   };
 
-  const response = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
+  const doFetch = async (attempt = 0): Promise<any> => {
+    const response = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
 
-  if (!response.ok) {
+    if (response.ok) {
+      return response.json();
+    }
+
     const status = response.status;
     let code: string | undefined;
     let message: string | undefined;
@@ -262,22 +267,32 @@ Keep headings as specified, concise, and actionable. If data is missing, note it
       console.error('OpenAI error', { status, text });
     }
 
-    if (code === 'insufficient_quota') {
-      throw new HttpsError(
-        'failed-precondition',
-        'OpenAI API quota exceeded. Please check OpenAI billing/usage limits.',
-      );
-    }
-    if (status === 401) {
-      throw new HttpsError('unauthenticated', 'Invalid OpenAI API key.');
-    }
-    if (status === 429) {
-      throw new HttpsError('resource-exhausted', 'Rate limited. Try again in a moment.');
-    }
-    throw new HttpsError('internal', 'AI generation failed');
-  }
+    const mapError = () => {
+      if (code === 'insufficient_quota') {
+        throw new HttpsError(
+          'failed-precondition',
+          'OpenAI API quota exceeded. Please check OpenAI billing/usage limits.',
+        );
+      }
+      if (status === 401) {
+        throw new HttpsError('unauthenticated', 'Invalid OpenAI API key.');
+      }
+      if (status === 429) {
+        throw new HttpsError('resource-exhausted', 'Rate limited. Try again in a moment.');
+      }
+      throw new HttpsError('internal', 'AI generation failed');
+    };
 
-  const data: any = await response.json();
+    if (status === 429 && attempt < MAX_RETRIES) {
+      const backoff = 300 * Math.pow(2, attempt) + Math.floor(Math.random() * 100);
+      await new Promise((r) => setTimeout(r, backoff));
+      return doFetch(attempt + 1);
+    }
+
+    mapError();
+  };
+
+  const data: any = await doFetch();
   const usage = data?.usage || null;
   const inputTokens = usage?.prompt_tokens ?? usage?.input_tokens ?? null;
   const outputTokens = usage?.completion_tokens ?? usage?.output_tokens ?? null;
