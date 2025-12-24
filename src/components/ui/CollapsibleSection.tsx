@@ -13,7 +13,7 @@ export function CollapsibleSection({ title, defaultOpen = false, children }: Pro
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 text-left"
+        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition-colors"
       >
         <span className="font-medium text-brand-navy">{title}</span>
         <span className="text-sm text-slate-600">{open ? '▾' : '▸'}</span>

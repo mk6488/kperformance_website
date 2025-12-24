@@ -97,7 +97,7 @@ export default function ClientDetail({ emailKey }: Props) {
                       <div className="flex flex-wrap justify-between gap-2">
                         <div className="space-y-1">
                           <p className="font-semibold text-brand-charcoal">{item.clientName}</p>
-                          <p className="text-sm text-slate-600">{first?.clientEmail || emailKey}</p>
+                          <p className="text-sm text-slate-600">{item.clientEmail || emailKey}</p>
                           <p className="text-xs text-slate-500">{formatDate(item.createdAt)}</p>
                         </div>
                         <div className="text-right space-y-1">

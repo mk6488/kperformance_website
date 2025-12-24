@@ -27,7 +27,7 @@ export function Tabs({ tabs, defaultTabId }: Props) {
             className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
               active === t.id
                 ? 'bg-white text-brand-navy border border-slate-200 shadow-sm'
-                : 'bg-transparent text-brand-navy/80 hover:text-brand-navy'
+                : 'bg-transparent text-slate-600 font-normal hover:text-brand-navy hover:bg-white/60'
             }`}
           >
             {t.label}
