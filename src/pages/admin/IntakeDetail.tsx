@@ -20,6 +20,8 @@ import { Button } from '../../components/ui/Button';
 import AdminRoute from '../../components/intake/AdminRoute';
 import { useAuthUser } from '../../lib/adminAuth';
 import { generateIntakeAIReport, ReportType } from '../../lib/aiApi';
+import { Tabs } from '../../components/ui/Tabs';
+import { CollapsibleSection } from '../../components/ui/CollapsibleSection';
 import bodyMapFront from '../../assets/bodyMapFront.png';
 import bodyMapBack from '../../assets/bodyMapBack.png';
 import bodyMapLeft from '../../assets/bodyMapLeft.png';
@@ -696,277 +698,305 @@ export default function IntakeDetail({ intakeId }: Props) {
                   </Button>
                 </div>
 
-                <div className="space-y-2">
-                  <h3 className="text-base font-semibold text-brand-navy">Main concern</h3>
-                  <p>{problem.mainConcern || 'Not provided'}</p>
-                  <p className="text-slate-600">Pain now: {problem.painNow ?? 'Not set'} /10</p>
-                  <p>Onset: {problem.onset || 'Not provided'}</p>
-                  <p>Location: {problem.locationText || 'Not provided'}</p>
-                  <p>Aggravators: {problem.aggravators || 'Not provided'}</p>
-                  <p>Helps: {problem.easers || 'Not provided'}</p>
-                  <p>Goals: {problem.goals || 'Not provided'}</p>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-base font-semibold text-brand-navy">Medical</h3>
-                  <p>Conditions: {medical.conditions || 'Not provided'}</p>
-                  <p>Surgeries: {medical.surgeries || 'Not provided'}</p>
-                  <p>Medications: {medical.medications || 'Not provided'}</p>
-                  <p>Allergies: {medical.allergies || 'Not provided'}</p>
-                  <p>Red flags: {(medical.redFlags || []).join(', ') || 'None selected'}</p>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-base font-semibold text-brand-navy">Lifestyle</h3>
-                  <p>Activity: {lifestyle.activity || 'Not provided'}</p>
-                  <p>Weekly load: {lifestyle.weeklyLoad || 'Not provided'}</p>
-                  <p>Sleep hours: {lifestyle.sleepHours || 'Not provided'}</p>
-                  <p>Stress: {lifestyle.stressScore ?? 'Not set'} /10</p>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-base font-semibold text-brand-navy">Consent</h3>
-                  <p>Health data consent: {consent.healthDataConsent ? 'Given' : 'Not given'}</p>
-                  <p>Confirmed truthful: {consent.confirmTruthful ? 'Yes' : 'No'}</p>
-                  <p>
-                    Contact prefs:{' '}
-                    {['email', 'sms', 'phone']
-                      .filter((k) => consent.contactPrefs && consent.contactPrefs[k])
-                      .join(', ') || 'None'}
-                  </p>
-                </div>
-
                 <div className="space-y-3">
-                  <h3 className="text-base font-semibold text-brand-navy">Body map</h3>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {views.map((v) => (
-                      <div key={v.id} className="border border-slate-200 rounded-lg bg-white p-3">
-                        <p className="text-sm font-semibold text-brand-charcoal mb-2">{v.label}</p>
-                        <div className="relative">
-                          <img src={v.img} alt={`${v.label} view`} className="w-full h-auto select-none" />
-                          {markers
-                            .filter((m) => m.view === v.id)
-                            .map((m, idx) => (
-                              <span
-                                key={`${v.id}-${idx}`}
-                                className="absolute -translate-x-1/2 -translate-y-1/2 block h-3 w-3 rounded-full bg-brand-navy shadow"
-                                style={{ left: `${m.x * 100}%`, top: `${m.y * 100}%` }}
-                              />
-                            ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                  <CollapsibleSection title="Main concern" defaultOpen>
+                    <p>{problem.mainConcern || 'Not provided'}</p>
+                    <p className="text-slate-600">Pain now: {problem.painNow ?? 'Not set'} /10</p>
+                    <p>Onset: {problem.onset || 'Not provided'}</p>
+                    <p>Location: {problem.locationText || 'Not provided'}</p>
+                    <p>Aggravators: {problem.aggravators || 'Not provided'}</p>
+                    <p>Helps: {problem.easers || 'Not provided'}</p>
+                    <p>Goals: {problem.goals || 'Not provided'}</p>
+                  </CollapsibleSection>
 
-                <div className="space-y-3">
-                  <h3 className="text-base font-semibold text-brand-navy">Follow-up</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {(['requestMoreInfo', 'notSuitable', 'readyToBook'] as Array<
-                      keyof typeof followUpTemplates
-                    >).map((id) => {
-                      const t = followUpTemplates[id];
-                      const { label } = t;
-                      return (
-                        <Button
-                          key={id}
-                          type="button"
-                          variant="secondary"
-                          className="text-sm"
-                          onClick={async () => {
-                            const filled = await copyFollowUp(id);
-                            if (filled) {
-                              // noop; copyFollowUp handles status and toast
-                            }
-                          }}
-                        >
-                          {label}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                  {copyMessage ? <p className="text-sm text-green-700">{copyMessage}</p> : null}
-                  <p className="text-xs text-slate-600">
-                    Templates copy to clipboard; status updates apply automatically when relevant. Optionally open your
-                    email client after copying.
-                  </p>
-                  <div className="grid sm:grid-cols-3 gap-2 text-xs">
-                    {(['requestMoreInfo', 'notSuitable', 'readyToBook'] as Array<
-                      keyof typeof followUpTemplates
-                    >).map((id) => {
-                      const t = followUpTemplates[id];
-                      const body = fillTemplate(t.body, replacements);
-                      const subject = fillTemplate(t.subject, replacements);
-                      return (
-                        <a
-                          key={`${id}-mailto`}
-                          href={makeMailto(subject, body, client.email)}
-                          className="text-brand-blue hover:underline"
-                        >
-                          Open email: {t.label}
-                        </a>
-                      );
-                    })}
-                  </div>
-                </div>
+                  <CollapsibleSection title="Medical" defaultOpen={false}>
+                    <p>Conditions: {medical.conditions || 'Not provided'}</p>
+                    <p>Surgeries: {medical.surgeries || 'Not provided'}</p>
+                    <p>Medications: {medical.medications || 'Not provided'}</p>
+                    <p>Allergies: {medical.allergies || 'Not provided'}</p>
+                    <p>Red flags: {(medical.redFlags || []).join(', ') || 'None selected'}</p>
+                  </CollapsibleSection>
 
-                <div className="space-y-3">
-                  <h3 className="text-base font-semibold text-brand-navy">AI Assistant</h3>
-                  <p className="text-sm text-amber-700">AI-assisted draft — clinician review required.</p>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      { id: 'clinician_summary', label: 'Clinician summary' },
-                      { id: 'treatment_plan', label: 'Treatment plan' },
-                      { id: 'followup_questions', label: 'Follow-up questions' },
-                      { id: 'both', label: 'Summary + plan' },
-                    ].map((b) => (
-                      <Button
-                        key={b.id}
-                        type="button"
-                        variant={aiGenerating === b.id ? 'primary' : 'secondary'}
-                        className="text-sm"
-                        disabled={!!aiGenerating || !aiAllowed}
-                        onClick={() =>
-                          handleGenerateAI(b.id as 'clinician_summary' | 'treatment_plan' | 'followup_questions' | 'both')
-                        }
-                      >
-                        {aiGenerating === b.id ? 'Generating…' : b.label}
-                      </Button>
-                    ))}
-                  </div>
-                  {!aiAllowed ? (
-                    <p className="text-sm text-amber-700">
-                      AI generation is disabled because client AI consent was not provided.
+                  <CollapsibleSection title="Lifestyle" defaultOpen={false}>
+                    <p>Activity: {lifestyle.activity || 'Not provided'}</p>
+                    <p>Weekly load: {lifestyle.weeklyLoad || 'Not provided'}</p>
+                    <p>Sleep hours: {lifestyle.sleepHours || 'Not provided'}</p>
+                    <p>Stress: {lifestyle.stressScore ?? 'Not set'} /10</p>
+                  </CollapsibleSection>
+
+                  <CollapsibleSection title="Consent" defaultOpen={false}>
+                    <p>Health data consent: {consent.healthDataConsent ? 'Given' : 'Not given'}</p>
+                    <p>Confirmed truthful: {consent.confirmTruthful ? 'Yes' : 'No'}</p>
+                    <p>
+                      Contact prefs:{' '}
+                      {['email', 'sms', 'phone']
+                        .filter((k) => consent.contactPrefs && consent.contactPrefs[k])
+                        .join(', ') || 'None'}
                     </p>
-                  ) : null}
-                  {aiError ? <p className="text-sm text-red-600">{aiError}</p> : null}
-                    {aiSuccess ? <p className="text-sm text-green-700">Generated and saved.</p> : null}
-                  {aiContent ? (
-                    <Card className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Button type="button" variant="secondary" onClick={handleCopyAI}>
-                          Copy
-                        </Button>
-                        <Button type="button" variant="secondary" disabled={savingNoteFromAI} onClick={addNoteFromAI}>
-                          {savingNoteFromAI ? 'Saving…' : 'Save to notes'}
-                        </Button>
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            disabled={updatingStatus}
-                            onClick={() => updateStatus('reviewed')}
-                          >
-                            Mark as reviewed
-                          </Button>
-                        {copyMessage ? <span className="text-sm text-green-700">{copyMessage}</span> : null}
-                      </div>
-                      <pre className="whitespace-pre-wrap text-sm text-slate-800">{aiContent}</pre>
-                    </Card>
-                  ) : null}
-                  <div className="space-y-2">
-                    <p className="text-sm font-semibold text-brand-charcoal">Saved AI reports</p>
-                    {aiReports.length === 0 ? (
-                      <p className="text-sm text-slate-600">No AI reports yet.</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {aiReports.map((r) => (
-                          <button
-                            key={r.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedReportId(r.id);
-                              setAiContent(r.content);
-                            }}
-                            className={`w-full rounded border px-3 py-2 text-left ${
-                              selectedReportId === r.id ? 'border-brand-blue bg-brand-blue/5' : 'border-slate-200 bg-white'
-                            }`}
-                          >
-                            <div className="flex justify-between text-sm text-brand-charcoal">
-                              <span>{r.reportType}</span>
-                              <span className="text-xs text-slate-600">
-                                {r.createdAt ? r.createdAt.toLocaleString() : 'pending'}
-                              </span>
-                            </div>
-                            <p className="text-xs text-slate-600 truncate">{r.content.slice(0, 140)}</p>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  </CollapsibleSection>
 
-                <div className="space-y-2">
-                  <h3 className="text-base font-semibold text-brand-navy">Activity</h3>
-                  {auditEvents.length === 0 ? (
-                    <p className="text-sm text-slate-600">No activity yet.</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {auditEvents.map((ev) => {
-                        const actor =
-                          ev.actorUid && user && ev.actorUid === user.uid
-                            ? 'You'
-                            : ev.actorEmail || shortenUid(ev.actorUid);
-                        const ts = formatNoteTimestamp(ev.createdAt);
-                        let text = '';
-                        if (ev.type === 'status_change') {
-                          const fromStatus = ev.meta?.fromStatus || 'unknown';
-                          const toStatus = ev.meta?.toStatus || 'unknown';
-                          text = `${actor} changed status from ${fromStatus} → ${toStatus}`;
-                        } else if (ev.type === 'note_added') {
-                          text = `${actor} added a note`;
-                        } else if (ev.type === 'reviewed') {
-                          text = `${actor} marked this as reviewed`;
-                        } else {
-                          text = `${actor} did ${ev.type || 'an action'}`;
-                        }
-                        return (
-                          <div key={ev.id} className="rounded border border-slate-200 bg-white px-3 py-2">
-                            <p className="text-sm text-brand-charcoal">{text}</p>
-                            <p className="text-xs text-slate-500">{ts}</p>
+                  <CollapsibleSection title="Body map" defaultOpen>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {views.map((v) => (
+                        <div key={v.id} className="border border-slate-200 rounded-lg bg-white p-3">
+                          <p className="text-sm font-semibold text-brand-charcoal mb-2">{v.label}</p>
+                          <div className="relative">
+                            <img src={v.img} alt={`${v.label} view`} className="w-full h-auto select-none" />
+                            {markers
+                              .filter((m) => m.view === v.id)
+                              .map((m, idx) => (
+                                <span
+                                  key={`${v.id}-${idx}`}
+                                  className="absolute -translate-x-1/2 -translate-y-1/2 block h-3 w-3 rounded-full bg-brand-navy shadow"
+                                  style={{ left: `${m.x * 100}%`, top: `${m.y * 100}%` }}
+                                />
+                              ))}
                           </div>
-                        );
-                      })}
+                        </div>
+                      ))}
                     </div>
-                  )}
+                  </CollapsibleSection>
                 </div>
 
-                <div className="space-y-2">
-                  <h3 className="text-base font-semibold text-brand-navy">Internal notes</h3>
-                  <div className="space-y-2">
-                    <textarea
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      rows={3}
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/40 focus:border-brand-blue/40"
-                      placeholder="Add a note (visible to admins only)"
-                    />
-                    <Button type="button" onClick={addNote} disabled={savingNote || !note.trim()}>
-                      {savingNote ? 'Saving…' : 'Add note'}
-                    </Button>
-                  </div>
-                  <div className="space-y-2">
-                    {internalNotes.length === 0 ? (
-                      <p className="text-sm text-slate-600">No notes yet.</p>
-                    ) : (
-                      internalNotes.map((n, idx) => (
-                        <div key={n.id || idx} className="rounded border border-slate-200 bg-white px-3 py-2">
-                          <p className="text-sm text-brand-charcoal whitespace-pre-wrap break-words">{n.text}</p>
-                          {n.isLegacy ? (
-                            <p className="text-[11px] uppercase tracking-wide text-amber-700">Legacy note</p>
-                          ) : null}
-                          <p className="text-xs text-slate-500">
-                            By{' '}
-                            {n.createdByUid && user && n.createdByUid === user.uid
-                              ? 'You'
-                              : n.createdByEmail
-                              ? n.createdByEmail
-                              : shortenUid(n.createdByUid)}{' '}
-                            • {formatNoteTimestamp(n.createdAt)}
-                          </p>
-                        </div>
-                      ))
-                    )}
-                  </div>
+                <div className="space-y-3">
+                  <h3 className="text-base font-semibold text-brand-navy">Work area</h3>
+                  <Tabs
+                    defaultTabId="notes"
+                    tabs={[
+                      {
+                        id: 'notes',
+                        label: 'Notes',
+                        content: (
+                          <div className="space-y-2">
+                            <h3 className="text-base font-semibold text-brand-navy">Internal notes</h3>
+                            <div className="space-y-2">
+                              <textarea
+                                value={note}
+                                onChange={(e) => setNote(e.target.value)}
+                                rows={3}
+                                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/40 focus:border-brand-blue/40"
+                                placeholder="Add a note (visible to admins only)"
+                              />
+                              <Button type="button" onClick={addNote} disabled={savingNote || !note.trim()}>
+                                {savingNote ? 'Saving…' : 'Add note'}
+                              </Button>
+                            </div>
+                            <div className="space-y-2">
+                              {internalNotes.length === 0 ? (
+                                <p className="text-sm text-slate-600">No notes yet.</p>
+                              ) : (
+                                internalNotes.map((n, idx) => (
+                                  <div key={n.id || idx} className="rounded border border-slate-200 bg-white px-3 py-2">
+                                    <p className="text-sm text-brand-charcoal whitespace-pre-wrap break-words">{n.text}</p>
+                                    {n.isLegacy ? (
+                                      <p className="text-[11px] uppercase tracking-wide text-amber-700">Legacy note</p>
+                                    ) : null}
+                                    <p className="text-xs text-slate-500">
+                                      By{' '}
+                                      {n.createdByUid && user && n.createdByUid === user.uid
+                                        ? 'You'
+                                        : n.createdByEmail
+                                        ? n.createdByEmail
+                                        : shortenUid(n.createdByUid)}{' '}
+                                      • {formatNoteTimestamp(n.createdAt)}
+                                    </p>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          </div>
+                        ),
+                      },
+                      {
+                        id: 'ai',
+                        label: 'AI Assistant',
+                        content: (
+                          <div className="space-y-3">
+                            <h3 className="text-base font-semibold text-brand-navy">AI Assistant</h3>
+                            <p className="text-sm text-amber-700">AI-assisted draft — clinician review required.</p>
+                            <div className="flex flex-wrap gap-2">
+                              {[
+                                { id: 'clinician_summary', label: 'Clinician summary' },
+                                { id: 'treatment_plan', label: 'Treatment plan' },
+                                { id: 'followup_questions', label: 'Follow-up questions' },
+                                { id: 'both', label: 'Summary + plan' },
+                              ].map((b) => (
+                                <Button
+                                  key={b.id}
+                                  type="button"
+                                  variant={aiGenerating === b.id ? 'primary' : 'secondary'}
+                                  className="text-sm"
+                                  disabled={!!aiGenerating || !aiAllowed}
+                                  onClick={() =>
+                                    handleGenerateAI(
+                                      b.id as 'clinician_summary' | 'treatment_plan' | 'followup_questions' | 'both',
+                                    )
+                                  }
+                                >
+                                  {aiGenerating === b.id ? 'Generating…' : b.label}
+                                </Button>
+                              ))}
+                            </div>
+                            {!aiAllowed ? (
+                              <p className="text-sm text-amber-700">
+                                AI generation is disabled because client AI consent was not provided.
+                              </p>
+                            ) : null}
+                            {aiError ? <p className="text-sm text-red-600">{aiError}</p> : null}
+                            {aiSuccess ? <p className="text-sm text-green-700">Generated and saved.</p> : null}
+                            {aiContent ? (
+                              <Card className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <Button type="button" variant="secondary" onClick={handleCopyAI}>
+                                    Copy
+                                  </Button>
+                                  <Button type="button" variant="secondary" disabled={savingNoteFromAI} onClick={addNoteFromAI}>
+                                    {savingNoteFromAI ? 'Saving…' : 'Save to notes'}
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="secondary"
+                                    disabled={updatingStatus}
+                                    onClick={() => updateStatus('reviewed')}
+                                  >
+                                    Mark as reviewed
+                                  </Button>
+                                  {copyMessage ? <span className="text-sm text-green-700">{copyMessage}</span> : null}
+                                </div>
+                                <pre className="whitespace-pre-wrap text-sm text-slate-800">{aiContent}</pre>
+                              </Card>
+                            ) : null}
+                            <div className="space-y-2">
+                              <p className="text-sm font-semibold text-brand-charcoal">Saved AI reports</p>
+                              {aiReports.length === 0 ? (
+                                <p className="text-sm text-slate-600">No AI reports yet.</p>
+                              ) : (
+                                <div className="space-y-2">
+                                  {aiReports.map((r) => (
+                                    <button
+                                      key={r.id}
+                                      type="button"
+                                      onClick={() => {
+                                        setSelectedReportId(r.id);
+                                        setAiContent(r.content);
+                                      }}
+                                      className={`w-full rounded border px-3 py-2 text-left ${
+                                        selectedReportId === r.id ? 'border-brand-blue bg-brand-blue/5' : 'border-slate-200 bg-white'
+                                      }`}
+                                    >
+                                      <div className="flex justify-between text-sm text-brand-charcoal">
+                                        <span>{r.reportType}</span>
+                                        <span className="text-xs text-slate-600">
+                                          {r.createdAt ? r.createdAt.toLocaleString() : 'pending'}
+                                        </span>
+                                      </div>
+                                      <p className="text-xs text-slate-600 truncate">{r.content.slice(0, 140)}</p>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ),
+                      },
+                      {
+                        id: 'followup',
+                        label: 'Follow-up',
+                        content: (
+                          <div className="space-y-3">
+                            <h3 className="text-base font-semibold text-brand-navy">Follow-up</h3>
+                            <div className="flex flex-wrap gap-2">
+                              {(['requestMoreInfo', 'notSuitable', 'readyToBook'] as Array<keyof typeof followUpTemplates>).map(
+                                (id) => {
+                                  const t = followUpTemplates[id];
+                                  const { label } = t;
+                                  return (
+                                    <Button
+                                      key={id}
+                                      type="button"
+                                      variant="secondary"
+                                      className="text-sm"
+                                      onClick={async () => {
+                                        const filled = await copyFollowUp(id);
+                                        if (filled) {
+                                          // noop; copyFollowUp handles status and toast
+                                        }
+                                      }}
+                                    >
+                                      {label}
+                                    </Button>
+                                  );
+                                },
+                              )}
+                            </div>
+                            {copyMessage ? <p className="text-sm text-green-700">{copyMessage}</p> : null}
+                            <p className="text-xs text-slate-600">
+                              Templates copy to clipboard; status updates apply automatically when relevant. Optionally open your
+                              email client after copying.
+                            </p>
+                            <div className="grid sm:grid-cols-3 gap-2 text-xs">
+                              {(['requestMoreInfo', 'notSuitable', 'readyToBook'] as Array<keyof typeof followUpTemplates>).map(
+                                (id) => {
+                                  const t = followUpTemplates[id];
+                                  const body = fillTemplate(t.body, replacements);
+                                  const subject = fillTemplate(t.subject, replacements);
+                                  return (
+                                    <a
+                                      key={`${id}-mailto`}
+                                      href={makeMailto(subject, body, client.email)}
+                                      className="text-brand-blue hover:underline"
+                                    >
+                                      Open email: {t.label}
+                                    </a>
+                                  );
+                                },
+                              )}
+                            </div>
+                          </div>
+                        ),
+                      },
+                      {
+                        id: 'activity',
+                        label: 'Activity',
+                        content: (
+                          <div className="space-y-2">
+                            <h3 className="text-base font-semibold text-brand-navy">Activity</h3>
+                            {auditEvents.length === 0 ? (
+                              <p className="text-sm text-slate-600">No activity yet.</p>
+                            ) : (
+                              <div className="space-y-2">
+                                {auditEvents.map((ev) => {
+                                  const actor =
+                                    ev.actorUid && user && ev.actorUid === user.uid
+                                      ? 'You'
+                                      : ev.actorEmail || shortenUid(ev.actorUid);
+                                  const ts = formatNoteTimestamp(ev.createdAt);
+                                  let text = '';
+                                  if (ev.type === 'status_change') {
+                                    const fromStatus = ev.meta?.fromStatus || 'unknown';
+                                    const toStatus = ev.meta?.toStatus || 'unknown';
+                                    text = `${actor} changed status from ${fromStatus} → ${toStatus}`;
+                                  } else if (ev.type === 'note_added') {
+                                    text = `${actor} added a note`;
+                                  } else if (ev.type === 'reviewed') {
+                                    text = `${actor} marked this as reviewed`;
+                                  } else {
+                                    text = `${actor} did ${ev.type || 'an action'}`;
+                                  }
+                                  return (
+                                    <div key={ev.id} className="rounded border border-slate-200 bg-white px-3 py-2">
+                                      <p className="text-sm text-brand-charcoal">{text}</p>
+                                      <p className="text-xs text-slate-500">{ts}</p>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        ),
+                      },
+                    ]}
+                  />
                 </div>
               </div>
             )}
