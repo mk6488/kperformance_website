@@ -665,7 +665,6 @@ export default function IntakeDetail({ intakeId }: Props) {
                     <p>{ageText}</p>
                   </div>
                   <div className="space-y-1">
-                    <p>Status: {data.status || 'submitted'}</p>
                     <p>Created: {createdAtDisplay}</p>
                     <p>Reviewed by: {data.reviewedByUid || '—'}</p>
                     {data.status === 'archived' ? (
@@ -684,6 +683,7 @@ export default function IntakeDetail({ intakeId }: Props) {
                     onChange={(e) => updateStatus(e.target.value)}
                     disabled={updatingStatus}
                   >
+                    <option value="submitted">submitted</option>
                     <option value="reviewed">reviewed</option>
                     <option value="needs_followup">needs_followup</option>
                     <option value="archived">archived</option>

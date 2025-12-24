@@ -113,9 +113,6 @@ export function IntakeAI({
                 {savingNoteFromAI ? 'Saving…' : 'Save to notes'}
               </Button>
             </div>
-            <Button type="button" variant="secondary" disabled={updatingStatus} onClick={() => updateStatus('reviewed')}>
-              Mark as reviewed
-            </Button>
             {copyMessage ? <span className="text-sm text-green-700">{copyMessage}</span> : null}
           </div>
           <pre className="whitespace-pre-wrap text-sm text-slate-800">{aiContent}</pre>
