@@ -15,8 +15,8 @@ const tiers = [
   },
   {
     duration: 'First session (assessment-led)',
-    price: '75 minutes',
-    notes: 'Longer first visit to assess thoroughly; price follows the adult or under-18 rate above.',
+    price: '75 min',
+    notes: 'First visit. Price: £65 adult / £45 under-18.',
   },
   {
     duration: 'Junior athlete block (3 sessions)',
