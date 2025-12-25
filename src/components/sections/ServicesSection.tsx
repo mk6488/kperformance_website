@@ -4,52 +4,28 @@ import { SectionHeading } from '../ui/SectionHeading';
 
 const services = [
   {
-    title: 'Soft Tissue Therapy & Sports Massage',
-    points: [
-      'Reduce pain, tension, and overuse symptoms',
-      'Improve mobility and tissue quality',
-      'Support recovery around training and competitions',
-    ],
+    title: 'Assessment',
+    points: ['Movement checks, strength tests, and history to find the main drivers.', 'Clear explanation in plain English.'],
   },
   {
-    title: 'Injury rehabilitation & exercise guidance',
-    points: [
-      'Simple, effective rehab plans',
-      'Return-to-play confidence',
-      'Age-appropriate progressions for teen athletes',
-    ],
+    title: 'Hands-on treatment',
+    points: ['Soft tissue therapy and sports massage to reduce pain and improve movement.', 'Targeted techniques based on the assessment.'],
   },
   {
-    title: 'Strength & conditioning support',
-    points: [
-      'Strength foundations for growing athletes',
-      'Movement quality and technique coaching',
-      'Build resilience for sport and everyday life',
-    ],
+    title: 'Movement & exercise',
+    points: ['Simple drills you can do at home or between sessions.', 'Progressions that fit your sport, schedule, and equipment.'],
   },
   {
-    title: 'Performance testing & movement screening',
-    points: [
-      'Quick, practical baseline tests',
-      'Movement assessments for young athletes',
-      'Clear feedback for athletes, parents, and coaches',
-    ],
+    title: 'Plan & next steps',
+    points: ['What to do this week to keep improving.', 'How to know if you’re on track, and when to adjust.'],
   },
   {
-    title: 'Mobile home visits',
-    points: [
-      'Treatment delivered in the comfort of your home',
-      'Ideal for busy families juggling school, work, and sport',
-      'Flexible around training and travel',
-    ],
+    title: 'Performance testing',
+    points: ['Quick baselines for strength, mobility, and movement quality.', 'Feedback you can share with coaches or keep for your own tracking.'],
   },
   {
-    title: 'Education & workshops',
-    points: [
-      'Warm-up and recovery routines',
-      'Everyday habits to support performance',
-      'Injury-prevention ideas for teams and clubs',
-    ],
+    title: 'Mobile sessions',
+    points: ['I come to you—home, club, or pitch.', 'Set up to minimise disruption to family life and training.'],
   },
 ];
 
@@ -59,8 +35,8 @@ export function ServicesSection() {
       <div className="flex flex-col gap-8">
         <SectionHeading
           eyebrow="Services"
-          title="Hands-on therapy, smart movement, clear guidance"
-          subtitle="Mobile soft tissue therapy with clear communication. Sessions combine hands-on work, movement education, and simple take-home strategies."
+          title="What a session includes"
+          subtitle="Every session combines assessment, hands-on treatment, movement work, and a clear plan you can follow between visits."
         />
         <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => (

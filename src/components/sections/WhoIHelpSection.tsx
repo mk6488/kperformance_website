@@ -6,25 +6,22 @@ const people = [
   {
     title: 'Youth & teen athletes',
     description:
-      'Developing bodies need the right mix of hands-on care and age-appropriate strength foundations. Ideal for rowers, runners, footballers, dancers, swimmers, and school-sport athletes.',
+      'Rowers, runners, footballers, dancers, swimmers, and school-sport athletes building strength and resilience.',
     accent: 'border-t-4 border-brand-navy',
   },
   {
     title: 'Adult recreational athletes',
-    description:
-      'Whether you train for health, competition, or enjoyment, I help you reduce pain, recover smarter, and move with confidence.',
+    description: 'Active adults training for health, competition, or enjoyment who want to keep moving well.',
     accent: 'border-t-4 border-brand-green',
   },
   {
-    title: 'Active people with pain',
-    description:
-      'Everyday aches, overuse injuries, and workplace tension. Soft tissue therapy and movement coaching can help you get back to feeling normal again.',
+    title: 'Recurring niggles or pain',
+    description: 'Stubborn aches from work, training, or past injuries that keep flaring when you load up again.',
     accent: 'border-t-4 border-brand-amber',
   },
   {
-    title: 'Parents of young athletes',
-    description:
-      'Support for your child’s sport, with clear communication, safeguarding awareness, and age-appropriate loading so they can enjoy their sport and stay healthy.',
+    title: 'Returning from injury',
+    description: 'Getting back to sport after time out, with a plan that respects your sport, schedule, and goals.',
     accent: 'border-t-4 border-brand-blue',
   },
 ];
