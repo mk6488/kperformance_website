@@ -11,6 +11,7 @@ export function Footer() {
         <p className="text-sm text-white/70">
           Mobile service available. Safeguarding trained and experienced with young athletes.
         </p>
+        <p className="text-sm text-white/70">Under-18s require consent from a parent or guardian.</p>
         <a
           href="/privacy"
           className="text-sm text-white/70 hover:text-white underline underline-offset-4"

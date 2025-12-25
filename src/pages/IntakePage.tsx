@@ -15,6 +15,7 @@ export default function IntakePage() {
           />
 
           <Card className="space-y-4">
+            <p className="text-sm text-slate-700">Under-18s require consent from a parent or guardian.</p>
             <p className="text-sm text-slate-600">
               If you need help while completing this form, please pause and contact Mike. You can also message
               via WhatsApp if you have a quick question.
