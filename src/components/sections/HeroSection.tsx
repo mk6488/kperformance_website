@@ -32,7 +32,7 @@ export function HeroSection() {
                 className="w-full sm:w-auto"
                 onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                Start your intake form
+                Send enquiry
               </Button>
               <Button
                 variant="secondary"
