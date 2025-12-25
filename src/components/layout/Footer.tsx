@@ -9,7 +9,7 @@ export function Footer() {
           <p>Phone: 07123 456789</p>
         </div>
         <p className="text-sm text-white/70">
-          Mobile service available. Safeguarding trained and experienced with young athletes.
+          Mobile service available. Safeguarding trained and experienced in working with young athletes.
         </p>
         <p className="text-sm text-white/70">Under-18s require consent from a parent or guardian.</p>
         <a
