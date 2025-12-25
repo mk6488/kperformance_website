@@ -10,7 +10,7 @@ export default function IntakePage() {
         <div className="max-w-4xl mx-auto px-4 md:px-6 space-y-8">
           <SectionHeading
             align="left"
-            title="New Patient Intake Form"
+            title="New Client Intake Form"
             subtitle="Save time and help Mike prepare before your first session. This quick intake covers your details, goals, and any important health notes."
           />
 

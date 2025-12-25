@@ -74,7 +74,7 @@ export default function StepAbout({ values, errors, touched, onChange }: Props) 
           onChange={(e) => onChange('client.under18', e.target.checked)}
           className="h-4 w-4 rounded border border-slate-300 text-brand-navy focus:ring-brand-blue"
         />
-        The patient is under 18
+        The client is under 18
       </label>
 
       {values.client.under18 && (
