@@ -126,11 +126,12 @@ export function ContactSection() {
 
                 <div className="space-y-2">
                   <Button type="submit" className="w-full sm:w-auto">
-                    Start your intake form
+                    Send enquiry
                   </Button>
                   <p className="text-sm text-slate-600">
                     If you&apos;re unsure, start the intake and I&apos;ll follow up with any questions.
                   </p>
+                  <p className="text-sm text-slate-600">Under-18s must have consent from a parent or guardian.</p>
                 </div>
               </form>
             ) : (
