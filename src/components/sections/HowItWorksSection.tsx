@@ -5,15 +5,15 @@ import { SectionHeading } from '../ui/SectionHeading';
 const steps = [
   {
     title: 'Free chat / enquiry',
-    description: 'We discuss your sport, goals, and any current pain or concerns to decide the best next steps.',
+    description: '5–10 minutes to outline your sport, goals, and any pain so we decide next steps.',
   },
   {
     title: 'Assessment & treatment',
-    description: 'Mobile visit with movement checks and hands-on soft tissue therapy targeted to you.',
+    description: '45–60 minutes (70 for a first session) with movement checks, hands-on work, and clear explanations.',
   },
   {
     title: 'Follow-up plan & support',
-    description: 'Clear advice, exercises, and checkpoints so you know what to do between sessions.',
+    description: 'You’ll get a simple plan to follow; we’ll review progress next session if needed.',
   },
 ];
 
