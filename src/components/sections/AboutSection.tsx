@@ -40,7 +40,7 @@ export function AboutSection() {
             </Card>
 
             <div className="rounded-xl border border-brand-green/40 bg-brand-green/10 p-4 text-sm text-brand-charcoal">
-              <p className="font-semibold text-brand-navy">Safeguarding & working with under-18s</p>
+              <h3 className="font-semibold text-brand-navy">Safeguarding & working with under-18s</h3>
               <p className="text-slate-700">
                 DBS checked and safeguarding trained. Clear communication with parents, guardians, and
                 coaches keeps sessions supportive and transparent.
