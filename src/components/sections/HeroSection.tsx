@@ -17,7 +17,7 @@ export function HeroSection() {
 
       <div className="relative">
         <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-8 pt-14 pb-10 md:pt-20 md:pb-16">
-          <div className="space-y-6 max-w-2xl">
+            <div className="space-y-6 max-w-2xl">
             <div className="space-y-3">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]">
                 Soft Tissue Therapy &amp; Sports Massage in Bristol
@@ -32,7 +32,7 @@ export function HeroSection() {
                 className="w-full sm:w-auto"
                 onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                Book a session
+                Start your intake form
               </Button>
               <Button
                 variant="secondary"
@@ -41,12 +41,15 @@ export function HeroSection() {
                   document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
                 }
               >
-                WhatsApp me
+                See how it works
               </Button>
             </div>
-            <p className="text-sm text-white/80">
-              Great for teens in sport, adult athletes, and anyone managing pain or niggles.
-            </p>
+            <div className="space-y-1">
+              <p className="text-sm text-white/80">Takes 5–10 minutes</p>
+              <p className="text-sm text-white/80">
+                Great for teens in sport, adult athletes, and anyone managing pain or niggles.
+              </p>
+            </div>
           </div>
         </div>
       </div>

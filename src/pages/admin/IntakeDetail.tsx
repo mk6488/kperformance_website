@@ -72,8 +72,12 @@ export type AIReport = {
   id: string;
   reportType: string;
   content: string;
+  contentText?: string;
+  contentJson?: any;
   createdAt?: Date;
   model?: string;
+  usage?: { inputTokens?: number | null; outputTokens?: number | null; totalTokens?: number | null } | null;
+  estCostUsd?: number | null;
   createdByUid?: string;
   createdByEmail?: string | null;
 };
@@ -227,9 +231,13 @@ export default function IntakeDetail({ intakeId }: Props) {
                 (rawCreated instanceof Date ? rawCreated : rawCreated ? new Date(rawCreated) : undefined);
               return {
                 id: d.id,
-                reportType: rd.reportType || 'unknown',
-                content: rd.content || '',
+                reportType: rd.reportType || rd.type || 'unknown',
+                content: rd.contentText || rd.content || '',
+                contentText: rd.contentText,
+                contentJson: rd.contentJson,
                 model: rd.model,
+                usage: rd.usage ?? null,
+                estCostUsd: typeof rd.estCostUsd === 'number' ? rd.estCostUsd : null,
                 createdByUid: rd.createdByUid,
                 createdByEmail: rd.createdByEmail,
                 createdAt: created && !Number.isNaN(created.getTime()) ? created : undefined,
@@ -429,10 +437,9 @@ export default function IntakeDetail({ intakeId }: Props) {
     } catch (err: any) {
       const code = err?.code || '';
       if (code === 'permission-denied') setAiError('You do not have permission to generate AI reports.');
-      else if (code === 'failed-precondition')
-        setAiError(err?.message || 'AI drafting requires client consent or quota is exceeded.');
-      else if (code === 'unauthenticated') setAiError('Invalid OpenAI API key.');
-      else if (code === 'resource-exhausted') setAiError('Rate limited. Try again in a moment.');
+      else if (code === 'failed-precondition') setAiError(err?.message || 'Unable to generate AI report.');
+      else if (code === 'unauthenticated') setAiError(err?.message || 'Invalid OpenAI API key.');
+      else if (code === 'resource-exhausted') setAiError(err?.message || 'Unable to generate AI report.');
       else setAiError(err?.message || 'Unable to generate AI report. Please try again.');
     } finally {
       setAiGenerating(null);
@@ -577,281 +584,291 @@ export default function IntakeDetail({ intakeId }: Props) {
               img { break-inside: avoid; }
             }
           `}</style>
-          <div className="flex flex-wrap gap-3">
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={navLoading || !prevId}
-              onClick={() => {
-                if (prevId) window.location.href = `/admin/intakes/${prevId}`;
-              }}
-            >
-              Previous
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={navLoading || !nextId}
-              onClick={() => {
-                if (nextId) window.location.href = `/admin/intakes/${nextId}`;
-              }}
-            >
-              Next
-            </Button>
-            {navLoading ? <p className="text-sm text-slate-600">Loading neighbours…</p> : null}
-            <Button
-              type="button"
-              variant="secondary"
-              className="no-print"
-              onClick={() => window.print()}
-            >
-              Print / Save as PDF
-            </Button>
-          </div>
-
           <Card className="space-y-3">
+            <div className="sticky top-0 z-20 space-y-3 border-b border-slate-200 bg-white/90 py-2 backdrop-blur">
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={navLoading || !prevId}
+                  onClick={() => {
+                    if (prevId) window.location.href = `/admin/intakes/${prevId}`;
+                  }}
+                >
+                  Previous
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={navLoading || !nextId}
+                  onClick={() => {
+                    if (nextId) window.location.href = `/admin/intakes/${nextId}`;
+                  }}
+                >
+                  Next
+                </Button>
+                {navLoading ? <p className="text-sm text-slate-600">Loading neighbours…</p> : null}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="no-print"
+                  onClick={() => window.print()}
+                >
+                  Print / Save as PDF
+                </Button>
+              </div>
+
+              {!loading && !error && data && (
+                <div className="space-y-4 text-sm text-slate-800">
+                  <Card className="space-y-2">
+                    <p className="text-base font-semibold text-brand-navy">Quick summary</p>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <p className="text-xs uppercase text-slate-500">Presenting problem</p>
+                        <p className="text-sm text-brand-charcoal">{problem.mainConcern || '—'}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs uppercase text-slate-500">Body map</p>
+                        <p className="text-sm text-brand-charcoal">{summaryLocationText || '—'}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs uppercase text-slate-500">Red flags</p>
+                        <p className="text-sm text-brand-charcoal">
+                          {(medical.redFlags || []).length > 0 ? (medical.redFlags || []).join(', ') : '—'}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs uppercase text-slate-500">Consent / Under 18</p>
+                        <p className="text-sm text-brand-charcoal">
+                          {consent.healthDataConsent ? 'Consent given' : 'Consent missing'} ·{' '}
+                          {client.under18 ? 'Under 18' : '18+ or not specified'}
+                        </p>
+                      </div>
+                      <div className="space-y-1 sm:col-span-2">
+                        <p className="text-xs uppercase text-slate-500">Contact</p>
+                        <p className="text-sm text-brand-charcoal">
+                          {client.fullName || '—'} · {client.email || '—'} · {client.phone || '—'}
+                        </p>
+                        {clientEmailLower ? (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="mt-1 text-xs"
+                            onClick={() => {
+                              window.location.href = `/admin/clients/${encodeURIComponent(clientEmailLower)}`;
+                            }}
+                          >
+                            View client history
+                          </Button>
+                        ) : null}
+                      </div>
+                    </div>
+                  </Card>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <p className="font-semibold text-brand-charcoal">{client.fullName || 'Unknown name'}</p>
+                      <p>{ageText}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p>Created: {createdAtDisplay}</p>
+                      <p>Reviewed by: {data.reviewedByUid || '—'}</p>
+                      {data.status === 'archived' ? (
+                        <p className="text-sm text-amber-700">
+                          Archived on {formatNoteTimestamp(archivedAtRaw)} by {data.archivedByUid || 'unknown'}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <p className="text-sm text-slate-700">Status</p>
+                    <select
+                      className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+                      value={data.status || 'submitted'}
+                      onChange={(e) => updateStatus(e.target.value)}
+                      disabled={updatingStatus}
+                    >
+                      <option value="submitted">submitted</option>
+                      <option value="reviewed">reviewed</option>
+                      <option value="needs_followup">needs_followup</option>
+                      <option value="archived">archived</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {loading && <p className="text-slate-700">Loading…</p>}
             {error && <p className="text-sm text-red-600">{error}</p>}
             {!loading && !error && data && (
               <div className="space-y-6 text-sm text-slate-800">
-                <Card className="space-y-2">
-                  <p className="text-base font-semibold text-brand-navy">Quick summary</p>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1">
-                      <p className="text-xs uppercase text-slate-500">Presenting problem</p>
-                      <p className="text-sm text-brand-charcoal">{problem.mainConcern || '—'}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs uppercase text-slate-500">Body map</p>
-                      <p className="text-sm text-brand-charcoal">{summaryLocationText || '—'}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs uppercase text-slate-500">Red flags</p>
-                      <p className="text-sm text-brand-charcoal">
-                        {(medical.redFlags || []).length > 0 ? (medical.redFlags || []).join(', ') : '—'}
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+                  <div className="space-y-3 lg:col-span-7 max-w-none lg:max-w-[48rem]">
+                    <CollapsibleSection title="Main concern" defaultOpen>
+                      <p>{problem.mainConcern || 'Not provided'}</p>
+                      <p className="text-slate-600">Pain now: {problem.painNow ?? 'Not set'} /10</p>
+                      <p>Onset: {problem.onset || 'Not provided'}</p>
+                      <p>Location: {problem.locationText || 'Not provided'}</p>
+                      <p>Aggravators: {problem.aggravators || 'Not provided'}</p>
+                      <p>Helps: {problem.easers || 'Not provided'}</p>
+                      <p>Goals: {problem.goals || 'Not provided'}</p>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Medical" defaultOpen={false}>
+                      <p>Conditions: {medical.conditions || 'Not provided'}</p>
+                      <p>Surgeries: {medical.surgeries || 'Not provided'}</p>
+                      <p>Medications: {medical.medications || 'Not provided'}</p>
+                      <p>Allergies: {medical.allergies || 'Not provided'}</p>
+                      <p>Red flags: {(medical.redFlags || []).join(', ') || 'None selected'}</p>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Lifestyle" defaultOpen={false}>
+                      <p>Activity: {lifestyle.activity || 'Not provided'}</p>
+                      <p>Weekly load: {lifestyle.weeklyLoad || 'Not provided'}</p>
+                      <p>Sleep hours: {lifestyle.sleepHours || 'Not provided'}</p>
+                      <p>Stress: {lifestyle.stressScore ?? 'Not set'} /10</p>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Consent" defaultOpen={false}>
+                      <p>Health data consent: {consent.healthDataConsent ? 'Given' : 'Not given'}</p>
+                      <p>Confirmed truthful: {consent.confirmTruthful ? 'Yes' : 'No'}</p>
+                      <p>
+                        Contact prefs:{' '}
+                        {['email', 'sms', 'phone']
+                          .filter((k) => consent.contactPrefs && consent.contactPrefs[k])
+                          .join(', ') || 'None'}
                       </p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs uppercase text-slate-500">Consent / Under 18</p>
-                      <p className="text-sm text-brand-charcoal">
-                        {consent.healthDataConsent ? 'Consent given' : 'Consent missing'} ·{' '}
-                        {client.under18 ? 'Under 18' : '18+ or not specified'}
-                      </p>
-                    </div>
-                    <div className="space-y-1 sm:col-span-2">
-                      <p className="text-xs uppercase text-slate-500">Contact</p>
-                      <p className="text-sm text-brand-charcoal">
-                        {client.fullName || '—'} · {client.email || '—'} · {client.phone || '—'}
-                      </p>
-                      {clientEmailLower ? (
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          className="mt-1 text-xs"
-                          onClick={() => {
-                            window.location.href = `/admin/clients/${encodeURIComponent(clientEmailLower)}`;
-                          }}
-                        >
-                          View client history
-                        </Button>
-                      ) : null}
-                    </div>
-                  </div>
-                </Card>
+                    </CollapsibleSection>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <p className="font-semibold text-brand-charcoal">{client.fullName || 'Unknown name'}</p>
-                    <p>{ageText}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p>Created: {createdAtDisplay}</p>
-                    <p>Reviewed by: {data.reviewedByUid || '—'}</p>
-                    {data.status === 'archived' ? (
-                      <p className="text-sm text-amber-700">
-                        Archived on {formatNoteTimestamp(archivedAtRaw)} by {data.archivedByUid || 'unknown'}
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                  <p className="text-sm text-slate-700">Status</p>
-                  <select
-                    className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
-                    value={data.status || 'submitted'}
-                    onChange={(e) => updateStatus(e.target.value)}
-                    disabled={updatingStatus}
-                  >
-                    <option value="submitted">submitted</option>
-                    <option value="reviewed">reviewed</option>
-                    <option value="needs_followup">needs_followup</option>
-                    <option value="archived">archived</option>
-                  </select>
-                </div>
-
-                <div className="space-y-3">
-                  <CollapsibleSection title="Main concern" defaultOpen>
-                    <p>{problem.mainConcern || 'Not provided'}</p>
-                    <p className="text-slate-600">Pain now: {problem.painNow ?? 'Not set'} /10</p>
-                    <p>Onset: {problem.onset || 'Not provided'}</p>
-                    <p>Location: {problem.locationText || 'Not provided'}</p>
-                    <p>Aggravators: {problem.aggravators || 'Not provided'}</p>
-                    <p>Helps: {problem.easers || 'Not provided'}</p>
-                    <p>Goals: {problem.goals || 'Not provided'}</p>
-                  </CollapsibleSection>
-
-                  <CollapsibleSection title="Medical" defaultOpen={false}>
-                    <p>Conditions: {medical.conditions || 'Not provided'}</p>
-                    <p>Surgeries: {medical.surgeries || 'Not provided'}</p>
-                    <p>Medications: {medical.medications || 'Not provided'}</p>
-                    <p>Allergies: {medical.allergies || 'Not provided'}</p>
-                    <p>Red flags: {(medical.redFlags || []).join(', ') || 'None selected'}</p>
-                  </CollapsibleSection>
-
-                  <CollapsibleSection title="Lifestyle" defaultOpen={false}>
-                    <p>Activity: {lifestyle.activity || 'Not provided'}</p>
-                    <p>Weekly load: {lifestyle.weeklyLoad || 'Not provided'}</p>
-                    <p>Sleep hours: {lifestyle.sleepHours || 'Not provided'}</p>
-                    <p>Stress: {lifestyle.stressScore ?? 'Not set'} /10</p>
-                  </CollapsibleSection>
-
-                  <CollapsibleSection title="Consent" defaultOpen={false}>
-                    <p>Health data consent: {consent.healthDataConsent ? 'Given' : 'Not given'}</p>
-                    <p>Confirmed truthful: {consent.confirmTruthful ? 'Yes' : 'No'}</p>
-                    <p>
-                      Contact prefs:{' '}
-                      {['email', 'sms', 'phone']
-                        .filter((k) => consent.contactPrefs && consent.contactPrefs[k])
-                        .join(', ') || 'None'}
-                    </p>
-                  </CollapsibleSection>
-
-                  <CollapsibleSection title="Body map" defaultOpen>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      {views.map((v) => (
-                        <div key={v.id} className="border border-slate-200 rounded-lg bg-white p-3">
-                          <p className="text-sm font-semibold text-brand-charcoal mb-2">{v.label}</p>
-                          <div className="relative">
-                            <img src={v.img} alt={`${v.label} view`} className="w-full h-auto select-none" />
-                            {markers
-                              .filter((m) => m.view === v.id)
-                              .map((m, idx) => (
-                                <span
-                                  key={`${v.id}-${idx}`}
-                                  className="absolute -translate-x-1/2 -translate-y-1/2 block h-3 w-3 rounded-full bg-brand-navy shadow"
-                                  style={{ left: `${m.x * 100}%`, top: `${m.y * 100}%` }}
-                                />
-                              ))}
+                    <CollapsibleSection title="Body map" defaultOpen>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {views.map((v) => (
+                          <div key={v.id} className="border border-slate-200 rounded-lg bg-white p-3">
+                            <p className="text-sm font-semibold text-brand-charcoal mb-2">{v.label}</p>
+                            <div className="relative">
+                              <img src={v.img} alt={`${v.label} view`} className="w-full h-auto select-none" />
+                              {markers
+                                .filter((m) => m.view === v.id)
+                                .map((m, idx) => (
+                                  <span
+                                    key={`${v.id}-${idx}`}
+                                    className="absolute -translate-x-1/2 -translate-y-1/2 block h-3 w-3 rounded-full bg-brand-navy shadow"
+                                    style={{ left: `${m.x * 100}%`, top: `${m.y * 100}%` }}
+                                  />
+                                ))}
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CollapsibleSection>
-                </div>
+                        ))}
+                      </div>
+                    </CollapsibleSection>
+                  </div>
 
-                <div className="space-y-3">
-                  <h3 className="text-base font-semibold text-brand-navy">Work area</h3>
-                  <Tabs
-                    defaultTabId="notes"
-                    tabs={[
-                      {
-                        id: 'notes',
-                        label: 'Notes',
-                        content: (
-                          <IntakeNotes
-                            note={note}
-                            setNote={setNote}
-                            savingNote={savingNote}
-                            addNote={addNote}
-                            internalNotes={internalNotes}
-                            user={user}
-                            shortenUid={shortenUid}
-                            formatNoteTimestamp={formatNoteTimestamp}
-                          />
-                        ),
-                      },
-                      {
-                        id: 'ai',
-                        label: 'AI Assistant',
-                        content: (
-                          <IntakeAI
-                            aiAllowed={aiAllowed}
-                            aiGenerating={aiGenerating}
-                            aiError={aiError}
-                            aiSuccess={aiSuccess}
-                            aiContent={aiContent}
-                            aiReports={aiReports}
-                            selectedReportId={selectedReportId}
-                            setSelectedReportId={setSelectedReportId}
-                            setAiContent={setAiContent}
-                            handleGenerateAI={handleGenerateAI}
-                            handleCopyAI={handleCopyAI}
-                            addNoteFromAI={addNoteFromAI}
-                            savingNoteFromAI={savingNoteFromAI}
-                            updatingStatus={updatingStatus}
-                            updateStatus={updateStatus}
-                            copyMessage={copyMessage}
-                          />
-                        ),
-                      },
-                      {
-                        id: 'followup',
-                        label: 'Follow-up',
-                        content: (
-                          <IntakeFollowUp
-                            followUpTemplates={followUpTemplates as any}
-                            copyMessage={copyMessage}
-                            replacements={replacements}
-                            clientEmail={client.email}
-                            copyFollowUp={copyFollowUp as any}
-                            fillTemplate={fillTemplate}
-                            makeMailto={makeMailto}
-                          />
-                        ),
-                      },
-                      {
-                        id: 'activity',
-                        label: 'Activity',
-                        content: (
-                          <div className="space-y-2">
-                            <h3 className="text-base font-semibold text-brand-navy">Activity</h3>
-                            {auditEvents.length === 0 ? (
-                              <p className="text-sm text-slate-600">No activity yet.</p>
-                            ) : (
-                              <div className="space-y-2">
-                                {auditEvents.map((ev) => {
-                                  const actor =
-                                    ev.actorUid && user && ev.actorUid === user.uid
-                                      ? 'You'
-                                      : ev.actorEmail || shortenUid(ev.actorUid);
-                                  const ts = formatNoteTimestamp(ev.createdAt);
-                                  let text = '';
-                                  if (ev.type === 'status_change') {
-                                    const fromStatus = ev.meta?.fromStatus || 'unknown';
-                                    const toStatus = ev.meta?.toStatus || 'unknown';
-                                    text = `${actor} changed status from ${fromStatus} → ${toStatus}`;
-                                  } else if (ev.type === 'note_added') {
-                                    text = `${actor} added a note`;
-                                  } else if (ev.type === 'reviewed') {
-                                    text = `${actor} marked this as reviewed`;
-                                  } else {
-                                    text = `${actor} did ${ev.type || 'an action'}`;
-                                  }
-                                  return (
-                                    <div key={ev.id} className="rounded border border-slate-200 bg-white px-3 py-2">
-                                      <p className="text-sm text-brand-charcoal">{text}</p>
-                                      <p className="text-xs text-slate-500">{ts}</p>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        ),
-                      },
-                    ]}
-                  />
+                  <div className="space-y-3 lg:col-span-5">
+                    <h3 className="text-sm font-medium text-slate-600">Work area</h3>
+                    <Tabs
+                      defaultTabId="notes"
+                      tabs={[
+                        {
+                          id: 'notes',
+                          label: 'Notes',
+                          content: (
+                            <IntakeNotes
+                              note={note}
+                              setNote={setNote}
+                              savingNote={savingNote}
+                              addNote={addNote}
+                              internalNotes={internalNotes}
+                              user={user}
+                              shortenUid={shortenUid}
+                              formatNoteTimestamp={formatNoteTimestamp}
+                            />
+                          ),
+                        },
+                        {
+                          id: 'ai',
+                          label: 'AI Assistant',
+                          content: (
+                            <IntakeAI
+                              uid={user?.uid || null}
+                              intakeId={intakeId}
+                              aiAllowed={aiAllowed}
+                              aiGenerating={aiGenerating}
+                              aiError={aiError}
+                              aiSuccess={aiSuccess}
+                              aiContent={aiContent}
+                              aiReports={aiReports}
+                              selectedReportId={selectedReportId}
+                              setSelectedReportId={setSelectedReportId}
+                              setAiContent={setAiContent}
+                              handleGenerateAI={handleGenerateAI}
+                              handleCopyAI={handleCopyAI}
+                              addNoteFromAI={addNoteFromAI}
+                              savingNoteFromAI={savingNoteFromAI}
+                              updatingStatus={updatingStatus}
+                              updateStatus={updateStatus}
+                              copyMessage={copyMessage}
+                            />
+                          ),
+                        },
+                        {
+                          id: 'followup',
+                          label: 'Follow-up',
+                          content: (
+                            <IntakeFollowUp
+                              followUpTemplates={followUpTemplates as any}
+                              copyMessage={copyMessage}
+                              replacements={replacements}
+                              clientEmail={client.email}
+                              copyFollowUp={copyFollowUp as any}
+                              fillTemplate={fillTemplate}
+                              makeMailto={makeMailto}
+                            />
+                          ),
+                        },
+                        {
+                          id: 'activity',
+                          label: 'Activity',
+                          content: (
+                            <div className="space-y-2">
+                              <h3 className="text-base font-semibold text-brand-navy">Activity</h3>
+                              {auditEvents.length === 0 ? (
+                                <p className="text-sm text-slate-600">No activity yet.</p>
+                              ) : (
+                                <div className="space-y-2">
+                                  {auditEvents.map((ev) => {
+                                    const actor =
+                                      ev.actorUid && user && ev.actorUid === user.uid
+                                        ? 'You'
+                                        : ev.actorEmail || shortenUid(ev.actorUid);
+                                    const ts = formatNoteTimestamp(ev.createdAt);
+                                    let text = '';
+                                    if (ev.type === 'status_change') {
+                                      const fromStatus = ev.meta?.fromStatus || 'unknown';
+                                      const toStatus = ev.meta?.toStatus || 'unknown';
+                                      text = `${actor} changed status from ${fromStatus} → ${toStatus}`;
+                                    } else if (ev.type === 'note_added') {
+                                      text = `${actor} added a note`;
+                                    } else if (ev.type === 'reviewed') {
+                                      text = `${actor} marked this as reviewed`;
+                                    } else {
+                                      text = `${actor} did ${ev.type || 'an action'}`;
+                                    }
+                                    return (
+                                      <div key={ev.id} className="rounded border border-slate-200 bg-white px-3 py-2">
+                                        <p className="text-sm text-brand-charcoal">{text}</p>
+                                        <p className="text-xs text-slate-500">{ts}</p>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          ),
+                        },
+                      ]}
+                    />
+                  </div>
                 </div>
 
                 <CollapsibleSection title="Danger zone" defaultOpen={false}>
