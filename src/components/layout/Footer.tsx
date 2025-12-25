@@ -5,11 +5,11 @@ export function Footer() {
         <div className="text-lg font-semibold">K Performance</div>
         <p className="text-sm text-white/80">Bristol, UK — mobile soft tissue therapy</p>
         <div className="text-sm text-white/80">
-          <p>Email: hello@kperformance.co.uk</p>
-          <p>Phone: 07123 456789</p>
+          <p>Email: mike@kperformance.uk</p>
+          <p>Phone: 07513 052467</p>
         </div>
         <p className="text-sm text-white/70">
-          Mobile service available. Safeguarding trained and experienced in working with young athletes.
+          Mobile service available. Safeguarding trained and experienced working with young athletes.
         </p>
         <p className="text-sm text-white/70">Under-18s require consent from a parent or guardian.</p>
         <a

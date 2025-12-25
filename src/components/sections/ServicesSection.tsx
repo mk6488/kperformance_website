@@ -47,7 +47,7 @@ export function ServicesSection() {
               <ul className="space-y-2 text-slate-600">
                 {service.points.map((point) => (
                   <li key={point} className="flex items-start gap-2">
-                    <span className="mt-1 h-2 w-2 rounded-full bg-brand-green" />
+                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
                     <span>{point}</span>
                   </li>
                 ))}

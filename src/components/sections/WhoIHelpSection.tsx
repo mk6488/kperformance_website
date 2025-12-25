@@ -33,7 +33,7 @@ export function WhoIHelpSection() {
         <SectionHeading
           eyebrow="Who I help"
           title="Supporting athletes, parents, and active people"
-          subtitle="Whether you&apos;re a teen in sport, a busy parent, or an active adult managing work and training, support is tailored to your context."
+          subtitle="Whether you&apos;re a young athlete, a busy parent, or an active adult managing work and training, support is tailored to your context."
         />
         <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
           {people.map((item) => (

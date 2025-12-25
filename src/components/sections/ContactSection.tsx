@@ -170,7 +170,7 @@ export function ContactSection() {
 
         <div className="space-y-2 text-sm text-slate-700">
           <p>Email: <a href="mailto:mike@kperformance.co.uk" className="text-brand-blue underline">mike@kperformance.co.uk</a></p>
-          <p className="text-xs text-slate-600">If you prefer, email works too—intake is the fastest way to get started.</p>
+          <p className="text-xs text-slate-600">If you prefer, email works too—enquiry form is the fastest way to get started.</p>
         </div>
       </div>
     </Section>

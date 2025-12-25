@@ -45,9 +45,8 @@ export function HeroSection() {
               </Button>
             </div>
             <div className="space-y-1">
-              <p className="text-sm text-white/80">Takes 5–10 minutes</p>
               <p className="text-sm text-white/80">
-                Great for teens in sport, adult athletes, and anyone managing pain or niggles.
+                Great for teen athletes, adults in sport, and anyone managing pain or niggles.
               </p>
             </div>
           </div>
