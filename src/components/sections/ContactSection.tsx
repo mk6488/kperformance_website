@@ -124,9 +124,14 @@ export function ContactSection() {
 
                 {error && <p className="text-sm text-red-600">{error}</p>}
 
-                <Button type="submit" className="w-full sm:w-auto">
-                  Send enquiry
-                </Button>
+                <div className="space-y-2">
+                  <Button type="submit" className="w-full sm:w-auto">
+                    Start your intake form
+                  </Button>
+                  <p className="text-sm text-slate-600">
+                    If you&apos;re unsure, start the intake and I&apos;ll follow up with any questions.
+                  </p>
+                </div>
               </form>
             ) : (
               <div className="rounded-xl border border-brand-navy/20 bg-white p-6 sm:p-8 shadow-sm">
@@ -142,11 +147,8 @@ export function ContactSection() {
           </Card>
 
           <Card className="h-full space-y-3 bg-brand-navy text-white">
-            <h3 className="text-xl font-semibold">Prefer WhatsApp?</h3>
-            <p className="text-white/85">
-              I&apos;m happy to chat and answer quick questions. Share your sport, goals, and location and
-              I&apos;ll reply as soon as I can with some options.
-            </p>
+            <h3 className="text-lg font-semibold">Quick questions?</h3>
+            <p className="text-white/85">WhatsApp is best for quick questions (no medical emergencies).</p>
             <Button
               variant="whatsapp"
               onClick={() => {
@@ -159,11 +161,15 @@ export function ContactSection() {
             >
               Open WhatsApp
             </Button>
-            <p className="text-sm text-white/75">
-              This button opens WhatsApp with a pre-filled message. Update the number in the link when
-              you&apos;re ready to go live.
+            <p className="text-xs text-white/75">
+              Opens WhatsApp with a pre-filled message. Update the number when you&apos;re ready to go live.
             </p>
           </Card>
+        </div>
+
+        <div className="space-y-2 text-sm text-slate-700">
+          <p>Email: <a href="mailto:mike@kperformance.co.uk" className="text-brand-blue underline">mike@kperformance.co.uk</a></p>
+          <p className="text-xs text-slate-600">If you prefer, email works too—intake is the fastest way to get started.</p>
         </div>
       </div>
     </Section>
