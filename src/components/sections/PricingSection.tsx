@@ -4,24 +4,24 @@ import { SectionHeading } from '../ui/SectionHeading';
 
 const tiers = [
   {
-    duration: 'Adult session',
-    price: '£65',
-    notes: '60 minutes of hands-on treatment, movement coaching, and clear next steps for adult athletes.',
-  },
-  {
-    duration: 'Under-18 session',
+    duration: '45 minutes',
     price: '£45',
-    notes: '60 minutes tailored for juniors, with parent/guardian consent and simple take-home drills.',
+    notes: 'Great for targeted soft tissue work, quick tune-ups, or follow-up sessions.',
   },
   {
-    duration: 'First session (assessment-led)',
-    price: '75 min',
-    notes: 'First visit. Price: £65 adult / £45 under-18.',
+    duration: '60 minutes',
+    price: '£55',
+    notes: 'Ideal for a full assessment, hands-on treatment, and movement coaching.',
+  },
+  {
+    duration: '75 minutes',
+    price: '£65',
+    notes: 'Recommended for more complex issues or multi-area treatment.',
   },
   {
     duration: 'Junior athlete block (3 sessions)',
-    price: '£120',
-    notes: 'Build momentum over 3–6 weeks with consistent hands-on work and progressive home drills.',
+    price: '£150',
+    notes: 'Perfect for building momentum with rehab or performance development over several weeks.',
   },
 ];
 
@@ -32,7 +32,7 @@ export function PricingSection() {
         <SectionHeading
           eyebrow="Pricing & locations"
           title="Simple, transparent pricing"
-          subtitle="Mobile within Bristol; we’ll confirm travel if you’re further out."
+          subtitle="Mobile within Bristol. Travel fees may apply for areas further out — we’ll confirm together."
         />
 
         <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -45,9 +45,6 @@ export function PricingSection() {
           ))}
         </div>
 
-        <p className="text-sm text-slate-600">
-          All sessions include assessment, hands-on treatment, and movement coaching. Standard sessions are 60 minutes; the first session is 75 minutes due to a full assessment.
-        </p>
         <p className="text-sm text-slate-600">
           All sessions are delivered at your home. Travel within Bristol is included; small additional fees may apply for locations outside the city.
         </p>
