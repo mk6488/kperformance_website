@@ -2,30 +2,41 @@ import { Card } from '../ui/Card';
 import { Section } from '../ui/Section';
 import { SectionHeading } from '../ui/SectionHeading';
 
-const services = [
+const performanceServices = [
   {
-    title: 'Assessment',
-    points: ['Movement checks, strength tests, and history to find the main drivers.', 'Clear explanation in plain English.'],
+    title: 'Programming & S&C',
+    points: ['Strength foundations for teen athletes', 'Age-appropriate loading with clear progressions'],
   },
   {
-    title: 'Hands-on treatment',
-    points: ['Soft tissue therapy and sports massage to reduce pain and improve movement.', 'Targeted techniques based on the assessment.'],
+    title: 'Movement quality',
+    points: ['Technique support for running, jumping, and change of direction', 'Warm-up and prep routines built for school/club demands'],
   },
   {
-    title: 'Movement & exercise',
-    points: ['Simple drills you can do at home or between sessions.', 'Progressions that fit your sport, schedule, and equipment.'],
+    title: 'Testing & tracking',
+    points: ['Simple baselines for strength, power, and mobility', 'Shared progress updates for parents/guardians'],
   },
   {
-    title: 'Plan & next steps',
-    points: ['What to do this week to keep improving.', 'How to know if you’re on track, and when to adjust.'],
+    title: 'Injury risk reduction',
+    points: ['Load management guidance around sport and exams', 'Confidence under training load'],
+  },
+];
+
+const therapyServices = [
+  {
+    title: 'Assessment-led treatment',
+    points: ['Movement checks and history to find what matters most', 'Soft tissue therapy and sports massage targeting your goals'],
   },
   {
-    title: 'Performance testing',
-    points: ['Quick baselines for strength, mobility, and movement quality.', 'Feedback you can share with coaches or keep for your own tracking.'],
+    title: 'Movement coaching',
+    points: ['Simple drills to support recovery and mobility', 'Progressions that fit your sport, schedule, and equipment'],
   },
   {
-    title: 'Mobile sessions',
-    points: ['I come to you—home, club, or pitch.', 'Set up to minimise disruption to family life and training.'],
+    title: 'Recovery & load support',
+    points: ['Plans to balance training, work, and life', 'Advice for managing flare-ups and niggles'],
+  },
+  {
+    title: 'Mobile visits',
+    points: ['Delivered at home or pitch/club where appropriate', 'Set up to minimise disruption for families'],
   },
 ];
 
@@ -38,22 +49,48 @@ export function ServicesSection() {
           title="What a session includes"
           subtitle="Every session combines assessment, hands-on treatment, movement work, and a clear plan you can follow between visits."
         />
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {services.map((service) => (
-            <Card key={service.title} className="h-full flex flex-col gap-4">
-              <div>
-                <h3 className="text-xl font-semibold text-brand-charcoal">{service.title}</h3>
-              </div>
-              <ul className="space-y-2 text-slate-600">
-                {service.points.map((point) => (
-                  <li key={point} className="flex items-start gap-2">
-                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
-                    <span>{point}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          ))}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div id="performance" className="space-y-4">
+            <h3 className="text-lg font-semibold text-brand-navy">Youth Performance Coaching</h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {performanceServices.map((service) => (
+                <Card key={service.title} className="h-full flex flex-col gap-4">
+                  <div>
+                    <h4 className="text-xl font-semibold text-brand-charcoal">{service.title}</h4>
+                  </div>
+                  <ul className="space-y-2 text-slate-600">
+                    {service.points.map((point) => (
+                      <li key={point} className="flex items-start gap-2">
+                        <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          <div id="therapy" className="space-y-4">
+            <h3 className="text-lg font-semibold text-brand-navy">Soft Tissue Therapy</h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {therapyServices.map((service) => (
+                <Card key={service.title} className="h-full flex flex-col gap-4">
+                  <div>
+                    <h4 className="text-xl font-semibold text-brand-charcoal">{service.title}</h4>
+                  </div>
+                  <ul className="space-y-2 text-slate-600">
+                    {service.points.map((point) => (
+                      <li key={point} className="flex items-start gap-2">
+                        <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </Section>

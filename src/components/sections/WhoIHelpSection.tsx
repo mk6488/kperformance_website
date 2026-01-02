@@ -6,12 +6,12 @@ const people = [
   {
     title: 'Youth & teen athletes',
     description:
-      'Rowers, runners, footballers, dancers, swimmers, and school-sport athletes building strength and resilience.',
+      'Rowers, runners, footballers, dancers, swimmers, and school-sport athletes building strength and resilience, with parents kept in the loop.',
     accent: 'border-t-4 border-brand-navy',
   },
   {
     title: 'Adult recreational athletes',
-    description: 'Active adults training for health, competition, or enjoyment who want to keep moving well.',
+    description: 'Active adults training for health, competition, or enjoyment who want to keep moving well (secondary focus).',
     accent: 'border-t-4 border-brand-green',
   },
   {
@@ -33,7 +33,7 @@ export function WhoIHelpSection() {
         <SectionHeading
           eyebrow="Who I help"
           title="Supporting athletes, parents, and active people"
-          subtitle="Whether you&apos;re a young athlete, a busy parent, or an active adult managing work and training, support is tailored to your context."
+          subtitle="Youth athletes first, with clear communication for parents/guardians — and support for active adults when needed."
         />
         <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
           {people.map((item) => (

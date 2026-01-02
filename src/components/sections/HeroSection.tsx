@@ -23,25 +23,23 @@ export function HeroSection() {
                 Soft Tissue Therapy &amp; Sports Massage in Bristol
               </h1>
               <p className="text-base sm:text-lg text-white/85">
-                Mobile soft tissue therapy, movement coaching, and recovery support — brought directly to
-                your home.
+                Youth athlete performance coaching and soft tissue therapy — build strength, resilience, and confidence.
               </p>
+              <p className="text-sm text-white/80">Safeguarding trained. Parents/guardians welcome.</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Button
                 className="w-full sm:w-auto"
-                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => document.getElementById('performance')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                Send enquiry
+                Explore youth performance coaching
               </Button>
               <Button
                 variant="secondary"
                 className="w-full sm:w-auto"
-                onClick={() =>
-                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
-                }
+                onClick={() => document.getElementById('therapy')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                See how it works
+                Explore soft tissue therapy
               </Button>
             </div>
             <div className="space-y-1">

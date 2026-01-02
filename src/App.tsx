@@ -7,6 +7,7 @@ import { HowItWorksSection } from './components/sections/HowItWorksSection';
 import { AboutSection } from './components/sections/AboutSection';
 import { PricingSection } from './components/sections/PricingSection';
 import { ContactSection } from './components/sections/ContactSection';
+import { FocusSection } from './components/sections/FocusSection';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import IntakePage from './pages/IntakePage';
 import AdminLogin from './pages/admin/AdminLogin';
@@ -133,6 +134,7 @@ function App() {
       <Header />
       <main className="space-y-0">
         <HeroSection />
+        <FocusSection />
         <WhoIHelpSection />
         <ServicesSection />
         <HowItWorksSection />

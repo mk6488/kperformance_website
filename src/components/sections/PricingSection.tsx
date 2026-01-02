@@ -1,6 +1,7 @@
 import { Card } from '../ui/Card';
 import { Section } from '../ui/Section';
 import { SectionHeading } from '../ui/SectionHeading';
+import { Button } from '../ui/Button';
 
 const tiers = [
   {
@@ -44,6 +45,19 @@ export function PricingSection() {
             </Card>
           ))}
         </div>
+
+        <Card className="flex flex-col gap-3 border border-brand-navy/20 bg-white">
+          <h3 className="text-lg font-semibold text-brand-navy">Youth performance coaching</h3>
+          <p className="text-slate-700">
+            Youth performance coaching options available (1:1 or blocks). Enquire for details.
+          </p>
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+          >
+            Enquire about performance coaching
+          </Button>
+        </Card>
 
         <p className="text-sm text-slate-600">
           All sessions are delivered at your home. Travel within Bristol is included; small additional fees may apply for locations outside the city.

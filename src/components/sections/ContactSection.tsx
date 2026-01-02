@@ -100,6 +100,21 @@ export function ContactSection() {
                 </div>
 
                 <label className="flex flex-col gap-2 text-sm text-brand-charcoal">
+                  I&apos;m interested in
+                  <select
+                    name="interest"
+                    className="w-full rounded-md border border-slate-200 px-3 py-3 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
+                  >
+                    <option value="Youth performance coaching">Youth performance coaching</option>
+                    <option value="Soft tissue therapy">Soft tissue therapy</option>
+                    <option value="Both">Both</option>
+                  </select>
+                  <span className="text-xs text-slate-600">
+                    If you&apos;re enquiring for an under-18, a parent/guardian should submit the form.
+                  </span>
+                </label>
+
+                <label className="flex flex-col gap-2 text-sm text-brand-charcoal">
                   Message
                   <textarea
                     name="message"
