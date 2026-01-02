@@ -52,7 +52,7 @@ export function ServicesSection() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div id="performance" className="space-y-4">
             <h3 className="text-lg font-semibold text-brand-navy">Youth Performance Coaching</h3>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 auto-rows-fr">
               {performanceServices.map((service) => (
                 <Card key={service.title} className="h-full flex flex-col gap-4">
                   <div>
@@ -73,7 +73,7 @@ export function ServicesSection() {
 
           <div id="therapy" className="space-y-4">
             <h3 className="text-lg font-semibold text-brand-navy">Soft Tissue Therapy</h3>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 auto-rows-fr">
               {therapyServices.map((service) => (
                 <Card key={service.title} className="h-full flex flex-col gap-4">
                   <div>
