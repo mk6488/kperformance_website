@@ -21,10 +21,9 @@ export function AboutSection() {
           <div className="space-y-4">
             <Card>
               <p className="text-slate-700 leading-relaxed">
-                I blend evidence-based soft tissue therapy with simple, effective movement coaching.
-                Sessions are mobile, friendly, and designed to help you feel confident in your body —
-                whether you&apos;re competing, juggling sport around school and exams, or returning from
-                injury.
+                I blend youth performance coaching, strength &amp; conditioning, and evidence-based soft tissue therapy.
+                Sessions are mobile, friendly, and designed to help you feel confident in your body — whether you&apos;re
+                competing, juggling sport around school and exams, or returning from injury.
               </p>
               <p className="text-slate-700 leading-relaxed mt-3">
                 I&apos;ve worked for years with junior athletes across Bristol, including school and club

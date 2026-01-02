@@ -8,8 +8,8 @@ const steps = [
     description: '5–10 minutes to outline your sport, goals, and any pain so we decide next steps.',
   },
   {
-    title: 'Assessment & treatment',
-    description: '45–60 minutes (70 for a first session) with movement checks, hands-on work, and clear explanations.',
+    title: 'Assessment & session',
+    description: '45–60 minutes (70 for a first session) with movement checks plus coaching or hands-on therapy, with clear explanations.',
   },
   {
     title: 'Follow-up plan & support',
@@ -24,7 +24,7 @@ export function HowItWorksSection() {
         <SectionHeading
           eyebrow="How it works"
           title="Simple steps from enquiry to support"
-          subtitle="A friendly first chat, focused treatment, and ongoing guidance that fits around school, training, or work."
+          subtitle="A friendly first chat, then assessment-led coaching or therapy, and ongoing guidance that fits around school, training, or work."
         />
 
         <div className="flex flex-col gap-5 md:flex-row md:gap-8">

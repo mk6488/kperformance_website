@@ -47,7 +47,7 @@ export function ServicesSection() {
         <SectionHeading
           eyebrow="Services"
           title="What a session includes"
-          subtitle="Every session combines assessment, hands-on treatment, movement work, and a clear plan you can follow between visits."
+          subtitle="Youth performance coaching and soft tissue therapy, each built on assessment, movement coaching, and clear next steps."
         />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-stretch">
           <h3 id="performance" className="text-lg font-semibold text-brand-navy">

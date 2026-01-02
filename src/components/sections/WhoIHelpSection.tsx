@@ -11,7 +11,7 @@ const people = [
   },
   {
     title: 'Adult recreational athletes',
-    description: 'Active adults training for health, competition, or enjoyment who want to keep moving well (secondary focus).',
+    description: 'Active adults in sport who want to keep moving well — secondary to the youth focus.',
     accent: 'border-t-4 border-brand-green',
   },
   {
