@@ -50,47 +50,46 @@ export function ServicesSection() {
           subtitle="Every session combines assessment, hands-on treatment, movement work, and a clear plan you can follow between visits."
         />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-stretch">
-          <div id="performance" className="h-full flex flex-col gap-4">
-            <h3 className="text-lg font-semibold text-brand-navy">Youth Performance Coaching</h3>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 auto-rows-fr items-stretch">
-              {performanceServices.map((service) => (
-                <Card key={service.title} className="h-full flex flex-col gap-4">
-                  <div>
-                    <h4 className="text-xl font-semibold text-brand-charcoal">{service.title}</h4>
-                  </div>
-                  <ul className="space-y-2 text-slate-600">
-                    {service.points.map((point) => (
-                      <li key={point} className="flex items-start gap-2">
-                        <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
-                        <span>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
-              ))}
-            </div>
-          </div>
+          <h3 id="performance" className="text-lg font-semibold text-brand-navy">
+            Youth Performance Coaching
+          </h3>
+          <h3 id="therapy" className="text-lg font-semibold text-brand-navy">
+            Soft Tissue Therapy
+          </h3>
+        </div>
 
-          <div id="therapy" className="h-full flex flex-col gap-4">
-            <h3 className="text-lg font-semibold text-brand-navy">Soft Tissue Therapy</h3>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 auto-rows-fr items-stretch">
-              {therapyServices.map((service) => (
-                <Card key={service.title} className="h-full flex flex-col gap-4">
-                  <div>
-                    <h4 className="text-xl font-semibold text-brand-charcoal">{service.title}</h4>
-                  </div>
-                  <ul className="space-y-2 text-slate-600">
-                    {service.points.map((point) => (
-                      <li key={point} className="flex items-start gap-2">
-                        <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
-                        <span>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
-              ))}
-            </div>
-          </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 auto-rows-fr items-stretch">
+          {performanceServices.map((service) => (
+            <Card key={`perf-${service.title}`} className="h-full flex flex-col gap-4">
+              <div>
+                <h4 className="text-xl font-semibold text-brand-charcoal">{service.title}</h4>
+              </div>
+              <ul className="space-y-2 text-slate-600">
+                {service.points.map((point) => (
+                  <li key={point} className="flex items-start gap-2">
+                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ))}
+
+          {therapyServices.map((service) => (
+            <Card key={`therapy-${service.title}`} className="h-full flex flex-col gap-4">
+              <div>
+                <h4 className="text-xl font-semibold text-brand-charcoal">{service.title}</h4>
+              </div>
+              <ul className="space-y-2 text-slate-600">
+                {service.points.map((point) => (
+                  <li key={point} className="flex items-start gap-2">
+                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ))}
         </div>
       </div>
     </Section>
