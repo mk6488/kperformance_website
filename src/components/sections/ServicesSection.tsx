@@ -49,8 +49,8 @@ export function ServicesSection() {
           title="What a session includes"
           subtitle="Every session combines assessment, hands-on treatment, movement work, and a clear plan you can follow between visits."
         />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div id="performance" className="space-y-4">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-stretch">
+          <div id="performance" className="h-full flex flex-col gap-4">
             <h3 className="text-lg font-semibold text-brand-navy">Youth Performance Coaching</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 auto-rows-fr items-stretch">
               {performanceServices.map((service) => (
@@ -71,7 +71,7 @@ export function ServicesSection() {
             </div>
           </div>
 
-          <div id="therapy" className="space-y-4">
+          <div id="therapy" className="h-full flex flex-col gap-4">
             <h3 className="text-lg font-semibold text-brand-navy">Soft Tissue Therapy</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 auto-rows-fr items-stretch">
               {therapyServices.map((service) => (
