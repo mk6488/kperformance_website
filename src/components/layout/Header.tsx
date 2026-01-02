@@ -45,7 +45,7 @@ export function Header() {
               <span className="text-lg font-semibold tracking-tight text-brand-navy">
                 K Performance
               </span>
-              <span className="mt-0.5 hidden text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-brand-navy/70 sm:block">
+              <span className="mt-0.5 hidden text-xs font-medium tracking-wide text-brand-navy/70 sm:block">
                 Youth Performance Coaching • Soft Tissue Therapy
               </span>
             </div>
