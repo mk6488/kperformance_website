@@ -20,10 +20,10 @@ export function HeroSection() {
             <div className="space-y-6 max-w-2xl">
             <div className="space-y-3">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]">
-                Soft Tissue Therapy &amp; Sports Massage in Bristol
+                Youth Performance Coaching &amp; Soft Tissue Therapy in Bristol
               </h1>
               <p className="text-base sm:text-lg text-white/85">
-                Youth athlete performance coaching and soft tissue therapy — build strength, resilience, and confidence.
+                K Performance supports youth athletes and active individuals with tailored performance coaching and hands-on soft tissue therapy.
               </p>
               <p className="text-sm text-white/80">Safeguarding trained. Parents/guardians welcome.</p>
             </div>

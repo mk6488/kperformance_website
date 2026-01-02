@@ -46,7 +46,7 @@ export function Header() {
                 K Performance
               </span>
               <span className="mt-0.5 hidden text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-brand-navy/70 sm:block">
-                Soft Tissue Therapy • Sports Massage
+                Youth Performance Coaching • Soft Tissue Therapy
               </span>
             </div>
           </button>
