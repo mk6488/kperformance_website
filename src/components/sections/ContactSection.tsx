@@ -97,9 +97,9 @@ export function ContactSection() {
                     name="interest"
                     className="w-full rounded-md border border-slate-200 px-3 py-3 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
                   >
-                    <option value="Youth performance coaching">Youth performance coaching</option>
+                    <option value="">Select an option</option>
+                    <option value="Performance coaching">Performance coaching</option>
                     <option value="Soft tissue therapy">Soft tissue therapy</option>
-                    <option value="Both">Both</option>
                   </select>
                   <span className="text-xs text-slate-600">
                     If you&apos;re enquiring for an under-18, a parent/guardian should submit the form.
