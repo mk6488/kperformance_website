@@ -20,12 +20,14 @@ export function AboutSection() {
               <img
                 src={softTissueUpperBody}
                 alt="Soft tissue therapy session focusing on upper back and shoulder work"
-                className="h-full w-full object-cover"
+                className="relative z-0 h-full w-full object-cover"
                 loading="lazy"
                 decoding="async"
               />
             </div>
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand-navy/35 via-brand-navy/10 to-transparent" />
+            <div
+              className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-[rgba(33,86,129,0.45)] via-[rgba(33,86,129,0.18)] to-transparent"
+            />
           </div>
 
           <div className="space-y-4">
