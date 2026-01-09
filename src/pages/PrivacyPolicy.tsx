@@ -13,8 +13,8 @@ export default function PrivacyPolicy() {
 
         <h2 className="text-xl font-semibold text-brand-navy">What information I collect</h2>
         <p className="text-slate-700">
-          When you contact me via the website form or WhatsApp, I may collect your name, email address,
-          phone number, and any information you choose to include about your enquiry.
+          When you contact me via the website form or email, I may collect your name, email address, and any
+          information you choose to include about your enquiry.
         </p>
 
         <h2 className="text-xl font-semibold text-brand-navy">How your information is used</h2>

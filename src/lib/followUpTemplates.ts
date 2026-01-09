@@ -20,7 +20,7 @@ Thanks for sharing your intake details. I just need a bit more information to he
 - What activities make it feel worse or better?
 - Have you had any recent imaging or diagnoses?
 
-Feel free to reply here with answers, or call/WhatsApp me if that’s easier.
+Feel free to reply to this email with your answers.
 
 Thanks,
 Mike
@@ -54,7 +54,7 @@ Please share:
 - Your availability over the next week
 - Preference for weekdays/weekends
 
-Alternatively, call or WhatsApp me and we’ll lock a slot in right away.
+Reply to this email with your availability and I’ll lock in a slot.
 
 Thanks,
 Mike

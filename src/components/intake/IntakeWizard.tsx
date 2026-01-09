@@ -277,10 +277,10 @@ export default function IntakeWizard() {
               variant="secondary"
               className="px-4"
               onClick={() => {
-                window.open('https://www.whatsapp.com/', '_blank');
+                window.open('mailto:mike@kperformance.uk', '_blank');
               }}
             >
-              Message Mike on WhatsApp
+              Email Mike
             </Button>
           </div>
         )}

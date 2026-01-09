@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes } from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'whatsapp';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
@@ -17,8 +17,6 @@ const variantClasses: Record<ButtonVariant, string> = {
     'border border-brand-navy text-brand-navy bg-white/90 px-6 py-3 hover:bg-slate-100 focus-visible:outline-brand-navy',
   ghost:
     'text-brand-navy px-4 py-2 hover:bg-brand-offWhite focus-visible:outline-brand-navy',
-  whatsapp:
-    'bg-[#25D366] text-white px-6 py-3 hover:bg-[#1DA851] focus-visible:outline-[#25D366] shadow-sm',
 };
 
 export function Button({ variant = 'primary', className = '', ...props }: ButtonProps) {

@@ -23,7 +23,7 @@ export function ContactSection() {
         setSubmitted(true);
       })
       .catch(() => {
-        setError('Something went wrong. Please try again or contact me via WhatsApp.');
+        setError('Something went wrong. Please try again or email me at mike@kperformance.uk.');
       });
   };
 
@@ -66,14 +66,6 @@ export function ContactSection() {
                       name="email"
                       type="email"
                       required
-                      className="w-full rounded-md border border-slate-200 px-3 py-3 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
-                    />
-                  </label>
-                  <label className="flex flex-col gap-2 text-sm text-brand-charcoal">
-                    Phone
-                    <input
-                      name="phone"
-                      type="tel"
                       className="w-full rounded-md border border-slate-200 px-3 py-3 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
                     />
                   </label>
@@ -155,31 +147,21 @@ export function ContactSection() {
                 <p className="mt-2 text-slate-700">
                   I’ll be in touch shortly with availability and next steps.
                 </p>
-                <p className="mt-4 text-sm text-slate-600">
-                  If your enquiry is time-sensitive, feel free to message me on WhatsApp.
-                </p>
               </div>
             )}
           </Card>
 
           <Card className="h-full space-y-3 bg-brand-navy text-white">
-            <h3 className="text-lg font-semibold">Quick questions?</h3>
-            <p className="text-white/85">WhatsApp is best for quick questions (no medical emergencies).</p>
+            <h3 className="text-lg font-semibold">Email</h3>
+            <p className="text-white/85">For anything urgent, email me and I’ll reply as soon as I can.</p>
             <Button
-              variant="whatsapp"
+              variant="secondary"
               onClick={() => {
-                // TODO: replace 447000000000 with the real WhatsApp number
-                window.open(
-                  'https://wa.me/447513052467?text=Hi%20Mike,%20I%20found%20your%20website%20and%20would%20like%20to%20ask%20about%20soft%20tissue%20therapy.',
-                  '_blank',
-                );
+                window.open('mailto:mike@kperformance.uk', '_blank');
               }}
             >
-              Open WhatsApp
+              Email Mike
             </Button>
-            <p className="text-xs text-white/75">
-              Opens WhatsApp with a pre-filled message. Update the number when you&apos;re ready to go live.
-            </p>
           </Card>
         </div>
 
