@@ -15,7 +15,7 @@ export function AboutSection() {
         />
 
         <div className="grid gap-6 md:grid-cols-2 md:items-start md:gap-8">
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="aspect-[4/5] sm:aspect-[16/10]">
               <img
                 src={softTissueUpperBody}
@@ -25,6 +25,7 @@ export function AboutSection() {
                 decoding="async"
               />
             </div>
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-black/5 to-transparent" />
           </div>
 
           <div className="space-y-4">
