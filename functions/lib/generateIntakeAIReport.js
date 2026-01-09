@@ -1,0 +1,445 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.generateIntakeAIReport = void 0;
+const firestore_1 = require("firebase-admin/firestore");
+const https_1 = require("firebase-functions/v2/https");
+const pricing_1 = require("./pricing");
+const MODEL = 'gpt-4o-mini';
+const PROMPT_VERSION = 'v2-lite-mode-controller-minimised';
+const COOLDOWN_MS = 30000;
+const DAILY_CAP_DEFAULT = 50;
+const EST_COST_PER_CALL_USD = 0.001; // fallback conservative estimate per call
+const DAILY_SPEND_CAP_USD = 5; // configurable ceiling; adjust as needed
+const MAX_RETRIES = 2;
+const systemPrompt = `
+You are "Soft Tissue Therapist Assistant" (Clinician Mode by default). Follow MODE CONTROLLER (Lite+), Safety, and Output rules exactly. UK English only.
+
+MODE CONTROLLER (Lite+):
+- Clinician Mode: concise, professional, clinical phrasing; audience is the treating clinician.
+- Patient Mode: plain-language, reassuring; audience is the patient. Use only if explicitly requested.
+- If not specified, stay in Clinician Mode.
+
+Safety:
+- Base outputs solely on provided intake context. Do not invent identifiers or appointments.
+- Be cautious with red flags; suggest escalation only when warranted.
+- If information is missing, state that it is missing rather than guessing.
+- Refer to the person only as "the client."
+
+Output formats:
+- Default to concise bullet points; avoid generic filler.
+- Do not repeat the same intake facts in multiple sections.
+- If information is missing, state one assumption (e.g., "Assuming no red flags…").
+- For treatment plans, max 8 bullets per subsection.
+- Always include a short "Referral triggers" section.
+`.trim();
+const emailPattern = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+const urlPattern = /\bhttps?:\/\/\S+/gi;
+const phonePattern = /\b(?:0\d{9,10}|\+?\d{1,3}[-\s]?\d{2,4}[-\s]?\d{3,4}[-\s]?\d{3,4})\b/g;
+const dobPattern = /\b(?:dob|dateofbirth|date_of_birth)\b/i;
+function scrubText(input) {
+    if (typeof input !== 'string')
+        return '';
+    return input.replace(emailPattern, '[redacted-email]').replace(urlPattern, '[redacted-url]').replace(phonePattern, '[redacted-phone]');
+}
+function ensureString(v) {
+    return typeof v === 'string' ? scrubText(v) : '';
+}
+function computeAgeYears(dobAny) {
+    let d = null;
+    if (dobAny?.toDate && typeof dobAny.toDate === 'function') {
+        d = dobAny.toDate();
+    }
+    else if (typeof dobAny === 'string') {
+        d = new Date(dobAny);
+    }
+    if (!d || Number.isNaN(d.getTime()))
+        return null;
+    const now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    const m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) {
+        age--;
+    }
+    if (age < 0 || age > 120)
+        return null;
+    return age;
+}
+function scrubObject(obj) {
+    if (Array.isArray(obj))
+        return obj.map((v) => scrubObject(v));
+    if (obj && typeof obj === 'object') {
+        const res = {};
+        Object.keys(obj).forEach((k) => {
+            res[k] = scrubObject(obj[k]);
+        });
+        return res;
+    }
+    if (typeof obj === 'string')
+        return scrubText(obj);
+    return obj;
+}
+function containsIdentifiers(str) {
+    const email = new RegExp(emailPattern);
+    const url = new RegExp(urlPattern);
+    const phone = new RegExp(phonePattern);
+    const dob = new RegExp(dobPattern);
+    return email.test(str) || url.test(str) || phone.test(str) || dob.test(str);
+}
+function minimiseContext(intake) {
+    const payload = intake?.payload || intake?.data || intake || {};
+    const client = payload.client || {};
+    const problem = payload.problem || {};
+    const medical = payload.medical || {};
+    const lifestyle = payload.lifestyle || {};
+    const consent = payload.consent || {};
+    const bodyMap = payload.bodyMap || payload?.problem?.bodyMap || {};
+    const ageYears = typeof client.ageYears === 'number'
+        ? client.ageYears
+        : computeAgeYears(client.dob || intake?.dob || payload?.dob || payload?.client?.dob);
+    const under18 = typeof client.under18 === 'boolean' ? client.under18 : ageYears === null ? null : ageYears < 18;
+    const ctx = {
+        status: intake?.status || 'submitted',
+        formVersion: intake?.formVersion || payload?.formVersion || 'unknown',
+        client: {
+            label: 'client',
+            ageYears: ageYears ?? null,
+            under18,
+        },
+        problem: {
+            mainConcern: ensureString(problem.mainConcern),
+            onset: ensureString(problem.onset),
+            locationText: ensureString(problem.locationText),
+            painNow: problem.painNow ?? null,
+            aggravators: ensureString(problem.aggravators),
+            easers: ensureString(problem.easers),
+            goals: ensureString(problem.goals),
+        },
+        medical: {
+            conditions: ensureString(medical.conditions),
+            surgeries: ensureString(medical.surgeries),
+            medications: ensureString(medical.medications),
+            allergies: ensureString(medical.allergies),
+            redFlags: Array.isArray(medical.redFlags) ? scrubObject(medical.redFlags).slice(0, 12) : [],
+            checkboxes: typeof medical.checkboxes === 'object' ? scrubObject(medical.checkboxes) : {},
+        },
+        lifestyle: {
+            activity: ensureString(lifestyle.activity),
+            weeklyLoad: ensureString(lifestyle.weeklyLoad),
+            sleepHours: ensureString(lifestyle.sleepHours),
+            stressScore: lifestyle.stressScore ?? null,
+        },
+        consent: {
+            healthDataConsent: !!consent.healthDataConsent,
+            confirmTruthful: !!consent.confirmTruthful,
+            aiDraftConsent: !!consent.aiDraftConsent,
+        },
+        bodyMap: {
+            markers: Array.isArray(bodyMap.markers)
+                ? bodyMap.markers
+                    .filter((m) => m &&
+                    ['front', 'back', 'left', 'right'].includes(m.view) &&
+                    typeof m.x === 'number' &&
+                    typeof m.y === 'number')
+                    .map((m) => ({
+                    view: m.view,
+                    x: m.x,
+                    y: m.y,
+                    label: ensureString(m.label),
+                }))
+                : [],
+        },
+    };
+    const scrubbed = scrubObject(ctx);
+    const json = JSON.stringify(scrubbed);
+    if (containsIdentifiers(json)) {
+        throw new https_1.HttpsError('failed-precondition', 'Context contains identifiable data; generation blocked.');
+    }
+    return { context: scrubbed, ageYears, under18 };
+}
+exports.generateIntakeAIReport = (0, https_1.onCall)({ region: 'europe-west2' }, async (request) => {
+    const uid = request.auth?.uid;
+    const email = request.auth?.token?.email || null;
+    if (!uid) {
+        throw new https_1.HttpsError('unauthenticated', 'Authentication required.');
+    }
+    const { intakeId, reportType, mode } = (request.data || {});
+    if (!intakeId || typeof intakeId !== 'string') {
+        throw new https_1.HttpsError('invalid-argument', 'intakeId is required.');
+    }
+    const allowedTypes = ['clinician_summary', 'treatment_plan', 'followup_questions', 'both'];
+    if (!reportType || !allowedTypes.includes(reportType)) {
+        throw new https_1.HttpsError('invalid-argument', 'reportType is invalid.');
+    }
+    const db = (0, firestore_1.getFirestore)();
+    // Verify admin allowlist
+    const adminDoc = await db.collection('adminUsers').doc(uid).get();
+    if (!adminDoc.exists) {
+        throw new https_1.HttpsError('permission-denied', 'Admin access required.');
+    }
+    const snap = await db.collection('intakes').doc(intakeId).get();
+    if (!snap.exists) {
+        throw new https_1.HttpsError('not-found', 'Intake not found.');
+    }
+    const intakeData = snap.data();
+    const { context, ageYears, under18 } = minimiseContext(intakeData);
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+        throw new https_1.HttpsError('failed-precondition', 'OPENAI_API_KEY not configured.');
+    }
+    // Optional write-back of computed age/under18 (no DOB stored)
+    if (ageYears !== null || under18 !== null) {
+        const update = {};
+        if (ageYears !== null)
+            update.ageYears = ageYears;
+        if (under18 !== null)
+            update.under18 = under18;
+        await db.collection('intakes').doc(intakeId).set(update, { merge: true });
+    }
+    const modeLabel = mode === 'patient' ? 'Patient Mode' : 'Clinician Mode';
+    const typeLabel = reportType === 'clinician_summary'
+        ? 'Clinical summary'
+        : reportType === 'treatment_plan'
+            ? 'Treatment plan'
+            : reportType === 'followup_questions'
+                ? 'Follow-up questions'
+                : 'Clinical summary + treatment plan';
+    const perReportInstruction = (() => {
+        if (reportType === 'clinician_summary') {
+            return [
+                'Headings exactly: Presenting Snapshot / Working Hypothesis / Plan / Referral Triggers',
+                'Keep bullets concise; no repetition across sections.',
+            ];
+        }
+        if (reportType === 'treatment_plan') {
+            return [
+                'Headings exactly: Session 1 Structure / Home Items / Reassess / Referral Triggers',
+                'Home Items: 3–5 bullets. Max 8 bullets per subsection.',
+            ];
+        }
+        if (reportType === 'followup_questions') {
+            return [
+                'Headings exactly: Safety / Clarifying / Goals',
+                'Provide 6–10 total questions split across those headings.',
+            ];
+        }
+        return [];
+    })();
+    const userPrompt = `
+Generate ${typeLabel} in ${modeLabel}.
+Use the intake context (already minimal and de-identified):
+${JSON.stringify(context, null, 2)}
+
+Instruction block for this report:
+${perReportInstruction.map((p) => `- ${p}`).join('\n')}
+
+Keep headings exactly as specified above, concise bullets, UK English, and actionable. If data is missing, state one assumption (e.g., "Assuming no red flags…"). Do not repeat the same facts across sections.
+`.trim();
+    const body = {
+        model: MODEL,
+        input: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+        ],
+        max_output_tokens: reportType === 'treatment_plan' ? 900 : reportType === 'both' ? 1100 : reportType === 'followup_questions' ? 800 : 900,
+        temperature: 0.25,
+    };
+    const doFetch = async (attempt = 0) => {
+        const response = await fetch('https://api.openai.com/v1/responses', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+        if (response.ok) {
+            return response.json();
+        }
+        const status = response.status;
+        let code;
+        let message;
+        try {
+            const errJson = await response.json();
+            code = errJson?.error?.code;
+            message = errJson?.error?.message;
+            console.error('OpenAI error', { status, code, message });
+        }
+        catch {
+            const text = await response.text();
+            console.error('OpenAI error', { status, text });
+        }
+        const mapError = () => {
+            if (code === 'insufficient_quota') {
+                throw new https_1.HttpsError('failed-precondition', 'OpenAI API quota exceeded. Please check OpenAI billing/usage limits.');
+            }
+            if (status === 401) {
+                throw new https_1.HttpsError('unauthenticated', 'Invalid OpenAI API key.');
+            }
+            if (status === 429) {
+                throw new https_1.HttpsError('resource-exhausted', 'Rate limited. Try again in a moment.');
+            }
+            throw new https_1.HttpsError('internal', 'AI generation failed');
+        };
+        if (status === 429 && attempt < MAX_RETRIES) {
+            const backoff = 300 * Math.pow(2, attempt) + Math.floor(Math.random() * 100);
+            await new Promise((r) => setTimeout(r, backoff));
+            return doFetch(attempt + 1);
+        }
+        mapError();
+    };
+    let data;
+    try {
+        data = await doFetch();
+    }
+    catch (err) {
+        // Roll back reservation on failure
+        await db.runTransaction(async (txn) => {
+            const snap = await txn.get(usageRef);
+            if (!snap.exists)
+                return;
+            const data = snap.data();
+            const pendingCount = typeof data?.pendingCount === 'number' ? data.pendingCount : 0;
+            txn.set(usageRef, { pendingCount: Math.max(0, pendingCount - 1) }, { merge: true });
+        });
+        throw err;
+    }
+    const usage = data?.usage || null;
+    const inputTokens = usage?.prompt_tokens ?? usage?.input_tokens ?? null;
+    const outputTokens = usage?.completion_tokens ?? usage?.output_tokens ?? null;
+    const totalTokens = usage?.total_tokens ?? (typeof inputTokens === 'number' && typeof outputTokens === 'number'
+        ? inputTokens + outputTokens
+        : null);
+    const estCost = (0, pricing_1.estimateCostUsd)(MODEL, inputTokens, outputTokens) ?? EST_COST_PER_CALL_USD;
+    const content = data?.output_text ||
+        (Array.isArray(data?.output)
+            ? data.output
+                .map((item) => (item?.content ? item.content.map((c) => c?.text || '').join('\n') : ''))
+                .join('\n')
+            : '') ||
+        (Array.isArray(data?.choices)
+            ? data.choices
+                .map((choice) => Array.isArray(choice?.message?.content)
+                ? choice.message.content.map((c) => c?.text || '').join('\n')
+                : choice?.message?.content || '')
+                .join('\n')
+            : '') ||
+        data?.choices?.[0]?.message?.content ||
+        '';
+    if (!content) {
+        throw new https_1.HttpsError('internal', 'Empty AI response');
+    }
+    const reportDoc = {
+        type: reportType,
+        reportType, // kept for backward compatibility
+        mode: mode === 'patient' ? 'patient' : 'clinician',
+        model: MODEL,
+        promptVersion: PROMPT_VERSION,
+        usage: {
+            inputTokens: inputTokens ?? null,
+            outputTokens: outputTokens ?? null,
+            totalTokens: totalTokens ?? null,
+        },
+        estCostUsd: estCost ?? null,
+        content,
+        createdAt: firestore_1.FieldValue.serverTimestamp(),
+        createdByUid: uid,
+        createdByEmail: email,
+    };
+    // Reservation: enforce cooldown/daily caps before calling OpenAI (no spend if blocked)
+    const provisionalCost = EST_COST_PER_CALL_USD;
+    const todayKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD UTC
+    const usageRef = db.collection('adminUsage').doc(uid).collection('days').doc(todayKey);
+    await db.runTransaction(async (txn) => {
+        const snap = await txn.get(usageRef);
+        const data = snap.exists ? snap.data() : {};
+        const now = Date.now();
+        const lastCallAt = data?.lastCallAt?.toDate ? data.lastCallAt.toDate() : null;
+        const pendingCount = typeof data?.pendingCount === 'number' ? data.pendingCount : 0;
+        const count = typeof data?.count === 'number' ? data.count : 0;
+        const estCostSoFar = typeof data?.estCostUsd === 'number' ? data.estCostUsd : 0;
+        if (lastCallAt && now - lastCallAt.getTime() < COOLDOWN_MS) {
+            throw new https_1.HttpsError('failed-precondition', 'Please wait before generating another report (cooldown).');
+        }
+        if (count + pendingCount >= DAILY_CAP_DEFAULT) {
+            throw new https_1.HttpsError('resource-exhausted', 'Daily AI generation limit reached. Try again tomorrow.');
+        }
+        if (estCostSoFar + provisionalCost > DAILY_SPEND_CAP_USD) {
+            throw new https_1.HttpsError('resource-exhausted', 'Daily AI spend limit reached. Try again tomorrow.');
+        }
+        txn.set(usageRef, {
+            pendingCount: pendingCount + 1,
+            lastCallAttemptAt: firestore_1.FieldValue.serverTimestamp(),
+        }, { merge: true });
+    });
+    await db.runTransaction(async (txn) => {
+        const snap = await txn.get(usageRef);
+        const data = snap.exists ? snap.data() : {};
+        const now = Date.now();
+        const lastCallAt = data?.lastCallAt?.toDate ? data.lastCallAt.toDate() : null;
+        if (lastCallAt && now - lastCallAt.getTime() < COOLDOWN_MS) {
+            throw new https_1.HttpsError('failed-precondition', 'Please wait before generating another report (cooldown).');
+        }
+        const count = typeof data?.count === 'number' ? data.count : 0;
+        const estCostSoFar = typeof data?.estCostUsd === 'number' ? data.estCostUsd : 0;
+        const byType = typeof data?.byType === 'object' && data.byType ? data.byType : {};
+        const costThisCall = estCost ?? EST_COST_PER_CALL_USD;
+        const nextCount = count + 1;
+        const nextCost = estCostSoFar + costThisCall;
+        if (nextCount > DAILY_CAP_DEFAULT) {
+            throw new https_1.HttpsError('resource-exhausted', 'Daily AI generation limit reached. Try again tomorrow.');
+        }
+        if (nextCost > DAILY_SPEND_CAP_USD) {
+            throw new https_1.HttpsError('resource-exhausted', 'Daily AI spend limit reached. Try again tomorrow.');
+        }
+        const nextByType = {
+            ...byType,
+            [reportType]: (byType[reportType] || 0) + 1,
+        };
+        txn.set(usageRef, {
+            count: nextCount,
+            estCostUsd: nextCost,
+            lastCallAt: firestore_1.FieldValue.serverTimestamp(),
+            byType: nextByType,
+        }, { merge: true });
+    });
+    const reportRef = await db.collection('intakes').doc(intakeId).collection('aiReports').add(reportDoc);
+    // Finalise usage: commit actual cost and counts, drop reservation
+    await db.runTransaction(async (txn) => {
+        const snap = await txn.get(usageRef);
+        const data = snap.exists ? snap.data() : {};
+        const count = typeof data?.count === 'number' ? data.count : 0;
+        const estCostSoFar = typeof data?.estCostUsd === 'number' ? data.estCostUsd : 0;
+        const pendingCount = typeof data?.pendingCount === 'number' ? data.pendingCount : 0;
+        const byType = typeof data?.byType === 'object' && data.byType ? data.byType : {};
+        const costThisCall = estCost ?? EST_COST_PER_CALL_USD;
+        const nextCount = count + 1;
+        const nextCost = estCostSoFar + costThisCall;
+        // Ensure limits still respected (in case real cost pushes over)
+        if (nextCount > DAILY_CAP_DEFAULT || nextCost > DAILY_SPEND_CAP_USD) {
+            txn.set(usageRef, {
+                pendingCount: Math.max(0, pendingCount - 1),
+            }, { merge: true });
+            throw new https_1.HttpsError('resource-exhausted', 'Daily AI limit reached after generation.');
+        }
+        const nextByType = {
+            ...byType,
+            [reportType]: (byType[reportType] || 0) + 1,
+        };
+        txn.set(usageRef, {
+            count: nextCount,
+            estCostUsd: nextCost,
+            pendingCount: Math.max(0, pendingCount - 1),
+            lastCallAt: firestore_1.FieldValue.serverTimestamp(),
+            byType: nextByType,
+        }, { merge: true });
+    });
+    await db.collection('intakes').doc(intakeId).collection('audit').add({
+        type: 'ai_report_generated',
+        createdAt: firestore_1.FieldValue.serverTimestamp(),
+        actorUid: uid,
+        actorEmail: email,
+        meta: { reportId: reportRef.id, reportType, model: MODEL },
+    });
+    console.log('AI report generated', { intakeId, reportType, promptVersion: PROMPT_VERSION, model: MODEL });
+    return { reportId: reportRef.id, content, model: MODEL };
+});
