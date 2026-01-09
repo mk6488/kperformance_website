@@ -112,3 +112,4 @@ __MACOSX/
 # Local debug
 debug/
 
+k-performance-*-firebase-adminsdk-*.json
