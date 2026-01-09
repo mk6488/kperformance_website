@@ -15,19 +15,19 @@ export function AboutSection() {
         />
 
         <div className="grid gap-6 md:grid-cols-2 md:items-start md:gap-8">
-          <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="aspect-[4/5] sm:aspect-[16/10]">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="relative aspect-[4/5] sm:aspect-[16/10]">
               <img
                 src={softTissueUpperBody}
                 alt="Soft tissue therapy session focusing on upper back and shoulder work"
-                className="relative z-0 h-full w-full object-cover"
+                className="absolute inset-0 z-0 h-full w-full object-cover"
                 loading="lazy"
                 decoding="async"
               />
+              <div
+                className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-[rgba(33,86,129,0.60)] via-[rgba(33,86,129,0.22)] to-transparent"
+              />
             </div>
-            <div
-              className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-[rgba(33,86,129,0.45)] via-[rgba(33,86,129,0.18)] to-transparent"
-            />
           </div>
 
           <div className="space-y-4">
