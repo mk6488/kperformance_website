@@ -25,7 +25,7 @@ export function AboutSection() {
                 decoding="async"
               />
             </div>
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-black/5 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand-navy/35 via-brand-navy/10 to-transparent" />
           </div>
 
           <div className="space-y-4">
