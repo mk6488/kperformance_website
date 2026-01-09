@@ -1,6 +1,7 @@
 import { Card } from '../ui/Card';
 import { Section } from '../ui/Section';
 import { SectionHeading } from '../ui/SectionHeading';
+import softTissueUpperBody from '../../assets/soft-tissue-upper-body-treatment.png';
 
 export function AboutSection() {
   return (
@@ -14,8 +15,16 @@ export function AboutSection() {
         />
 
         <div className="grid gap-6 md:grid-cols-2 md:items-start md:gap-8">
-          <div className="rounded-2xl bg-brand-offWhite border border-slate-100 aspect-[3/2] sm:aspect-[4/3] flex items-center justify-center text-slate-500">
-            Imagery or practitioner photo placeholder
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="aspect-[4/5] sm:aspect-[16/10]">
+              <img
+                src={softTissueUpperBody}
+                alt="Soft tissue therapy session focusing on upper back and shoulder work"
+                className="h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
           </div>
 
           <div className="space-y-4">
