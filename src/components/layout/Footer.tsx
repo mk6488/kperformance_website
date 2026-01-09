@@ -6,7 +6,6 @@ export function Footer() {
         <p className="text-sm text-white/80">Bristol, UK — mobile soft tissue therapy</p>
         <div className="text-sm text-white/80">
           <p>Email: mike@kperformance.uk</p>
-          <p>Phone: 07513 052467</p>
         </div>
         <p className="text-sm text-white/70">
           Mobile service available. Safeguarding trained and experienced working with young athletes.

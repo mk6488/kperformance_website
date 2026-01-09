@@ -37,8 +37,8 @@ export function ContactSection() {
           align="left"
         />
 
-        <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
-          <Card className="lg:col-span-2">
+        <div className="mx-auto w-full max-w-2xl">
+          <Card className="w-full">
             {!submitted ? (
               <form
                 name="contact"
@@ -149,19 +149,6 @@ export function ContactSection() {
                 </p>
               </div>
             )}
-          </Card>
-
-          <Card className="h-full space-y-3 bg-brand-navy text-white">
-            <h3 className="text-lg font-semibold">Email</h3>
-            <p className="text-white/85">For anything urgent, email me and I’ll reply as soon as I can.</p>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                window.open('mailto:mike@kperformance.uk', '_blank');
-              }}
-            >
-              Email Mike
-            </Button>
           </Card>
         </div>
 
