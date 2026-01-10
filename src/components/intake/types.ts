@@ -1,4 +1,4 @@
-export type IntakeStepId = 'about' | 'problem' | 'medical' | 'lifestyle' | 'consent';
+export type IntakeStepId = 'about' | 'problem' | 'bodyMap' | 'medical' | 'lifestyle' | 'consent' | 'review';
 
 export type IntakeStep = {
   id: IntakeStepId;
@@ -28,6 +28,10 @@ export type IntakeValues = {
     aggravators: string;
     easers: string;
     goals: string;
+    quality: string;
+    dailyImpact: string;
+    twentyFourHourBehaviour: string;
+    worriesOrAvoidance: string;
   };
   medical: {
     conditions: string;
@@ -42,6 +46,13 @@ export type IntakeValues = {
     weeklyLoad: string;
     sleepHours: string;
     stressScore: number | null;
+    sleepQuality: 'Good' | 'Fair' | 'Poor' | '';
+    moodScore: number | null;
+    nutritionQuality: 'Good' | 'Fair' | 'Poor' | '';
+    alcoholIntake: 'None' | 'Low' | 'Moderate' | 'High' | '';
+    smoking: 'No' | 'Yes' | 'Prefer not to say' | '';
+    windDown: string;
+    fun: string;
   };
   bodyMap: {
     markers: Array<{
@@ -87,6 +98,10 @@ export const defaultIntakeValues: IntakeValues = {
     aggravators: '',
     easers: '',
     goals: '',
+    quality: '',
+    dailyImpact: '',
+    twentyFourHourBehaviour: '',
+    worriesOrAvoidance: '',
   },
   medical: {
     conditions: '',
@@ -101,6 +116,13 @@ export const defaultIntakeValues: IntakeValues = {
     weeklyLoad: '',
     sleepHours: '',
     stressScore: null,
+    sleepQuality: '',
+    moodScore: null,
+    nutritionQuality: '',
+    alcoholIntake: '',
+    smoking: '',
+    windDown: '',
+    fun: '',
   },
   bodyMap: {
     markers: [],

@@ -36,6 +36,10 @@ export default function StepReview({ values }: Props) {
         <p>Pain now: {painText}</p>
         <p>Onset: {values.problem.onset || 'Not provided'}</p>
         <p>Location: {values.problem.locationText || 'Not provided'}</p>
+        <p>Quality: {values.problem.quality || 'Not provided'}</p>
+        <p>24-hour behaviour: {values.problem.twentyFourHourBehaviour || 'Not provided'}</p>
+        <p>Daily impact: {values.problem.dailyImpact || 'Not provided'}</p>
+        <p>Worries / avoidance: {values.problem.worriesOrAvoidance || 'Not provided'}</p>
         <p>Aggravators: {values.problem.aggravators || 'Not provided'}</p>
         <p>Helps: {values.problem.easers || 'Not provided'}</p>
         <p>Goals: {values.problem.goals || 'Not provided'}</p>
@@ -71,6 +75,13 @@ export default function StepReview({ values }: Props) {
           Stress level:{' '}
           {values.lifestyle.stressScore === null ? 'Not set' : `${values.lifestyle.stressScore}/10`}
         </p>
+        <p>Sleep quality: {values.lifestyle.sleepQuality || 'Not provided'}</p>
+        <p>Mood: {values.lifestyle.moodScore === null ? 'Not set' : `${values.lifestyle.moodScore}/10`}</p>
+        <p>Nutrition quality: {values.lifestyle.nutritionQuality || 'Not provided'}</p>
+        <p>Alcohol intake: {values.lifestyle.alcoholIntake || 'Not provided'}</p>
+        <p>Smoking: {values.lifestyle.smoking || 'Not provided'}</p>
+        <p>Wind down: {values.lifestyle.windDown || 'Not provided'}</p>
+        <p>Fun: {values.lifestyle.fun || 'Not provided'}</p>
       </div>
 
       <div className="space-y-2">

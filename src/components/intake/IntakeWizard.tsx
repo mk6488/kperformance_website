@@ -148,7 +148,7 @@ export default function IntakeWizard() {
       clearDraft();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
-      setSubmitError('Something went wrong while submitting. Please try again or contact Mike.');
+      setSubmitError('Something went wrong while submitting. Please try again or email mike@kperformance.uk.');
     } finally {
       setSubmitting(false);
     }
