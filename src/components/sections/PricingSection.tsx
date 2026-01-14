@@ -1,28 +1,22 @@
 import { Card } from '../ui/Card';
 import { Section } from '../ui/Section';
 import { SectionHeading } from '../ui/SectionHeading';
-import { Button } from '../ui/Button';
 
 const tiers = [
   {
-    duration: '45 minutes',
+    duration: 'Soft tissue therapy (Under 18)',
     price: '£45',
-    notes: 'Great for targeted soft tissue work, quick tune-ups, or follow-up sessions.',
+    notes: 'Juniors (under 18). Per session.',
   },
   {
-    duration: '60 minutes',
-    price: '£55',
-    notes: 'Ideal for a full assessment, hands-on treatment, and movement coaching.',
-  },
-  {
-    duration: '75 minutes',
+    duration: 'Soft tissue therapy (Adult 18+)',
     price: '£65',
-    notes: 'Recommended for more complex issues or multi-area treatment.',
+    notes: 'Adults (18+). Per session.',
   },
   {
-    duration: 'Junior athlete block (3 sessions)',
-    price: '£150',
-    notes: 'Perfect for building momentum with rehab or performance development over several weeks.',
+    duration: 'Performance Coaching (Youth Athletes Only)',
+    price: '£45',
+    notes: 'Youth athletes only. Per session.',
   },
 ];
 
@@ -33,10 +27,10 @@ export function PricingSection() {
         <SectionHeading
           eyebrow="Pricing & locations"
           title="Simple, transparent pricing"
-          subtitle="Mobile within Bristol. Travel fees may apply for areas further out — we’ll confirm together."
+          subtitle="Youth-first pricing for soft tissue therapy and performance coaching. Mobile within Bristol; we’ll confirm travel if you’re further out."
         />
 
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {tiers.map((tier) => (
             <Card key={tier.duration} className="h-full flex flex-col gap-3">
               <h3 className="text-xl font-semibold text-brand-charcoal">{tier.duration}</h3>
@@ -46,18 +40,9 @@ export function PricingSection() {
           ))}
         </div>
 
-        <Card className="flex flex-col gap-3 border border-brand-navy/20 bg-white">
-          <h3 className="text-lg font-semibold text-brand-navy">Youth performance coaching</h3>
-          <p className="text-slate-700">
-            Youth performance coaching options available (1:1 or blocks). Enquire for details.
-          </p>
-          <Button
-            className="w-full sm:w-auto"
-            onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-          >
-            Enquire about performance coaching
-          </Button>
-        </Card>
+        <p className="text-sm text-slate-700">
+          Block bookings and group sessions are available on request — please get in touch.
+        </p>
 
         <p className="text-sm text-slate-600">
           All sessions are delivered at your home. Travel within Bristol is included; small additional fees may apply for locations outside the city.
