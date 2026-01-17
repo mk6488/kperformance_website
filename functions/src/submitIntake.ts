@@ -216,6 +216,12 @@ export const submitIntake = onCall({ region: 'europe-west2' }, async (request) =
 
     return { intakeId: docRef.id };
   } catch (err: any) {
+    console.error('submitIntake: Firestore write failed', {
+      message: err?.message,
+      code: err?.code,
+      name: err?.name,
+      stack: err?.stack,
+    });
     throw new HttpsError('internal', 'Unable to save intake');
   }
 });
