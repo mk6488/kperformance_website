@@ -573,9 +573,16 @@ export default function IntakeDetail({ intakeId }: Props) {
   return (
     <AdminRoute>
       <Section id="admin-intake-detail" variant="muted">
-        <div className="max-w-5xl mx-auto px-4 md:px-6 space-y-6 h-[100dvh] flex flex-col min-h-0">
-          <SectionHeading title="Intake detail" subtitle={intakeId} align="left" />
-          <style>{`
+        <div className="h-[100dvh] flex flex-col min-h-0">
+          <div className="shrink-0">
+            <div className="max-w-5xl mx-auto px-4 md:px-6 space-y-6">
+              <SectionHeading title="Intake detail" subtitle={intakeId} align="left" />
+            </div>
+          </div>
+
+          <div className="flex-1 min-h-0 overflow-auto">
+            <div className="max-w-5xl mx-auto px-4 md:px-6 space-y-6">
+              <style>{`
             @media print {
               header, footer, button, .no-print { display: none !important; }
               body { background: white; }
@@ -584,126 +591,125 @@ export default function IntakeDetail({ intakeId }: Props) {
               img { break-inside: avoid; }
             }
           `}</style>
-          <Card className="space-y-3 flex flex-col min-h-0">
-            <div className="shrink-0 space-y-3 border-b border-slate-200 bg-white/90 py-2">
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={navLoading || !prevId}
-                  onClick={() => {
-                    if (prevId) window.location.href = `/admin/intakes/${prevId}`;
-                  }}
-                >
-                  Previous
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={navLoading || !nextId}
-                  onClick={() => {
-                    if (nextId) window.location.href = `/admin/intakes/${nextId}`;
-                  }}
-                >
-                  Next
-                </Button>
-                {navLoading ? <p className="text-sm text-slate-600">Loading neighbours…</p> : null}
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="no-print"
-                  onClick={() => window.print()}
-                >
-                  Print / Save as PDF
-                </Button>
-              </div>
-
-              {!loading && !error && data && (
-                <div className="space-y-4 text-sm text-slate-800">
-                  <Card className="space-y-2">
-                    <p className="text-base font-semibold text-brand-navy">Quick summary</p>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1">
-                        <p className="text-xs uppercase text-slate-500">Presenting problem</p>
-                        <p className="text-sm text-brand-charcoal">{problem.mainConcern || '—'}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs uppercase text-slate-500">Body map</p>
-                        <p className="text-sm text-brand-charcoal">{summaryLocationText || '—'}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs uppercase text-slate-500">Red flags</p>
-                        <p className="text-sm text-brand-charcoal">
-                          {(medical.redFlags || []).length > 0 ? (medical.redFlags || []).join(', ') : '—'}
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs uppercase text-slate-500">Consent / Under 18</p>
-                        <p className="text-sm text-brand-charcoal">
-                          {consent.healthDataConsent ? 'Consent given' : 'Consent missing'} ·{' '}
-                          {client.under18 ? 'Under 18' : '18+ or not specified'}
-                        </p>
-                      </div>
-                      <div className="space-y-1 sm:col-span-2">
-                        <p className="text-xs uppercase text-slate-500">Contact</p>
-                        <p className="text-sm text-brand-charcoal">
-                          {client.fullName || '—'} · {client.email || '—'} · {client.phone || '—'}
-                        </p>
-                        {clientEmailLower ? (
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            className="mt-1 text-xs"
-                            onClick={() => {
-                              window.location.href = `/admin/clients/${encodeURIComponent(clientEmailLower)}`;
-                            }}
-                          >
-                            View client history
-                          </Button>
-                        ) : null}
-                      </div>
-                    </div>
-                  </Card>
-
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div>
-                      <p className="font-semibold text-brand-charcoal">{client.fullName || 'Unknown name'}</p>
-                      <p>{ageText}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p>Created: {createdAtDisplay}</p>
-                      <p>Reviewed by: {data.reviewedByUid || '—'}</p>
-                      {data.status === 'archived' ? (
-                        <p className="text-sm text-amber-700">
-                          Archived on {formatNoteTimestamp(archivedAtRaw)} by {data.archivedByUid || 'unknown'}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3">
-                    <p className="text-sm text-slate-700">Status</p>
-                    <select
-                      className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
-                      value={data.status || 'submitted'}
-                      onChange={(e) => updateStatus(e.target.value)}
-                      disabled={updatingStatus}
+              <Card className="space-y-3">
+                <div className="space-y-3 border-b border-slate-200 bg-white py-2">
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={navLoading || !prevId}
+                      onClick={() => {
+                        if (prevId) window.location.href = `/admin/intakes/${prevId}`;
+                      }}
                     >
-                      <option value="submitted">submitted</option>
-                      <option value="reviewed">reviewed</option>
-                      <option value="needs_followup">needs_followup</option>
-                      <option value="archived">archived</option>
-                    </select>
+                      Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={navLoading || !nextId}
+                      onClick={() => {
+                        if (nextId) window.location.href = `/admin/intakes/${nextId}`;
+                      }}
+                    >
+                      Next
+                    </Button>
+                    {navLoading ? <p className="text-sm text-slate-600">Loading neighbours…</p> : null}
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="no-print"
+                      onClick={() => window.print()}
+                    >
+                      Print / Save as PDF
+                    </Button>
                   </div>
-                </div>
-              )}
-            </div>
 
-            <div className="flex-1 min-h-0 overflow-auto">
-              {loading && <p className="text-slate-700">Loading…</p>}
-              {error && <p className="text-sm text-red-600">{error}</p>}
-              {!loading && !error && data && (
-                <div className="space-y-6 text-sm text-slate-800">
+                  {!loading && !error && data && (
+                    <div className="space-y-4 text-sm text-slate-800">
+                      <Card className="space-y-2">
+                        <p className="text-base font-semibold text-brand-navy">Quick summary</p>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="space-y-1">
+                            <p className="text-xs uppercase text-slate-500">Presenting problem</p>
+                            <p className="text-sm text-brand-charcoal">{problem.mainConcern || '—'}</p>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-xs uppercase text-slate-500">Body map</p>
+                            <p className="text-sm text-brand-charcoal">{summaryLocationText || '—'}</p>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-xs uppercase text-slate-500">Red flags</p>
+                            <p className="text-sm text-brand-charcoal">
+                              {(medical.redFlags || []).length > 0 ? (medical.redFlags || []).join(', ') : '—'}
+                            </p>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-xs uppercase text-slate-500">Consent / Under 18</p>
+                            <p className="text-sm text-brand-charcoal">
+                              {consent.healthDataConsent ? 'Consent given' : 'Consent missing'} ·{' '}
+                              {client.under18 ? 'Under 18' : '18+ or not specified'}
+                            </p>
+                          </div>
+                          <div className="space-y-1 sm:col-span-2">
+                            <p className="text-xs uppercase text-slate-500">Contact</p>
+                            <p className="text-sm text-brand-charcoal">
+                              {client.fullName || '—'} · {client.email || '—'} · {client.phone || '—'}
+                            </p>
+                            {clientEmailLower ? (
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                className="mt-1 text-xs"
+                                onClick={() => {
+                                  window.location.href = `/admin/clients/${encodeURIComponent(clientEmailLower)}`;
+                                }}
+                              >
+                                View client history
+                              </Button>
+                            ) : null}
+                          </div>
+                        </div>
+                      </Card>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div>
+                          <p className="font-semibold text-brand-charcoal">{client.fullName || 'Unknown name'}</p>
+                          <p>{ageText}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p>Created: {createdAtDisplay}</p>
+                          <p>Reviewed by: {data.reviewedByUid || '—'}</p>
+                          {data.status === 'archived' ? (
+                            <p className="text-sm text-amber-700">
+                              Archived on {formatNoteTimestamp(archivedAtRaw)} by {data.archivedByUid || 'unknown'}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-3">
+                        <p className="text-sm text-slate-700">Status</p>
+                        <select
+                          className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+                          value={data.status || 'submitted'}
+                          onChange={(e) => updateStatus(e.target.value)}
+                          disabled={updatingStatus}
+                        >
+                          <option value="submitted">submitted</option>
+                          <option value="reviewed">reviewed</option>
+                          <option value="needs_followup">needs_followup</option>
+                          <option value="archived">archived</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {loading && <p className="text-slate-700">Loading…</p>}
+                {error && <p className="text-sm text-red-600">{error}</p>}
+                {!loading && !error && data && (
+                  <div className="space-y-6 text-sm text-slate-800">
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
                   <div className="space-y-3 lg:col-span-7 max-w-none lg:max-w-[48rem]">
                     <CollapsibleSection title="Main concern" defaultOpen>
