@@ -573,7 +573,7 @@ export default function IntakeDetail({ intakeId }: Props) {
   return (
     <AdminRoute>
       <Section id="admin-intake-detail" variant="muted">
-        <div className="max-w-5xl mx-auto px-4 md:px-6 h-[100dvh] flex flex-col min-h-0 gap-6">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 min-h-[100dvh] flex flex-col gap-6">
           <SectionHeading title="Intake detail" subtitle={intakeId} align="left" />
           <style>{`
             @media print {
@@ -584,7 +584,7 @@ export default function IntakeDetail({ intakeId }: Props) {
               img { break-inside: avoid; }
             }
           `}</style>
-          <Card className="flex-1 min-h-0 flex flex-col p-0">
+          <Card className="flex-1 min-h-0 flex flex-col p-0 overflow-hidden">
             <div className="shrink-0 space-y-3 border-b border-slate-200 bg-white/90 py-2 px-5 sm:px-6">
               <div className="flex flex-wrap gap-3">
                 <Button
