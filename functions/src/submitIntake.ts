@@ -204,6 +204,18 @@ export const submitIntake = onCall({ region: 'europe-west2' }, async (request) =
   }
 
   try {
+    const client: any = {
+      fullName: payload.client.fullName,
+      dob: payload.client.dob,
+      email: payload.client.email,
+      phone: payload.client.phone,
+      under18: payload.client.under18,
+    };
+    if (payload.client.guardian) {
+      client.guardian = payload.client.guardian;
+    }
+    const payloadForSave = { ...payload, client };
+
     const docRef = await db.collection('intakes').add({
       createdAt: FieldValue.serverTimestamp(),
       createdByUid: uid,
@@ -211,7 +223,7 @@ export const submitIntake = onCall({ region: 'europe-west2' }, async (request) =
       emailLower: payload.client.email,
       formVersion: payload.formVersion || 'intake-v2',
       submittedAtClientISO: payload.submittedAtClientISO || null,
-      payload,
+      payload: payloadForSave,
     });
 
     return { intakeId: docRef.id };
