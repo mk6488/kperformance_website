@@ -573,7 +573,7 @@ export default function IntakeDetail({ intakeId }: Props) {
   return (
     <AdminRoute>
       <Section id="admin-intake-detail" variant="muted">
-        <div className="max-w-5xl mx-auto px-4 md:px-6 space-y-6">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 space-y-6 h-[100dvh] flex flex-col min-h-0">
           <SectionHeading title="Intake detail" subtitle={intakeId} align="left" />
           <style>{`
             @media print {
@@ -584,8 +584,8 @@ export default function IntakeDetail({ intakeId }: Props) {
               img { break-inside: avoid; }
             }
           `}</style>
-          <Card className="space-y-3">
-            <div className="sticky top-0 z-20 space-y-3 border-b border-slate-200 bg-white/90 py-2 backdrop-blur">
+          <Card className="space-y-3 flex flex-col min-h-0">
+            <div className="shrink-0 space-y-3 border-b border-slate-200 bg-white/90 py-2">
               <div className="flex flex-wrap gap-3">
                 <Button
                   type="button"
@@ -699,10 +699,11 @@ export default function IntakeDetail({ intakeId }: Props) {
               )}
             </div>
 
-            {loading && <p className="text-slate-700">Loading…</p>}
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            {!loading && !error && data && (
-              <div className="space-y-6 text-sm text-slate-800">
+            <div className="flex-1 min-h-0 overflow-auto">
+              {loading && <p className="text-slate-700">Loading…</p>}
+              {error && <p className="text-sm text-red-600">{error}</p>}
+              {!loading && !error && data && (
+                <div className="space-y-6 text-sm text-slate-800">
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
                   <div className="space-y-3 lg:col-span-7 max-w-none lg:max-w-[48rem]">
                     <CollapsibleSection title="Main concern" defaultOpen>
