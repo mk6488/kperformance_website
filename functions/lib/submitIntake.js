@@ -185,6 +185,17 @@ exports.submitIntake = (0, https_1.onCall)({ region: 'europe-west2' }, async (re
         throw new https_1.HttpsError('invalid-argument', 'Invalid payload');
     }
     try {
+        const client = {
+            fullName: payload.client.fullName,
+            dob: payload.client.dob,
+            email: payload.client.email,
+            phone: payload.client.phone,
+            under18: payload.client.under18,
+        };
+        if (payload.client.guardian) {
+            client.guardian = payload.client.guardian;
+        }
+        const payloadForSave = { ...payload, client };
         const docRef = await db.collection('intakes').add({
             createdAt: firestore_1.FieldValue.serverTimestamp(),
             createdByUid: uid,
@@ -192,11 +203,17 @@ exports.submitIntake = (0, https_1.onCall)({ region: 'europe-west2' }, async (re
             emailLower: payload.client.email,
             formVersion: payload.formVersion || 'intake-v2',
             submittedAtClientISO: payload.submittedAtClientISO || null,
-            payload,
+            payload: payloadForSave,
         });
         return { intakeId: docRef.id };
     }
     catch (err) {
+        console.error('submitIntake: Firestore write failed', {
+            message: err?.message,
+            code: err?.code,
+            name: err?.name,
+            stack: err?.stack,
+        });
         throw new https_1.HttpsError('internal', 'Unable to save intake');
     }
 });
