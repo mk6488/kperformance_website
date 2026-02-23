@@ -4,39 +4,31 @@ import { SectionHeading } from '../ui/SectionHeading';
 
 const performanceServices = [
   {
-    title: 'Programming & S&C',
-    points: ['Strength foundations for teen athletes', 'Age-appropriate loading with clear progressions'],
+    title: 'Strength & power development',
+    points: ['Age-appropriate loading and progressions', 'Programmes built around sport and school demands'],
   },
   {
-    title: 'Movement quality',
-    points: ['Technique support for running, jumping, and change of direction', 'Warm-up and prep routines built for school/club demands'],
+    title: 'Speed, agility & movement',
+    points: ['Acceleration, deceleration, and change-of-direction', 'Running mechanics and athletic movement quality'],
   },
   {
-    title: 'Testing & tracking',
-    points: ['Simple baselines for strength, power, and mobility', 'Shared progress updates for parents/guardians'],
+    title: 'Injury resilience',
+    points: ['Build robust tissues and movement patterns', 'Plan training loads around growth and competition cycles'],
   },
   {
-    title: 'Injury risk reduction',
-    points: ['Load management guidance around sport and exams', 'Confidence under training load'],
+    title: 'Athlete confidence',
+    points: ['Testing and progress tracking athletes understand', 'Clear communication with parent/guardian where needed'],
   },
 ];
 
 const therapyServices = [
   {
-    title: 'Assessment-led treatment',
-    points: ['Movement checks and history to find what matters most', 'Soft tissue therapy and sports massage targeting your goals'],
+    title: 'Soft tissue therapy add-on',
+    points: ['Hands-on treatment for pain and tightness', 'Useful in-season support for busy youth athletes'],
   },
   {
-    title: 'Movement coaching',
-    points: ['Simple drills to support recovery and mobility', 'Progressions that fit your sport, schedule, and equipment'],
-  },
-  {
-    title: 'Recovery & load support',
-    points: ['Plans to balance training, work, and life', 'Advice for managing flare-ups and niggles'],
-  },
-  {
-    title: 'Mobile visits',
-    points: ['Delivered at home or pitch/club where appropriate', 'Set up to minimise disruption for families'],
+    title: 'Recovery support',
+    points: ['Mobility and tissue-care strategies', 'Simple plans to manage flare-ups and keep training'],
   },
 ];
 
@@ -46,50 +38,50 @@ export function ServicesSection() {
       <div className="flex flex-col gap-8">
         <SectionHeading
           eyebrow="Services"
-          title="What a session includes"
-          subtitle="Youth performance coaching and soft tissue therapy, each built on assessment, movement coaching, and clear next steps."
+          title="Coaching built for youth athletes"
+          subtitle="Performance coaching leads the offer. Therapy remains available as targeted support when needed."
         />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-stretch">
-          <h3 id="performance" className="text-lg font-semibold text-brand-navy">
-            Youth Performance Coaching
+
+        <div className="space-y-4">
+          <h3 id="performance" className="text-xl font-semibold text-brand-navy">
+            Youth Performance Coaching (Primary)
           </h3>
-          <h3 id="therapy" className="text-lg font-semibold text-brand-navy">
-            Soft Tissue Therapy
-          </h3>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 auto-rows-fr items-stretch">
+            {performanceServices.map((service) => (
+              <Card key={`perf-${service.title}`} className="h-full flex flex-col gap-4 hover-lift">
+                <h4 className="text-lg font-semibold text-brand-charcoal">{service.title}</h4>
+                <ul className="space-y-2 text-slate-600">
+                  {service.points.map((point) => (
+                    <li key={point} className="flex items-start gap-2">
+                      <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ))}
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 auto-rows-fr items-stretch">
-          {performanceServices.map((service) => (
-            <Card key={`perf-${service.title}`} className="h-full flex flex-col gap-4">
-              <div>
-                <h4 className="text-xl font-semibold text-brand-charcoal">{service.title}</h4>
-              </div>
-              <ul className="space-y-2 text-slate-600">
-                {service.points.map((point) => (
-                  <li key={point} className="flex items-start gap-2">
-                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
-                    <span>{point}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          ))}
-
-          {therapyServices.map((service) => (
-            <Card key={`therapy-${service.title}`} className="h-full flex flex-col gap-4">
-              <div>
-                <h4 className="text-xl font-semibold text-brand-charcoal">{service.title}</h4>
-              </div>
-              <ul className="space-y-2 text-slate-600">
-                {service.points.map((point) => (
-                  <li key={point} className="flex items-start gap-2">
-                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
-                    <span>{point}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          ))}
+        <div className="space-y-4">
+          <h3 id="therapy" className="text-xl font-semibold text-brand-navy/80">
+            Soft Tissue Therapy (Secondary)
+          </h3>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 auto-rows-fr items-stretch">
+            {therapyServices.map((service) => (
+              <Card key={`therapy-${service.title}`} className="h-full flex flex-col gap-4 border-slate-200/80">
+                <h4 className="text-lg font-semibold text-brand-charcoal">{service.title}</h4>
+                <ul className="space-y-2 text-slate-600">
+                  {service.points.map((point) => (
+                    <li key={point} className="flex items-start gap-2">
+                      <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-blue" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     </Section>
@@ -97,6 +89,3 @@ export function ServicesSection() {
 }
 
 export default ServicesSection;
-
-
-

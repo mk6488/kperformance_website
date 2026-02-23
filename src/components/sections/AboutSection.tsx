@@ -1,62 +1,45 @@
 import { Card } from '../ui/Card';
 import { Section } from '../ui/Section';
 import { SectionHeading } from '../ui/SectionHeading';
-import softTissueUpperBody from '../../assets/soft-tissue-upper-body-treatment.png';
 
 export function AboutSection() {
   return (
     <Section id="about">
       <div className="flex flex-col gap-8">
         <SectionHeading
-          eyebrow="About"
-          title="Hi, I’m Mike — soft tissue therapist and strength coach"
-          subtitle="I help young athletes, active adults, and busy families stay healthy, recover quickly, and feel confident in their sport."
+          eyebrow="About coach Mike"
+          title="Long-term athlete development, not quick fixes"
+          subtitle="I coach youth athletes to become stronger, faster, and more resilient with age-appropriate structure and clear support."
           align="left"
         />
 
         <div className="grid gap-6 md:grid-cols-2 md:items-start md:gap-8">
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="relative aspect-[4/5] sm:aspect-[16/10]">
-              <img
-                src={softTissueUpperBody}
-                alt="Soft tissue therapy session focusing on upper back and shoulder work"
-                className="absolute inset-0 z-0 h-full w-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-              <div
-                className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-[rgba(33,86,129,0.60)] via-[rgba(33,86,129,0.22)] to-transparent"
-              />
-            </div>
-          </div>
+          <Card className="space-y-4 hover-lift">
+            <p className="text-slate-700 leading-relaxed">
+              My work combines strength and conditioning principles with practical coaching for real athletes in school,
+              academy, and club environments. Sessions are designed to create robust movement quality, confidence,
+              and measurable progression.
+            </p>
+            <ul className="space-y-2 text-slate-700">
+              <li>• Level 4 Strength &amp; Conditioning</li>
+              <li>• Level 5 Soft Tissue Therapy</li>
+              <li>• Youth sport and athlete pathway experience</li>
+            </ul>
+          </Card>
 
           <div className="space-y-4">
-            <Card>
-              <p className="text-slate-700 leading-relaxed">
-                I blend youth performance coaching, strength &amp; conditioning, and evidence-based soft tissue therapy.
-                Sessions are mobile, friendly, and designed to help you feel confident in your body — whether you&apos;re
-                competing, juggling sport around school and exams, or returning from injury.
+            <Card className="border-brand-green/30 bg-brand-green/5">
+              <h3 className="font-semibold text-brand-navy">Safeguarding & under-18 support</h3>
+              <p className="text-slate-700 mt-2">
+                DBS checked and safeguarding trained. Parent/guardian communication stays clear and consistent throughout.
               </p>
-              <p className="text-slate-700 leading-relaxed mt-3">
-                I&apos;ve worked for years with junior athletes across Bristol, including school and club
-                programmes. I understand how demanding training and growth phases can be, and how
-                important it is to support athletes in a way that&apos;s age-appropriate, clear, and
-                practical.
-              </p>
-              <ul className="mt-4 space-y-2 text-slate-700">
-                <li>• Level 5 Soft Tissue Therapy</li>
-                <li>• Level 4 Strength &amp; Conditioning</li>
-                <li>• Experience with youth sport, academy pathways, and recreational athletes</li>
-              </ul>
             </Card>
-
-            <div className="rounded-xl border border-brand-green/40 bg-brand-green/10 p-4 text-sm text-brand-charcoal">
-              <h3 className="font-semibold text-brand-navy">Safeguarding & working with under-18s</h3>
-              <p className="text-slate-700">
-                DBS checked and safeguarding trained. Clear communication with parents, guardians, and
-                coaches keeps sessions supportive and transparent.
+            <Card className="border-brand-blue/30 bg-brand-blue/5">
+              <h3 className="font-semibold text-brand-navy">Secondary therapy support available</h3>
+              <p className="text-slate-700 mt-2">
+                Soft tissue therapy remains available to support recovery, pain management, and return-to-training confidence.
               </p>
-            </div>
+            </Card>
           </div>
         </div>
       </div>
@@ -65,6 +48,3 @@ export function AboutSection() {
 }
 
 export default AboutSection;
-
-
-

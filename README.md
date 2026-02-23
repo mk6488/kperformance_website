@@ -66,3 +66,14 @@ Notes:
   - “AI-assisted draft — clinician review required” banner shown.
   - No aiReports content stored in localStorage; loaded live from Firestore.
 
+
+## CrossFit Clifton logo asset
+
+For the redesigned homepage location section, place the CrossFit Clifton logo at:
+
+```
+public/crossfit-clifton-logo.png
+```
+
+If the file is missing, the site shows a placeholder message in that section.
+

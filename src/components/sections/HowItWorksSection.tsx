@@ -4,16 +4,16 @@ import { SectionHeading } from '../ui/SectionHeading';
 
 const steps = [
   {
-    title: 'Free chat / enquiry',
-    description: '5–10 minutes to outline your sport, goals, and any pain so we decide next steps.',
+    title: 'Enquiry + athlete goals',
+    description: 'Quick call to understand sport, training age, and current goals.',
   },
   {
-    title: 'Assessment & session',
-    description: '45–60 minutes (70 for a first session) with movement checks plus coaching or hands-on therapy, with clear explanations.',
+    title: 'Performance assessment',
+    description: 'Movement, strength, and performance baseline to tailor the right coaching plan.',
   },
   {
-    title: 'Follow-up plan & support',
-    description: 'You’ll get a simple plan to follow; we’ll review progress next session if needed.',
+    title: 'Structured coaching progression',
+    description: 'Weekly coaching with clear progression and optional therapy support when required.',
   },
 ];
 
@@ -23,13 +23,13 @@ export function HowItWorksSection() {
       <div className="flex flex-col gap-8">
         <SectionHeading
           eyebrow="How it works"
-          title="Simple steps from enquiry to support"
-          subtitle="A friendly first chat, then assessment-led coaching or therapy, and ongoing guidance that fits around school, training, or work."
+          title="A clear coaching journey"
+          subtitle="Built to make progress simple for youth athletes and parents."
         />
 
         <div className="flex flex-col gap-5 md:flex-row md:gap-8">
           {steps.map((step, index) => (
-            <Card key={step.title} className="flex-1 flex gap-4 items-start">
+            <Card key={step.title} className="flex-1 flex gap-4 items-start hover-lift">
               <div className="h-10 w-10 min-h-[2.5rem] min-w-[2.5rem] shrink-0 rounded-full bg-brand-navy text-white flex items-center justify-center font-semibold">
                 {index + 1}
               </div>
@@ -46,6 +46,3 @@ export function HowItWorksSection() {
 }
 
 export default HowItWorksSection;
-
-
-

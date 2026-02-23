@@ -4,25 +4,25 @@ import { SectionHeading } from '../ui/SectionHeading';
 
 const people = [
   {
-    title: 'Youth & teen athletes',
+    title: 'Teen athletes chasing performance',
     description:
-      'Rowers, runners, footballers, dancers, swimmers, and school-sport athletes building strength and resilience, with parents kept in the loop.',
+      'Football, rugby, athletics, dance, and multi-sport athletes who want to move better, get stronger, and perform with confidence.',
     accent: 'border-t-4 border-brand-navy',
   },
   {
-    title: 'Adult recreational athletes',
-    description: 'Active adults in sport who want to keep moving well — secondary to the youth focus.',
+    title: 'Parents seeking expert support',
+    description: 'Families wanting safe, structured, and age-appropriate coaching with clear progress feedback.',
     accent: 'border-t-4 border-brand-green',
   },
   {
-    title: 'Recurring niggles or pain',
-    description: 'Stubborn aches from work, training, or past injuries that keep flaring when you load up again.',
-    accent: 'border-t-4 border-brand-amber',
+    title: 'Athletes returning from setbacks',
+    description: 'Support for rebuilding load tolerance, movement quality, and confidence after pain or interruption.',
+    accent: 'border-t-4 border-brand-blue',
   },
   {
-    title: 'Returning from injury',
-    description: 'Getting back to sport after time out, with a plan that respects your sport, schedule, and goals.',
-    accent: 'border-t-4 border-brand-blue',
+    title: 'Active adults (limited slots)',
+    description: 'Secondary offer for adults who need coaching or therapy support around sport and training.',
+    accent: 'border-t-4 border-brand-amber',
   },
 ];
 
@@ -32,12 +32,12 @@ export function WhoIHelpSection() {
       <div className="flex flex-col gap-8">
         <SectionHeading
           eyebrow="Who I help"
-          title="Supporting athletes, parents, and active people"
-          subtitle="Youth athletes first, with clear communication for parents/guardians — and support for active adults when needed."
+          title="Youth athletes are the priority"
+          subtitle="Coaching is designed around developing young athletes first, with parents and guardians included throughout."
         />
         <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
           {people.map((item) => (
-            <Card key={item.title} className={`${item.accent} h-full`}>
+            <Card key={item.title} className={`${item.accent} h-full hover-lift`}>
               <h3 className="text-xl font-semibold text-brand-charcoal mb-2">{item.title}</h3>
               <p className="text-slate-600">{item.description}</p>
             </Card>
@@ -49,6 +49,3 @@ export function WhoIHelpSection() {
 }
 
 export default WhoIHelpSection;
-
-
-
