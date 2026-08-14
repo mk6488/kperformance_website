@@ -1,8 +1,12 @@
+import { useIntersection } from '../../hooks/useIntersection';
 import { Card } from '../ui/Card';
 import { Section } from '../ui/Section';
 import { SectionHeading } from '../ui/SectionHeading';
 
 export function AboutSection() {
+  const { ref: bioRef, visible: bioVisible } = useIntersection(0.08);
+  const { ref: statRef, visible: statVisible } = useIntersection(0.1);
+
   return (
     <Section id="about" variant="muted">
       <div className="flex flex-col gap-8">
@@ -13,7 +17,12 @@ export function AboutSection() {
         />
 
         <div className="grid gap-6 md:grid-cols-[3fr_2fr] md:items-start md:gap-10">
-          <div className="space-y-4">
+
+          {/* Bio + credentials + safeguarding */}
+          <div
+            ref={bioRef}
+            className={`space-y-4 reveal ${bioVisible ? 'is-visible' : ''}`}
+          >
             <Card>
               <p className="text-slate-700 leading-relaxed">
                 Mike Katholnig has spent years coaching young athletes directly — including junior
@@ -39,12 +48,17 @@ export function AboutSection() {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-brand-navy text-white p-8 flex flex-col justify-center min-h-[180px]">
-            <p className="text-5xl font-bold leading-none tracking-tight">7+ Years</p>
-            <p className="mt-3 text-white/70 text-sm leading-relaxed">
+          {/* 7+ Years stat panel */}
+          <div
+            ref={statRef}
+            className={`rounded-2xl bg-brand-navy text-white p-8 flex flex-col justify-center min-h-[180px] reveal reveal-delay-2 ${statVisible ? 'is-visible' : ''}`}
+          >
+            <p className="text-5xl font-black leading-none tracking-tight">7+ Years</p>
+            <p className="mt-4 text-white/55 text-sm leading-relaxed">
               Coaching young athletes — including junior S&amp;C at City of Bristol Rowing Club.
             </p>
           </div>
+
         </div>
       </div>
     </Section>

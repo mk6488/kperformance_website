@@ -9,5 +9,93 @@ body {
   color: #1F2A35;
 }
 
+/* ==========================================
+   HERO ENTRANCE ANIMATIONS
+   ========================================== */
 
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
+.hero-item {
+  animation: heroFadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hero-item-1 { animation-delay: 0.05s; }
+.hero-item-2 { animation-delay: 0.18s; }
+.hero-item-3 { animation-delay: 0.32s; }
+.hero-item-4 { animation-delay: 0.48s; }
+.hero-item-5 { animation-delay: 0.62s; }
+.hero-item-6 { animation-delay: 0.76s; }
+
+/* ==========================================
+   SCROLL-TRIGGERED REVEAL
+   ========================================== */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.reveal-delay-1 { transition-delay: 100ms; }
+.reveal-delay-2 { transition-delay: 200ms; }
+.reveal-delay-3 { transition-delay: 300ms; }
+.reveal-delay-4 { transition-delay: 400ms; }
+
+/* ==========================================
+   TRAJECTORY LINE ANIMATION
+   ========================================== */
+
+@keyframes drawLine {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.trajectory-line {
+  transform-origin: left center;
+  animation: drawLine 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-play-state: paused;
+}
+
+.trajectory-line.is-visible {
+  animation-play-state: running;
+}
+
+/* ==========================================
+   REDUCED MOTION
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-item {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .reveal,
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .trajectory-line,
+  .trajectory-line.is-visible {
+    animation: none;
+    transform: scaleX(1);
+  }
+}

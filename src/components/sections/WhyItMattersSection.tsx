@@ -1,19 +1,32 @@
+import { useIntersection } from '../../hooks/useIntersection';
 import { Section } from '../ui/Section';
 
 export function WhyItMattersSection() {
+  const { ref: leftRef, visible: leftVisible } = useIntersection(0.1);
+  const { ref: rightRef, visible: rightVisible } = useIntersection(0.1);
+
   return (
     <Section id="why-it-matters" variant="muted">
       <div className="grid gap-10 md:grid-cols-[5fr_6fr] md:gap-16 md:items-start">
-        <div className="space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-blue">
+
+        {/* Left — big editorial statement */}
+        <div
+          ref={leftRef}
+          className={`space-y-3 reveal ${leftVisible ? 'is-visible' : ''}`}
+        >
+          <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-brand-blue">
             Why it matters
           </p>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-semibold leading-tight text-brand-charcoal">
-            Young athletes change fast.
+          <h2 className="text-5xl sm:text-6xl md:text-7xl font-bold leading-[0.95] tracking-tight text-brand-charcoal">
+            Young athletes<br />change fast.
           </h2>
         </div>
 
-        <div className="space-y-4 text-slate-700 text-base leading-relaxed">
+        {/* Right — explanatory copy */}
+        <div
+          ref={rightRef}
+          className={`space-y-5 text-slate-600 text-base leading-relaxed reveal reveal-delay-2 ${rightVisible ? 'is-visible' : ''}`}
+        >
           <p>
             Growth spurts, shifting training loads, technique, and the simple unpredictability of
             adolescence all shape how a child's body is adapting to their sport — and it isn't always
@@ -26,6 +39,7 @@ export function WhyItMattersSection() {
             whatever sport they play.
           </p>
         </div>
+
       </div>
     </Section>
   );
