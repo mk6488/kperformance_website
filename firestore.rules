@@ -1,0 +1,44 @@
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Admin allowlist lives at adminUsers/{uid}. Only allow access when:
+    // - request.auth is present AND
+    // - a matching adminUsers/{uid} document exists (server-side populated).
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    }
+
+    // Allow authenticated users to read their own adminUsers doc (for allowlist check).
+    match /adminUsers/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Intake documents: created by Cloud Functions (admin SDK). Clients must not
+    // write directly. Only admins may read/update for review/status/notes.
+    match /intakes/{docId} {
+      allow create: if false; // client writes blocked; server uses Admin SDK
+      allow read, list: if isAdmin();
+      allow update, delete: if isAdmin(); // admins may update status/review fields/notes
+    }
+
+    // Internal notes subcollection for intakes
+    match /intakes/{docId}/internalNotes/{noteId} {
+      allow create, read, list, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Audit trail for admin actions on intakes
+    match /intakes/{docId}/audit/{eventId} {
+      allow create, read, list: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // AI reports generated for an intake
+    match /intakes/{docId}/aiReports/{reportId} {
+      allow create, read, list: if isAdmin();
+      allow update, delete: if false;
+    }
+  }
+}
+
