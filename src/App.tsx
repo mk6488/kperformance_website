@@ -8,6 +8,7 @@ import { AboutSection } from './components/sections/AboutSection';
 import { ContactSection } from './components/sections/ContactSection';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import IntakePage from './pages/IntakePage';
+import CalculatorPage from './pages/CalculatorPage';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminApp from './pages/admin/AdminApp';
 import AdminRoute from './components/intake/AdminRoute';
@@ -113,6 +114,10 @@ function App() {
         <Footer />
       </div>
     );
+  }
+
+  if (pathname === '/calculator') {
+    return <CalculatorPage />;
   }
 
   if (pathname === '/privacy') {

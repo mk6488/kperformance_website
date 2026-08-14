@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assessment Calculator — K Performance</title>
+<style>
+  :root {
+    /* K Performance brand tokens */
+    --navy:     #215681;
+    --blue:     #4A86B7;
+    --green:    #5CBF88;
+    --amber:    #E3A857;
+    --offwhite: #F7F9FC;
+    --charcoal: #1F2A35;
+    --slate:    #334155;
+
+    /* Functional tokens */
+    --ink:      #1F2A35;
+    --muted:    #64748B;
+    --line:     #DCE3ED;
+
+    /* Readout */
+    --readout-bg: #1F2A35;
+    --readout-fg: #E2EAF4;
+
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Courier New", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--offwhite); color: var(--ink); font-family: var(--sans); }
+  body { padding-bottom: 80px; }
+
+  /* ── Header ── */
+  header {
+    background: var(--charcoal);
+    padding: 28px 20px 26px;
+  }
+  .header-inner {
+    max-width: 920px;
+    margin: 0 auto;
+  }
+  .header-brand-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+  .header-logo {
+    height: 48px;
+    width: auto;
+    border-radius: 6px;
+    display: block;
+    flex-shrink: 0;
+  }
+  .header-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .header-brand-name {
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--blue);
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #fff;
+    line-height: 1.1;
+  }
+  header p {
+    margin: 0 0 12px;
+    font-size: 0.875rem;
+    color: rgba(226, 234, 244, 0.72);
+    line-height: 1.55;
+    max-width: 580px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 0.67rem;
+    letter-spacing: 0.04em;
+    color: var(--green);
+    background: rgba(92, 191, 136, 0.12);
+    border: 1px solid rgba(92, 191, 136, 0.28);
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+
+  /* ── Main layout ── */
+  main {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 22px 16px 40px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  @media (min-width: 860px) {
+    .layout { grid-template-columns: 1fr 340px; }
+    .readout-col { position: sticky; top: 16px; align-self: start; }
+  }
+
+  /* ── Cards ── */
+  section.card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 20px 22px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(31, 42, 53, 0.06);
+  }
+  section.card h2 {
+    font-size: 0.67rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--blue);
+    margin: 0 0 14px;
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* ── Form rows ── */
+  .row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  @media (min-width: 520px) {
+    .row.cols-2 { grid-template-columns: 1fr 1fr; }
+    .row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .row.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  }
+  label {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 5px;
+    font-weight: 600;
+  }
+  input[type=number], input[type=text], select {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: var(--mono);
+    background: #fff;
+    color: var(--ink);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  select { font-family: var(--sans); }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(74, 134, 183, 0.16);
+  }
+
+  /* ── Test blocks ── */
+  .test-block {
+    border-top: 1px dashed var(--line);
+    padding-top: 14px;
+    margin-top: 14px;
+  }
+  .test-block:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+  .test-block .test-name {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+  .side-label {
+    font-size: 0.67rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 5px;
+  }
+  .trial-group { display: flex; gap: 6px; }
+  .trial-group input { width: 100%; }
+  .note {
+    font-size: 0.76rem;
+    color: var(--muted);
+    line-height: 1.55;
+    margin: 4px 0 0;
+  }
+
+  /* ── Readout panel ── */
+  .readout {
+    background: var(--readout-bg);
+    color: var(--readout-fg);
+    border-radius: 14px;
+    padding: 18px 18px 16px;
+    box-shadow: 0 2px 10px rgba(31, 42, 53, 0.20);
+  }
+  .readout h2 {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--blue);
+    margin: 0 0 14px;
+    padding: 0 0 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .readout-group { margin-bottom: 16px; }
+  .readout-group-title {
+    font-size: 0.63rem;
+    font-weight: 600;
+    color: rgba(74, 134, 183, 0.85);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 7px;
+  }
+  .readout-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--mono);
+    font-size: 0.84rem;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .readout-line .val {
+    font-weight: 700;
+    color: var(--green);
+  }
+  .readout-line.flagged .val { color: #FF9090; }
+
+  /* ── Flags ── */
+  .flags-box {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+  }
+  .flag-item {
+    background: rgba(192, 57, 43, 0.16);
+    border: 1px solid rgba(220, 80, 60, 0.35);
+    color: #FFD0CC;
+    font-size: 0.77rem;
+    padding: 8px 10px;
+    border-radius: 7px;
+    margin-bottom: 7px;
+    line-height: 1.45;
+  }
+  .flag-item.note-flag {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(226, 234, 244, 0.72);
+  }
+  .no-flags {
+    font-size: 0.8rem;
+    color: rgba(74, 134, 183, 0.60);
+    font-style: italic;
+  }
+
+  /* ── Buttons ── */
+  .copy-btn {
+    margin-top: 14px;
+    width: 100%;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    padding: 11px 16px;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: background 0.15s, transform 0.1s;
+  }
+  .copy-btn:hover { background: #194063; }
+  .copy-btn:active { transform: translateY(1px); }
+  .copied-msg {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--green);
+    margin-top: 7px;
+    height: 16px;
+  }
+  .clear-btn {
+    background: #fff;
+    border: 1px solid var(--line);
+    color: var(--slate);
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .clear-btn:hover { border-color: var(--navy); color: var(--navy); }
+  .top-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
+
+  /* ── Footer ── */
+  footer {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 24px 16px 40px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.7;
+    border-top: 1px solid var(--line);
+  }
+  footer strong { color: var(--slate); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-brand-row">
+      <img src="logo.png" alt="K Performance" class="header-logo">
+      <div class="header-identity">
+        <div class="header-brand-name">K Performance</div>
+        <h1>Assessment Calculator</h1>
+      </div>
+    </div>
+    <p>Enter the measurements from the assessment. Results calculate automatically as you work.</p>
+    <span class="badge">No data stored · no login · no tracking</span>
+  </div>
+</header>
+
+<main>
+  <div class="top-actions">
+    <button class="clear-btn" onclick="clearAll()">Clear all fields</button>
+  </div>
+  <div class="layout">
+
+    <div class="input-col">
+
+      <section class="card">
+        <h2>Anthropometrics</h2>
+        <div class="row cols-4">
+          <div><label for="age">Age (yrs, decimal)</label><input type="number" step="0.1" id="age" oninput="calc()"></div>
+          <div><label for="sex">Sex</label>
+            <select id="sex" onchange="calc()">
+              <option value="">—</option>
+              <option value="M">M</option>
+              <option value="F">F</option>
+            </select>
+          </div>
+          <div><label for="height">Height (cm)</label><input type="number" step="0.1" id="height" oninput="calc()"></div>
+          <div><label for="sitht">Sitting height (cm)</label><input type="number" step="0.1" id="sitht" oninput="calc()"></div>
+        </div>
+        <div class="row cols-2">
+          <div><label for="mass">Mass (kg)</label><input type="number" step="0.1" id="mass" oninput="calc()"></div>
+          <div><label for="sport">Sport (for your own reference only)</label><input type="text" id="sport" placeholder="e.g. Football"></div>
+        </div>
+        <p class="note">No name, DOB or other identifying field on this page, deliberately — see the note at the bottom.</p>
+      </section>
+
+      <section class="card">
+        <h2>Isometric strength (ActivForce, kg)</h2>
+        <p class="note" style="margin-bottom:12px;">Trial 1 and 2 required for each side. Add Trial 3 only if the first two differed by more than 10%.</p>
+        <div id="strength-tests"></div>
+      </section>
+
+      <section class="card">
+        <h2>Power &amp; speed</h2>
+        <div class="test-block">
+          <div class="test-name">Countermovement jump (cm)</div>
+          <div class="row cols-3">
+            <div><label>Trial 1</label><input type="number" step="0.1" id="cmj1" oninput="calc()"></div>
+            <div><label>Trial 2</label><input type="number" step="0.1" id="cmj2" oninput="calc()"></div>
+            <div><label>Trial 3</label><input type="number" step="0.1" id="cmj3" oninput="calc()"></div>
+          </div>
+        </div>
+        <div class="test-block">
+          <div class="test-name">Standing broad jump (cm)</div>
+          <div class="row cols-3">
+            <div><label>Trial 1</label><input type="number" step="0.1" id="bj1" oninput="calc()"></div>
+            <div><label>Trial 2</label><input type="number" step="0.1" id="bj2" oninput="calc()"></div>
+            <div><label>Trial 3</label><input type="number" step="0.1" id="bj3" oninput="calc()"></div>
+          </div>
+        </div>
+        <div class="test-block">
+          <div class="test-name">Single-leg hop for distance (cm)</div>
+          <div class="row cols-2">
+            <div>
+              <div class="side-label">Left</div>
+              <div class="trial-group">
+                <input type="number" step="0.1" id="hopl1" placeholder="T1" oninput="calc()">
+                <input type="number" step="0.1" id="hopl2" placeholder="T2" oninput="calc()">
+                <input type="number" step="0.1" id="hopl3" placeholder="T3" oninput="calc()">
+              </div>
+            </div>
+            <div>
+              <div class="side-label">Right</div>
+              <div class="trial-group">
+                <input type="number" step="0.1" id="hopr1" placeholder="T1" oninput="calc()">
+                <input type="number" step="0.1" id="hopr2" placeholder="T2" oninput="calc()">
+                <input type="number" step="0.1" id="hopr3" placeholder="T3" oninput="calc()">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="test-block">
+          <div class="test-name">Sprint</div>
+          <div class="row cols-2">
+            <div><label for="sprinttime">Time (s)</label><input type="number" step="0.01" id="sprinttime" oninput="calc()"></div>
+            <div><label for="sprintdist">Distance (m)</label><input type="number" step="1" id="sprintdist" value="20" oninput="calc()"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Range of motion</h2>
+        <div class="row cols-4">
+          <div><label for="ktwl">Knee-to-wall L (cm)</label><input type="number" step="0.1" id="ktwl" oninput="calc()"></div>
+          <div><label for="ktwr">Knee-to-wall R (cm)</label><input type="number" step="0.1" id="ktwr" oninput="calc()"></div>
+          <div><label for="ball">Balance L (s)</label><input type="number" step="1" id="ball" oninput="calc()"></div>
+          <div><label for="balr">Balance R (s)</label><input type="number" step="1" id="balr" oninput="calc()"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Aerobic</h2>
+        <div class="row cols-2">
+          <div><label for="aerotype">Test used</label>
+            <select id="aerotype">
+              <option value="">—</option>
+              <option>Beep Test</option>
+              <option>Cooper 12-min</option>
+              <option>Critical Speed 3-min</option>
+            </select>
+          </div>
+          <div><label for="aeroresult">Result</label><input type="text" id="aeroresult" placeholder="e.g. Level 8.4"></div>
+        </div>
+        <p class="note">Not auto-calculated here — record as-tested and compare manually against the athlete's own previous result in the Excel record.</p>
+      </section>
+
+    </div>
+
+    <div class="readout-col">
+      <div class="readout">
+        <h2>Live readout</h2>
+
+        <div class="readout-group">
+          <div class="readout-group-title">Strength — LSI &amp; relative force</div>
+          <div id="strength-readout"></div>
+        </div>
+
+        <div class="readout-group">
+          <div class="readout-group-title">Ratios</div>
+          <div class="readout-line"><span>Adductor : Abductor</span><span class="val" id="r-addabd">—</span></div>
+          <div class="readout-line"><span>Flexion : Extension</span><span class="val" id="r-flexext">—</span></div>
+        </div>
+
+        <div class="readout-group">
+          <div class="readout-group-title">Power &amp; speed</div>
+          <div class="readout-line"><span>CMJ best</span><span class="val" id="r-cmj">—</span></div>
+          <div class="readout-line"><span>Broad jump best</span><span class="val" id="r-bj">—</span></div>
+          <div class="readout-line"><span>Hop LSI</span><span class="val" id="r-hoplsi">—</span></div>
+        </div>
+
+        <div class="readout-group">
+          <div class="readout-group-title">Growth</div>
+          <div class="readout-line"><span>Leg length</span><span class="val" id="r-legln">—</span></div>
+          <div class="readout-line"><span>Maturity offset</span><span class="val" id="r-mat">—</span></div>
+        </div>
+
+        <div class="flags-box">
+          <div class="readout-group-title">Flags — review, don't conclude</div>
+          <div id="flags-list"><span class="no-flags">No flags yet — enter values above.</span></div>
+        </div>
+
+        <button class="copy-btn" onclick="copyResults()">Copy results as text</button>
+        <div class="copied-msg" id="copied-msg"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <strong>What this page does:</strong> calculates limb symmetry index, relative force (%BM), strength ratios, maturity offset (Mirwald et al., 2002), and flags results against fixed thresholds (90% LSI, 10% trial variance) — the same maths as the Excel calculator. <strong>What it deliberately doesn't do:</strong> store anything, identify an athlete, generate interpretation or recommendations, or send any data anywhere. There's no server behind this page and no analytics on it. Athlete names, dates of birth and longitudinal records stay in the private Excel workbook, not here — copy the numbers across using the button above.
+</footer>
+
+<script>
+const STRENGTH_TESTS = [
+  {key:"habd", name:"Hip Abduction"},
+  {key:"hadd", name:"Hip Adduction"},
+  {key:"kflex", name:"Knee Flexion"},
+  {key:"kext", name:"Knee Extension"},
+  {key:"apf", name:"Ankle Plantarflexion"},
+];
+const LSI_THRESHOLD = 90;
+const VARIANCE_THRESHOLD = 10;
+
+function buildStrengthInputs(){
+  const container = document.getElementById("strength-tests");
+  STRENGTH_TESTS.forEach(t => {
+    const block = document.createElement("div");
+    block.className = "test-block";
+    block.innerHTML = `
+      <div class="test-name">${t.name}</div>
+      <div class="row cols-2">
+        <div>
+          <div class="side-label">Left</div>
+          <div class="trial-group">
+            <input type="number" step="0.1" id="${t.key}_l1" placeholder="T1" oninput="calc()">
+            <input type="number" step="0.1" id="${t.key}_l2" placeholder="T2" oninput="calc()">
+            <input type="number" step="0.1" id="${t.key}_l3" placeholder="T3" oninput="calc()">
+          </div>
+        </div>
+        <div>
+          <div class="side-label">Right</div>
+          <div class="trial-group">
+            <input type="number" step="0.1" id="${t.key}_r1" placeholder="T1" oninput="calc()">
+            <input type="number" step="0.1" id="${t.key}_r2" placeholder="T2" oninput="calc()">
+            <input type="number" step="0.1" id="${t.key}_r3" placeholder="T3" oninput="calc()">
+          </div>
+        </div>
+      </div>`;
+    container.appendChild(block);
+  });
+}
+buildStrengthInputs();
+
+function num(id){
+  const el = document.getElementById(id);
+  if(!el) return null;
+  const v = parseFloat(el.value);
+  return isNaN(v) ? null : v;
+}
+function str(id){
+  const el = document.getElementById(id);
+  return el ? el.value : "";
+}
+function best(...vals){
+  const valid = vals.filter(v => v !== null && !isNaN(v));
+  return valid.length ? Math.max(...valid) : null;
+}
+function fmt(v, decimals=1, suffix=""){
+  return (v === null || v === undefined || isNaN(v)) ? "—" : v.toFixed(decimals) + suffix;
+}
+
+let lastResults = null;
+
+function calc(){
+  const flags = [];
+  const strengthData = {};
+  const readoutEl = document.getElementById("strength-readout");
+  readoutEl.innerHTML = "";
+
+  const mass = num("mass");
+
+  STRENGTH_TESTS.forEach(t => {
+    const l1=num(t.key+"_l1"), l2=num(t.key+"_l2"), l3=num(t.key+"_l3");
+    const r1=num(t.key+"_r1"), r2=num(t.key+"_r2"), r3=num(t.key+"_r3");
+    const lBest = best(l1,l2,l3);
+    const rBest = best(r1,r2,r3);
+    let lsi = null, lBM = null, rBM = null;
+    if(lBest !== null && rBest !== null && lBest > 0 && rBest > 0){
+      lsi = Math.min(lBest,rBest)/Math.max(lBest,rBest)*100;
+    }
+    if(lBest !== null && mass) lBM = lBest/mass*100;
+    if(rBest !== null && mass) rBM = rBest/mass*100;
+    strengthData[t.key] = {lBest, rBest, lsi, lBM, rBM};
+
+    const flagged = lsi !== null && lsi < LSI_THRESHOLD;
+    const line = document.createElement("div");
+    line.className = "readout-line" + (flagged ? " flagged" : "");
+    line.innerHTML = `<span>${t.name} LSI</span><span class="val">${fmt(lsi,1,"%")}</span>`;
+    readoutEl.appendChild(line);
+
+    if(flagged){
+      flags.push({type:"threshold", text:`REVIEW: ${t.name} LSI below ${LSI_THRESHOLD}% (${lsi.toFixed(1)}%)`});
+    }
+    // trial variance (T1 vs T2)
+    [["L",l1,l2],["R",r1,r2]].forEach(([side, a, b]) => {
+      if(a !== null && b !== null && a>0 && b>0){
+        const diff = Math.abs(a-b)/Math.max(a,b)*100;
+        if(diff > VARIANCE_THRESHOLD){
+          flags.push({type:"protocol", text:`REVIEW: ${t.name} ${side} — trials differ by ${diff.toFixed(0)}% — check if a third trial was taken`});
+        }
+      }
+    });
+  });
+
+  // ratios
+  const abdAvg = (strengthData.habd.lBest !== null && strengthData.habd.rBest !== null) ? (strengthData.habd.lBest+strengthData.habd.rBest)/2 : null;
+  const addAvg = (strengthData.hadd.lBest !== null && strengthData.hadd.rBest !== null) ? (strengthData.hadd.lBest+strengthData.hadd.rBest)/2 : null;
+  const flexAvg = (strengthData.kflex.lBest !== null && strengthData.kflex.rBest !== null) ? (strengthData.kflex.lBest+strengthData.kflex.rBest)/2 : null;
+  const extAvg = (strengthData.kext.lBest !== null && strengthData.kext.rBest !== null) ? (strengthData.kext.lBest+strengthData.kext.rBest)/2 : null;
+  const addAbdRatio = (addAvg !== null && abdAvg) ? addAvg/abdAvg : null;
+  const flexExtRatio = (flexAvg !== null && extAvg) ? flexAvg/extAvg : null;
+  document.getElementById("r-addabd").textContent = fmt(addAbdRatio,2);
+  document.getElementById("r-flexext").textContent = fmt(flexExtRatio,2);
+
+  // jumps
+  const cmjBest = best(num("cmj1"), num("cmj2"), num("cmj3"));
+  const bjBest = best(num("bj1"), num("bj2"), num("bj3"));
+  const hopLBest = best(num("hopl1"), num("hopl2"), num("hopl3"));
+  const hopRBest = best(num("hopr1"), num("hopr2"), num("hopr3"));
+  let hopLSI = null;
+  if(hopLBest !== null && hopRBest !== null && hopLBest>0 && hopRBest>0){
+    hopLSI = Math.min(hopLBest,hopRBest)/Math.max(hopLBest,hopRBest)*100;
+  }
+  document.getElementById("r-cmj").textContent = fmt(cmjBest,1," cm");
+  document.getElementById("r-bj").textContent = fmt(bjBest,1," cm");
+  const hopLine = document.getElementById("r-hoplsi");
+  hopLine.textContent = fmt(hopLSI,1,"%");
+  hopLine.parentElement.classList.toggle("flagged", hopLSI !== null && hopLSI < LSI_THRESHOLD);
+  if(hopLSI !== null && hopLSI < LSI_THRESHOLD){
+    flags.push({type:"threshold", text:`REVIEW: Hop LSI below ${LSI_THRESHOLD}% (${hopLSI.toFixed(1)}%)`});
+  }
+
+  // growth / maturity offset (Mirwald et al. 2002)
+  const age = num("age"), height = num("height"), sitht = num("sitht"), sex = str("sex");
+  let legLen = null, matOffset = null;
+  if(height !== null && sitht !== null) legLen = height - sitht;
+  if(age !== null && height && sitht !== null && mass !== null && legLen !== null && sex){
+    if(sex === "M"){
+      matOffset = -9.236 + 0.0002708*(legLen*sitht) - 0.001663*(age*legLen) + 0.007216*(age*sitht) + 0.02292*(mass/height*100);
+    } else if(sex === "F"){
+      matOffset = -9.376 + 0.0001882*(legLen*sitht) + 0.0022*(age*legLen) + 0.005841*(age*sitht) - 0.002658*(age*mass) + 0.07693*(mass/height*100);
+    }
+  }
+  document.getElementById("r-legln").textContent = fmt(legLen,1," cm");
+  document.getElementById("r-mat").textContent = fmt(matOffset,2," yrs");
+
+  // missing-data flag (core fields)
+  const coreFields = [height, sitht, mass, num("sprinttime")];
+  if(coreFields.some(v => v === null) && coreFields.some(v => v !== null)){
+    flags.push({type:"protocol", text:"REVIEW: one or more core measurements (height, sitting height, mass, sprint) still blank"});
+  }
+
+  // render flags
+  const flagsEl = document.getElementById("flags-list");
+  flagsEl.innerHTML = "";
+  if(flags.length === 0){
+    flagsEl.innerHTML = '<span class="no-flags">No flags yet — enter values above.</span>';
+  } else {
+    flags.forEach(f => {
+      const d = document.createElement("div");
+      d.className = "flag-item";
+      d.textContent = f.text;
+      flagsEl.appendChild(d);
+    });
+  }
+
+  lastResults = {strengthData, addAbdRatio, flexExtRatio, cmjBest, bjBest, hopLBest, hopRBest, hopLSI, legLen, matOffset, flags};
+}
+
+function clearAll(){
+  document.querySelectorAll("input").forEach(i => i.value = "");
+  document.querySelectorAll("select").forEach(s => s.value = "");
+  document.getElementById("sprintdist").value = 20;
+  calc();
+}
+
+function copyResults(){
+  if(!lastResults) { calc(); }
+  const r = lastResults;
+  const lines = [];
+  lines.push("ASSESSMENT CALCULATOR RESULTS — no athlete identity attached, paste into your own record");
+  lines.push("");
+  STRENGTH_TESTS.forEach(t => {
+    const d = r.strengthData[t.key];
+    lines.push(`${t.name}: L ${fmt(d.lBest,1)}kg / R ${fmt(d.rBest,1)}kg / LSI ${fmt(d.lsi,1)}% / L %BM ${fmt(d.lBM,1)} / R %BM ${fmt(d.rBM,1)}`);
+  });
+  lines.push(`Adductor:Abductor ratio: ${fmt(r.addAbdRatio,2)}`);
+  lines.push(`Flexion:Extension ratio: ${fmt(r.flexExtRatio,2)}`);
+  lines.push(`CMJ best: ${fmt(r.cmjBest,1)} cm`);
+  lines.push(`Broad jump best: ${fmt(r.bjBest,1)} cm`);
+  lines.push(`Hop L/R best: ${fmt(r.hopLBest,1)} / ${fmt(r.hopRBest,1)} cm — LSI ${fmt(r.hopLSI,1)}%`);
+  lines.push(`Leg length: ${fmt(r.legLen,1)} cm`);
+  lines.push(`Maturity offset: ${fmt(r.matOffset,2)} yrs from PHV`);
+  lines.push("");
+  lines.push("FLAGS:");
+  if(r.flags.length === 0){ lines.push("None."); }
+  else { r.flags.forEach(f => lines.push("- " + f.text)); }
+
+  const text = lines.join("\n");
+  navigator.clipboard.writeText(text).then(()=>{
+    const msg = document.getElementById("copied-msg");
+    msg.textContent = "Copied — paste into your report or Excel record.";
+    setTimeout(()=>{msg.textContent="";}, 3000);
+  }).catch(()=>{
+    const msg = document.getElementById("copied-msg");
+    msg.textContent = "Couldn't copy automatically — select and copy manually.";
+  });
+}
+
+calc();
+</script>
+
+</body>
+</html>
