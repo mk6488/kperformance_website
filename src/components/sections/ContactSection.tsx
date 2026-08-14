@@ -1,12 +1,14 @@
 import { useState } from 'react';
+import { useIntersection } from '../../hooks/useIntersection';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Section } from '../ui/Section';
-import { SectionHeading } from '../ui/SectionHeading';
 
 export function ContactSection() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { ref: leftRef, visible: leftVisible } = useIntersection(0.1);
+  const { ref: rightRef, visible: rightVisible } = useIntersection(0.08);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,15 +31,32 @@ export function ContactSection() {
 
   return (
     <Section id="contact" variant="muted">
-      <div className="flex flex-col gap-8">
-        <SectionHeading
-          eyebrow="Contact"
-          title="Get in touch"
-          subtitle="Get in touch, and we'll find a time that works."
-          align="left"
-        />
+      <div className="grid gap-12 md:grid-cols-2 md:items-start md:gap-16">
 
-        <div className="mx-auto w-full max-w-2xl">
+        {/* Left — typographic closing statement */}
+        <div
+          ref={leftRef}
+          className={`reveal ${leftVisible ? 'is-visible' : ''}`}
+        >
+          <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-brand-blue mb-4">
+            Contact
+          </p>
+          <h2 className="text-5xl sm:text-6xl font-bold leading-[0.95] tracking-tight text-brand-charcoal">
+            Book the<br />assessment.
+          </h2>
+          <p className="mt-8 text-sm text-slate-600">
+            Email:{' '}
+            <a href="mailto:mike@kperformance.uk" className="text-brand-blue underline">
+              mike@kperformance.uk
+            </a>
+          </p>
+        </div>
+
+        {/* Right — enquiry form */}
+        <div
+          ref={rightRef}
+          className={`reveal reveal-delay-2 ${rightVisible ? 'is-visible' : ''}`}
+        >
           <Card className="w-full">
             {!submitted ? (
               <form
@@ -121,14 +140,6 @@ export function ContactSection() {
           </Card>
         </div>
 
-        <div className="text-sm text-slate-700">
-          <p>
-            Email:{' '}
-            <a href="mailto:mike@kperformance.uk" className="text-brand-blue underline">
-              mike@kperformance.uk
-            </a>
-          </p>
-        </div>
       </div>
     </Section>
   );

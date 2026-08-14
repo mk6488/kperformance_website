@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-type SectionVariant = 'default' | 'muted' | 'dark' | 'charcoal';
+type SectionVariant = 'default' | 'muted' | 'dark' | 'charcoal' | 'navy';
 
 type SectionProps = {
   id?: string;
@@ -14,6 +14,7 @@ const variantClasses: Record<SectionVariant, string> = {
   muted:    'bg-brand-offWhite',
   dark:     'bg-brand-slate text-white',
   charcoal: 'bg-brand-charcoal text-white',
+  navy:     'bg-brand-navy text-white',
 };
 
 export function Section({ id, variant = 'default', className = '', children }: SectionProps) {

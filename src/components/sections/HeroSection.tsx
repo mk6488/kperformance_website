@@ -17,10 +17,13 @@ export function HeroSection() {
           className="h-16 w-16 sm:h-20 sm:w-20 object-contain hero-item hero-item-1"
         />
 
-        {/* Typographic device */}
-        <p className="text-[9px] sm:text-[11px] font-bold tracking-[0.5em] uppercase text-white/30 hero-item hero-item-2 -mt-2">
-          Know your performance
-        </p>
+        {/* Typographic device — intentional badge */}
+        <div className="inline-flex items-center gap-2.5 border border-brand-green/50 rounded-full px-5 py-1.5 hero-item hero-item-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-brand-green flex-shrink-0" aria-hidden="true" />
+          <span className="text-[10px] sm:text-xs font-bold tracking-[0.3em] uppercase text-brand-green">
+            Know your performance
+          </span>
+        </div>
 
         {/* Main proposition — parent-facing, retained exactly */}
         <div className="space-y-4 sm:space-y-5 max-w-3xl hero-item hero-item-3">
