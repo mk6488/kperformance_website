@@ -16,8 +16,11 @@ export function AssessmentOutputSection() {
           <p className="text-[5.5rem] sm:text-[7rem] md:text-[9rem] font-black leading-none tracking-tighter text-white">
             2
           </p>
-          <p className="mt-3 text-[10px] font-bold tracking-[0.28em] uppercase text-white/40 leading-loose">
-            Genuine strengths<br />named specifically
+          <p className="mt-4 text-[10px] sm:text-xs font-bold tracking-[0.28em] uppercase text-white/70">
+            Genuine strengths
+          </p>
+          <p className="mt-1 text-sm text-white/35">
+            Named specifically
           </p>
         </div>
 
@@ -26,8 +29,11 @@ export function AssessmentOutputSection() {
           <p className="text-[5.5rem] sm:text-[7rem] md:text-[9rem] font-black leading-none tracking-tighter text-brand-green">
             3
           </p>
-          <p className="mt-3 text-[10px] font-bold tracking-[0.28em] uppercase text-white/40 leading-loose">
-            Priorities most worth<br />working on next
+          <p className="mt-4 text-[10px] sm:text-xs font-bold tracking-[0.28em] uppercase text-white/70">
+            Priorities
+          </p>
+          <p className="mt-1 text-sm text-white/35">
+            Most worth working on next
           </p>
         </div>
 
