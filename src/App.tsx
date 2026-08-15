@@ -3,7 +3,6 @@ import { Footer } from './components/layout/Footer';
 import { HeroSection } from './components/sections/HeroSection';
 import { WhyItMattersSection } from './components/sections/WhyItMattersSection';
 import { WhatActuallyHappensSection } from './components/sections/WhatActuallyHappensSection';
-import { AssessmentOutputSection } from './components/sections/AssessmentOutputSection';
 import { AboutSection } from './components/sections/AboutSection';
 import { ContactSection } from './components/sections/ContactSection';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -139,8 +138,7 @@ function App() {
         <HeroSection />
         <WhyItMattersSection />
         <WhatActuallyHappensSection />
-        <AssessmentOutputSection />
-        <AboutSection />
+<AboutSection />
         <ContactSection />
       </main>
       <Footer />

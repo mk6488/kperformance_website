@@ -42,9 +42,12 @@ export function ContactSection() {
             Contact
           </p>
           <h2 className="text-5xl sm:text-6xl font-bold leading-[0.95] tracking-tight text-brand-charcoal">
-            Book the<br />assessment.
+            Get in touch
           </h2>
-          <p className="mt-8 text-sm text-slate-600">
+          <p className="mt-4 text-lg text-slate-600 leading-snug">
+            and we'll find a time that works.
+          </p>
+          <p className="mt-6 text-sm text-slate-600">
             Email:{' '}
             <a href="mailto:mike@kperformance.uk" className="text-brand-blue underline">
               mike@kperformance.uk
