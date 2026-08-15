@@ -6,7 +6,6 @@
 <title>Assessment Calculator — K Performance</title>
 <style>
   :root {
-    /* K Performance brand tokens */
     --navy:     #215681;
     --blue:     #4A86B7;
     --green:    #5CBF88;
@@ -14,91 +13,117 @@
     --offwhite: #F7F9FC;
     --charcoal: #1F2A35;
     --slate:    #334155;
-
-    /* Functional tokens */
-    --ink:      #1F2A35;
     --muted:    #64748B;
-    --line:     #DCE3ED;
-
-    /* Readout */
+    --line:     #e9eef5;
     --readout-bg: #1F2A35;
     --readout-fg: #E2EAF4;
-
     --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Courier New", monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: var(--offwhite); color: var(--ink); font-family: var(--sans); }
+  html, body { margin: 0; padding: 0; background: var(--offwhite); color: var(--charcoal); font-family: var(--sans); }
   body { padding-bottom: 80px; }
 
-  /* ── Header ── */
+  /* ── Nav header — matches main site ── */
   header {
-    background: var(--charcoal);
-    padding: 28px 20px 26px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.95);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #f1f5f9;
   }
   .header-inner {
-    max-width: 920px;
+    max-width: 960px;
     margin: 0 auto;
-  }
-  .header-brand-row {
+    padding: 10px 24px;
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 14px;
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
   .header-logo {
-    height: 48px;
-    width: auto;
-    border-radius: 6px;
+    height: 40px;
+    width: 40px;
+    object-fit: contain;
     display: block;
     flex-shrink: 0;
   }
-  .header-identity {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  .header-brand-name {
-    font-size: 0.67rem;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--blue);
-  }
-  header h1 {
-    margin: 0;
-    font-size: 1.45rem;
-    font-weight: 700;
+  .header-name {
+    font-size: 1.1rem;
+    font-weight: 600;
     letter-spacing: -0.01em;
-    color: #fff;
-    line-height: 1.1;
+    color: var(--navy);
+    line-height: 1;
   }
-  header p {
+  .header-divider {
+    width: 1px;
+    height: 18px;
+    background: #e2e8f0;
+    flex-shrink: 0;
+  }
+  .header-page {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  /* ── Page intro ── */
+  .page-intro {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    padding: 20px 24px 18px;
+  }
+  .page-intro-inner {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .page-eyebrow {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--blue);
+    margin: 0 0 6px;
+  }
+  .page-desc {
+    font-size: 0.9rem;
+    color: var(--muted);
     margin: 0 0 12px;
-    font-size: 0.875rem;
-    color: rgba(226, 234, 244, 0.72);
     line-height: 1.55;
-    max-width: 580px;
+    max-width: 560px;
   }
   .badge {
     display: inline-flex;
     align-items: center;
-    font-family: var(--mono);
-    font-size: 0.67rem;
-    letter-spacing: 0.04em;
+    gap: 6px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     color: var(--green);
-    background: rgba(92, 191, 136, 0.12);
+    background: rgba(92, 191, 136, 0.10);
     border: 1px solid rgba(92, 191, 136, 0.28);
-    padding: 4px 10px;
+    padding: 4px 12px;
     border-radius: 100px;
+  }
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    flex-shrink: 0;
   }
 
   /* ── Main layout ── */
   main {
-    max-width: 920px;
+    max-width: 960px;
     margin: 0 auto;
-    padding: 22px 16px 40px;
+    padding: 24px 24px 40px;
   }
   .layout {
     display: grid;
@@ -107,27 +132,27 @@
   }
   @media (min-width: 860px) {
     .layout { grid-template-columns: 1fr 340px; }
-    .readout-col { position: sticky; top: 16px; align-self: start; }
+    .readout-col { position: sticky; top: 70px; align-self: start; }
   }
 
-  /* ── Cards ── */
+  /* ── Cards — matches main site ── */
   section.card {
     background: #fff;
     border: 1px solid var(--line);
-    border-radius: 14px;
+    border-radius: 12px;
     padding: 20px 20px 22px;
     margin-bottom: 16px;
-    box-shadow: 0 1px 3px rgba(31, 42, 53, 0.06);
+    box-shadow: 0 1px 3px rgba(31, 42, 53, 0.05);
   }
   section.card h2 {
-    font-size: 0.67rem;
+    font-size: 0.68rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em;
     color: var(--blue);
     margin: 0 0 14px;
     padding: 0 0 10px;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid #f1f5f9;
   }
 
   /* ── Form rows ── */
@@ -145,31 +170,32 @@
   label {
     display: block;
     font-size: 0.72rem;
+    font-weight: 600;
     color: var(--muted);
     margin-bottom: 5px;
-    font-weight: 600;
+    letter-spacing: 0.02em;
   }
   input[type=number], input[type=text], select {
     width: 100%;
     padding: 9px 11px;
-    border: 1px solid var(--line);
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     font-family: var(--mono);
     background: #fff;
-    color: var(--ink);
+    color: var(--charcoal);
     transition: border-color 0.15s, box-shadow 0.15s;
   }
-  select { font-family: var(--sans); }
+  select { font-family: var(--sans); font-size: 0.92rem; }
   input:focus, select:focus {
     outline: none;
     border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(74, 134, 183, 0.16);
+    box-shadow: 0 0 0 3px rgba(74, 134, 183, 0.15);
   }
 
   /* ── Test blocks ── */
   .test-block {
-    border-top: 1px dashed var(--line);
+    border-top: 1px solid #f1f5f9;
     padding-top: 14px;
     margin-top: 14px;
   }
@@ -181,10 +207,11 @@
     margin-bottom: 10px;
   }
   .side-label {
-    font-size: 0.67rem;
+    font-size: 0.65rem;
+    font-weight: 700;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     margin-bottom: 5px;
   }
   .trial-group { display: flex; gap: 6px; }
@@ -196,19 +223,19 @@
     margin: 4px 0 0;
   }
 
-  /* ── Readout panel ── */
+  /* ── Live readout panel ── */
   .readout {
     background: var(--readout-bg);
     color: var(--readout-fg);
-    border-radius: 14px;
+    border-radius: 12px;
     padding: 18px 18px 16px;
-    box-shadow: 0 2px 10px rgba(31, 42, 53, 0.20);
+    box-shadow: 0 2px 12px rgba(31, 42, 53, 0.18);
   }
   .readout h2 {
     font-size: 0.65rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.15em;
     color: var(--blue);
     margin: 0 0 14px;
     padding: 0 0 10px;
@@ -217,10 +244,10 @@
   .readout-group { margin-bottom: 16px; }
   .readout-group-title {
     font-size: 0.63rem;
-    font-weight: 600;
+    font-weight: 700;
     color: rgba(74, 134, 183, 0.85);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.10em;
     margin-bottom: 7px;
   }
   .readout-line {
@@ -230,7 +257,7 @@
     font-family: var(--mono);
     font-size: 0.84rem;
     padding: 4px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
   .readout-line .val {
     font-weight: 700;
@@ -242,30 +269,30 @@
   .flags-box {
     margin-top: 16px;
     padding-top: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.10);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
   .flag-item {
-    background: rgba(192, 57, 43, 0.16);
-    border: 1px solid rgba(220, 80, 60, 0.35);
+    background: rgba(192, 57, 43, 0.14);
+    border: 1px solid rgba(220, 80, 60, 0.30);
     color: #FFD0CC;
     font-size: 0.77rem;
     padding: 8px 10px;
-    border-radius: 7px;
+    border-radius: 8px;
     margin-bottom: 7px;
     line-height: 1.45;
   }
   .flag-item.note-flag {
     background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.10);
     color: rgba(226, 234, 244, 0.72);
   }
   .no-flags {
     font-size: 0.8rem;
-    color: rgba(74, 134, 183, 0.60);
+    color: rgba(74, 134, 183, 0.55);
     font-style: italic;
   }
 
-  /* ── Buttons ── */
+  /* ── Buttons — matches main site ── */
   .copy-btn {
     margin-top: 14px;
     width: 100%;
@@ -280,8 +307,9 @@
     cursor: pointer;
     font-family: var(--sans);
     transition: background 0.15s, transform 0.1s;
+    min-height: 44px;
   }
-  .copy-btn:hover { background: #194063; }
+  .copy-btn:hover { background: var(--blue); }
   .copy-btn:active { transform: translateY(1px); }
   .copied-msg {
     text-align: center;
@@ -292,51 +320,60 @@
   }
   .clear-btn {
     background: #fff;
-    border: 1px solid var(--line);
+    border: 1px solid #e2e8f0;
     color: var(--slate);
-    padding: 8px 16px;
+    padding: 8px 18px;
     border-radius: 100px;
     font-size: 0.78rem;
     font-weight: 600;
     cursor: pointer;
     font-family: var(--sans);
     transition: border-color 0.15s, color 0.15s;
+    min-height: 36px;
   }
   .clear-btn:hover { border-color: var(--navy); color: var(--navy); }
   .top-actions {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
   }
 
-  /* ── Footer ── */
+  /* ── Footer — matches main site ── */
   footer {
-    max-width: 920px;
-    margin: 0 auto;
-    padding: 24px 16px 40px;
-    font-size: 0.72rem;
-    color: var(--muted);
-    line-height: 1.7;
-    border-top: 1px solid var(--line);
+    background: var(--slate);
+    color: rgba(255, 255, 255, 0.80);
+    margin-top: 0;
   }
-  footer strong { color: var(--slate); }
+  .footer-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 28px 24px;
+    font-size: 0.78rem;
+    line-height: 1.7;
+  }
+  .footer-inner strong { color: rgba(255, 255, 255, 0.95); }
 </style>
 </head>
 <body>
 
 <header>
   <div class="header-inner">
-    <div class="header-brand-row">
-      <img src="logo-white.png" alt="K Performance" class="header-logo">
-      <div class="header-identity">
-        <div class="header-brand-name">K Performance</div>
-        <h1>Assessment Calculator</h1>
-      </div>
+    <div class="header-brand">
+      <img src="logo-blue.png" alt="K Performance" class="header-logo">
+      <span class="header-name">K Performance</span>
+      <div class="header-divider"></div>
+      <span class="header-page">Assessment Calculator</span>
     </div>
-    <p>Enter the measurements from the assessment. Results calculate automatically as you work.</p>
-    <span class="badge">No data stored · no login · no tracking</span>
   </div>
 </header>
+
+<div class="page-intro">
+  <div class="page-intro-inner">
+    <p class="page-eyebrow">Internal Tool</p>
+    <p class="page-desc">Enter the measurements from the assessment. Results calculate automatically as you work.</p>
+    <span class="badge"><span class="badge-dot"></span>No data stored · no login · no tracking</span>
+  </div>
+</div>
 
 <main>
   <div class="top-actions">
@@ -491,7 +528,9 @@
 </main>
 
 <footer>
-  <strong>What this page does:</strong> calculates limb symmetry index, relative force (%BM), strength ratios, maturity offset (Mirwald et al., 2002), and flags results against fixed thresholds (90% LSI, 10% trial variance) — the same maths as the Excel calculator. <strong>What it deliberately doesn't do:</strong> store anything, identify an athlete, generate interpretation or recommendations, or send any data anywhere. There's no server behind this page and no analytics on it. Athlete names, dates of birth and longitudinal records stay in the private Excel workbook, not here — copy the numbers across using the button above.
+  <div class="footer-inner">
+    <strong>What this page does:</strong> calculates limb symmetry index, relative force (%BM), strength ratios, maturity offset (Mirwald et al., 2002), and flags results against fixed thresholds (90% LSI, 10% trial variance) — the same maths as the Excel calculator. <strong>What it deliberately doesn't do:</strong> store anything, identify an athlete, generate interpretation or recommendations, or send any data anywhere. There's no server behind this page and no analytics on it. Athlete names, dates of birth and longitudinal records stay in the private Excel workbook, not here — copy the numbers across using the button above.
+  </div>
 </footer>
 
 <script>
@@ -585,7 +624,6 @@ function calc(){
     if(flagged){
       flags.push({type:"threshold", text:`REVIEW: ${t.name} LSI below ${LSI_THRESHOLD}% (${lsi.toFixed(1)}%)`});
     }
-    // trial variance (T1 vs T2)
     [["L",l1,l2],["R",r1,r2]].forEach(([side, a, b]) => {
       if(a !== null && b !== null && a>0 && b>0){
         const diff = Math.abs(a-b)/Math.max(a,b)*100;
@@ -596,7 +634,6 @@ function calc(){
     });
   });
 
-  // ratios
   const abdAvg = (strengthData.habd.lBest !== null && strengthData.habd.rBest !== null) ? (strengthData.habd.lBest+strengthData.habd.rBest)/2 : null;
   const addAvg = (strengthData.hadd.lBest !== null && strengthData.hadd.rBest !== null) ? (strengthData.hadd.lBest+strengthData.hadd.rBest)/2 : null;
   const flexAvg = (strengthData.kflex.lBest !== null && strengthData.kflex.rBest !== null) ? (strengthData.kflex.lBest+strengthData.kflex.rBest)/2 : null;
@@ -606,7 +643,6 @@ function calc(){
   document.getElementById("r-addabd").textContent = fmt(addAbdRatio,2);
   document.getElementById("r-flexext").textContent = fmt(flexExtRatio,2);
 
-  // jumps
   const cmjBest = best(num("cmj1"), num("cmj2"), num("cmj3"));
   const bjBest = best(num("bj1"), num("bj2"), num("bj3"));
   const hopLBest = best(num("hopl1"), num("hopl2"), num("hopl3"));
@@ -624,7 +660,6 @@ function calc(){
     flags.push({type:"threshold", text:`REVIEW: Hop LSI below ${LSI_THRESHOLD}% (${hopLSI.toFixed(1)}%)`});
   }
 
-  // growth / maturity offset (Mirwald et al. 2002)
   const age = num("age"), height = num("height"), sitht = num("sitht"), sex = str("sex");
   let legLen = null, matOffset = null;
   if(height !== null && sitht !== null) legLen = height - sitht;
@@ -638,13 +673,11 @@ function calc(){
   document.getElementById("r-legln").textContent = fmt(legLen,1," cm");
   document.getElementById("r-mat").textContent = fmt(matOffset,2," yrs");
 
-  // missing-data flag (core fields)
   const coreFields = [height, sitht, mass, num("sprinttime")];
   if(coreFields.some(v => v === null) && coreFields.some(v => v !== null)){
     flags.push({type:"protocol", text:"REVIEW: one or more core measurements (height, sitting height, mass, sprint) still blank"});
   }
 
-  // render flags
   const flagsEl = document.getElementById("flags-list");
   flagsEl.innerHTML = "";
   if(flags.length === 0){

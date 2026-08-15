@@ -33,8 +33,8 @@ export default function CalculatorPage() {
 
   // Replace the relative logo reference with an absolute path the iframe can resolve
   const srcDoc = calculatorHtml.replace(
-    'src="logo-white.png"',
-    `src="${window.location.origin}/logo-white.png"`
+    'src="logo-blue.png"',
+    `src="${window.location.origin}/logo-blue.png"`
   );
 
   async function handleSubmit(e: FormEvent) {
@@ -71,16 +71,15 @@ export default function CalculatorPage() {
           onClick={handleLogout}
           style={{
             position: 'absolute',
-            top: 28,
-            right: 20,
-            background: 'rgba(255,255,255,0.1)',
-            color: '#E2EAF4',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: 6,
-            padding: '6px 14px',
+            top: 14,
+            right: 24,
+            background: '#fff',
+            color: '#334155',
+            border: '1px solid #e2e8f0',
+            borderRadius: 100,
+            padding: '6px 16px',
             fontSize: '0.75rem',
             fontWeight: 600,
-            letterSpacing: '0.05em',
             cursor: 'pointer',
           }}
         >
