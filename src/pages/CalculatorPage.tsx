@@ -90,71 +90,83 @@ export default function CalculatorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-offWhite flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-6">
+    <div className="min-h-screen bg-brand-offWhite flex flex-col">
 
-        <div className="text-center space-y-3">
-          <img
-            src="/calculator-logo.png"
-            alt="K Performance"
-            className="h-12 w-auto mx-auto rounded-md"
-          />
-          <div>
-            <p className="text-xs font-bold tracking-widest uppercase text-brand-blue">
-              K Performance
-            </p>
-            <h1 className="text-xl font-bold text-brand-charcoal mt-0.5">
-              Assessment Calculator
-            </h1>
+      {/* Header — matches main site */}
+      <header className="bg-white/95 backdrop-blur border-b border-slate-100">
+        <div className="flex items-center gap-3 px-6 py-2.5">
+          <img src="/logo-blue.png" alt="K Performance" className="h-10 w-10 object-contain" />
+          <span className="text-lg font-semibold tracking-tight text-brand-navy">K Performance</span>
+          <div className="w-px h-5 bg-slate-200 mx-0.5" />
+          <span className="text-sm font-semibold text-slate-500">Assessment Calculator</span>
+        </div>
+      </header>
+
+      {/* Centred form */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
+        <div className="w-full max-w-sm space-y-5">
+
+          <div className="space-y-1">
+            <p className="text-xs font-bold tracking-[0.15em] uppercase text-brand-blue">Internal Tool</p>
+            <h1 className="text-2xl font-semibold text-brand-charcoal">Sign in</h1>
           </div>
+
+          <div className="bg-white rounded-xl border border-[#e9eef5] shadow-sm p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="block text-[0.72rem] font-semibold text-slate-500 tracking-[0.02em]">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-brand-charcoal focus:outline-none focus:ring-[3px] focus:ring-brand-blue/15 focus:border-brand-blue transition-colors"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="block text-[0.72rem] font-semibold text-slate-500 tracking-[0.02em]">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-brand-charcoal focus:outline-none focus:ring-[3px] focus:ring-brand-blue/15 focus:border-brand-blue transition-colors"
+                />
+              </div>
+              {error ? (
+                <p className="text-sm text-red-600">{error}</p>
+              ) : null}
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full rounded-full bg-brand-navy text-white font-semibold py-2.5 text-sm hover:bg-brand-blue transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              >
+                {submitting ? 'Checking…' : 'Sign in'}
+              </button>
+            </form>
+          </div>
+
+          <p className="text-center text-xs text-slate-400">
+            Session ends when you close this tab
+          </p>
+
         </div>
-
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6 space-y-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Email
-              </label>
-              <input
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/40 focus:border-brand-blue transition-colors"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Password
-              </label>
-              <input
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/40 focus:border-brand-blue transition-colors"
-              />
-            </div>
-            {error ? (
-              <p className="text-sm text-red-600">{error}</p>
-            ) : null}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full rounded-full bg-brand-navy text-white font-semibold py-2.5 text-sm hover:bg-brand-blue transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {submitting ? 'Checking…' : 'Sign in'}
-            </button>
-          </form>
-        </div>
-
-        <p className="text-center text-xs text-slate-400">
-          Internal tool · session ends when you close this tab
-        </p>
-
       </div>
+
+      {/* Footer — matches main site */}
+      <footer className="bg-brand-slate">
+        <div className="px-6 py-6">
+          <p className="text-sm font-semibold text-white">K Performance</p>
+          <p className="text-xs text-white/70 mt-1">Leigh Woods, Bristol — youth athlete assessment</p>
+        </div>
+      </footer>
+
     </div>
   );
 }
