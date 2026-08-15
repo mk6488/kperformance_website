@@ -34,7 +34,7 @@ export default function CalculatorPage() {
   // Replace the relative logo reference with an absolute path the iframe can resolve
   const srcDoc = calculatorHtml.replace(
     'src="logo-white.png"',
-    `src="${window.location.origin}/calculator-logo.png"`
+    `src="${window.location.origin}/logo-white.png"`
   );
 
   async function handleSubmit(e: FormEvent) {
