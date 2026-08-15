@@ -54,6 +54,11 @@ export default function CalculatorPage() {
     }
   }
 
+  function handleLogout() {
+    try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
+    setAuthed(false);
+  }
+
   if (authed) {
     return (
       <div style={{ position: 'fixed', inset: 0 }}>
@@ -62,6 +67,25 @@ export default function CalculatorPage() {
           title="K Performance Assessment Calculator"
           style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
         />
+        <button
+          onClick={handleLogout}
+          style={{
+            position: 'absolute',
+            top: 28,
+            right: 20,
+            background: 'rgba(255,255,255,0.1)',
+            color: '#E2EAF4',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: 6,
+            padding: '6px 14px',
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            letterSpacing: '0.05em',
+            cursor: 'pointer',
+          }}
+        >
+          Log out
+        </button>
       </div>
     );
   }
