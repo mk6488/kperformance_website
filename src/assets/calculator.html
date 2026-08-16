@@ -450,10 +450,22 @@
           </div>
         </div>
         <div class="test-block">
-          <div class="test-name">Sprint</div>
+          <div class="test-name">Sprint splits (s)</div>
           <div class="row cols-2">
-            <div><label for="sprinttime">Time (s)</label><input type="number" step="0.01" id="sprinttime" oninput="calc()"></div>
-            <div><label for="sprintdist">Distance (m)</label><input type="number" step="1" id="sprintdist" value="20" oninput="calc()"></div>
+            <div>
+              <div class="side-label">0–10m</div>
+              <div class="trial-group">
+                <input type="number" step="0.01" id="split010_t1" placeholder="T1" oninput="calc()">
+                <input type="number" step="0.01" id="split010_t2" placeholder="T2" oninput="calc()">
+              </div>
+            </div>
+            <div>
+              <div class="side-label">10–20m</div>
+              <div class="trial-group">
+                <input type="number" step="0.01" id="split1020_t1" placeholder="T1" oninput="calc()">
+                <input type="number" step="0.01" id="split1020_t2" placeholder="T2" oninput="calc()">
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -506,6 +518,9 @@
           <div class="readout-line"><span>CMJ best</span><span class="val" id="r-cmj">—</span></div>
           <div class="readout-line"><span>Broad jump best</span><span class="val" id="r-bj">—</span></div>
           <div class="readout-line"><span>Hop LSI</span><span class="val" id="r-hoplsi">—</span></div>
+          <div class="readout-line"><span>0–10m best</span><span class="val" id="r-s010">—</span></div>
+          <div class="readout-line"><span>10–20m best</span><span class="val" id="r-s1020">—</span></div>
+          <div class="readout-line"><span>20m total</span><span class="val" id="r-s20">—</span></div>
         </div>
 
         <div class="readout-group">
@@ -588,6 +603,10 @@ function best(...vals){
   const valid = vals.filter(v => v !== null && !isNaN(v));
   return valid.length ? Math.max(...valid) : null;
 }
+function bestTime(...vals){
+  const valid = vals.filter(v => v !== null && !isNaN(v));
+  return valid.length ? Math.min(...valid) : null;
+}
 function fmt(v, decimals=1, suffix=""){
   return (v === null || v === undefined || isNaN(v)) ? "—" : v.toFixed(decimals) + suffix;
 }
@@ -660,6 +679,13 @@ function calc(){
     flags.push({type:"threshold", text:`REVIEW: Hop LSI below ${LSI_THRESHOLD}% (${hopLSI.toFixed(1)}%)`});
   }
 
+  const s010 = bestTime(num("split010_t1"), num("split010_t2"));
+  const s1020 = bestTime(num("split1020_t1"), num("split1020_t2"));
+  const s20total = (s010 !== null && s1020 !== null) ? s010 + s1020 : null;
+  document.getElementById("r-s010").textContent = fmt(s010,2," s");
+  document.getElementById("r-s1020").textContent = fmt(s1020,2," s");
+  document.getElementById("r-s20").textContent = fmt(s20total,2," s");
+
   const age = num("age"), height = num("height"), sitht = num("sitht"), sex = str("sex");
   let legLen = null, matOffset = null;
   if(height !== null && sitht !== null) legLen = height - sitht;
@@ -673,7 +699,7 @@ function calc(){
   document.getElementById("r-legln").textContent = fmt(legLen,1," cm");
   document.getElementById("r-mat").textContent = fmt(matOffset,2," yrs");
 
-  const coreFields = [height, sitht, mass, num("sprinttime")];
+  const coreFields = [height, sitht, mass, num("split010_t1")];
   if(coreFields.some(v => v === null) && coreFields.some(v => v !== null)){
     flags.push({type:"protocol", text:"REVIEW: one or more core measurements (height, sitting height, mass, sprint) still blank"});
   }
@@ -691,13 +717,12 @@ function calc(){
     });
   }
 
-  lastResults = {strengthData, addAbdRatio, flexExtRatio, cmjBest, bjBest, hopLBest, hopRBest, hopLSI, legLen, matOffset, flags};
+  lastResults = {strengthData, addAbdRatio, flexExtRatio, cmjBest, bjBest, hopLBest, hopRBest, hopLSI, s010, s1020, s20total, legLen, matOffset, flags};
 }
 
 function clearAll(){
   document.querySelectorAll("input").forEach(i => i.value = "");
   document.querySelectorAll("select").forEach(s => s.value = "");
-  document.getElementById("sprintdist").value = 20;
   calc();
 }
 
@@ -716,6 +741,9 @@ function copyResults(){
   lines.push(`CMJ best: ${fmt(r.cmjBest,1)} cm`);
   lines.push(`Broad jump best: ${fmt(r.bjBest,1)} cm`);
   lines.push(`Hop L/R best: ${fmt(r.hopLBest,1)} / ${fmt(r.hopRBest,1)} cm — LSI ${fmt(r.hopLSI,1)}%`);
+  lines.push(`0-10m split: ${fmt(r.s010,2)} s`);
+  lines.push(`10-20m split: ${fmt(r.s1020,2)} s`);
+  lines.push(`20m total: ${fmt(r.s20total,2)} s`);
   lines.push(`Leg length: ${fmt(r.legLen,1)} cm`);
   lines.push(`Maturity offset: ${fmt(r.matOffset,2)} yrs from PHV`);
   lines.push("");
