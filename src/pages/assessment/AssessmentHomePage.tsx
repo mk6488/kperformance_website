@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Assessment } from '../../assessment/types';
 import { listRecentAssessments, createAssessment } from '../../assessment/assessmentApi';
 import { emptyAssessment } from '../../assessment/emptyAssessment';
+import { adminSignOut } from '../../lib/adminAuth';
 
 function statusLabel(s: Assessment['status']) {
   if (s === 'complete') return { text: 'Complete', cls: 'bg-brand-green/15 text-emerald-800' };
@@ -42,13 +43,21 @@ export default function AssessmentHomePage() {
             <img src="/logo-blue.png" alt="K Performance" className="h-8 w-8 object-contain" />
             <span className="font-semibold text-brand-navy text-base">Assessments</span>
           </div>
-          <button
-            onClick={handleNew}
-            disabled={creating}
-            className="bg-brand-navy text-white text-sm font-semibold px-5 py-2.5 rounded-full min-h-[44px] hover:bg-brand-blue transition-colors disabled:opacity-50"
-          >
-            {creating ? 'Starting…' : '+ New session'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => adminSignOut().finally(() => { window.location.replace('/admin/login'); })}
+              className="text-sm font-medium text-brand-slate px-3 py-2 rounded-lg min-h-[44px] hover:bg-slate-100 transition-colors"
+            >
+              Sign out
+            </button>
+            <button
+              onClick={handleNew}
+              disabled={creating}
+              className="bg-brand-navy text-white text-sm font-semibold px-5 py-2.5 rounded-full min-h-[44px] hover:bg-brand-blue transition-colors disabled:opacity-50"
+            >
+              {creating ? 'Starting…' : '+ New session'}
+            </button>
+          </div>
         </div>
       </header>
 
