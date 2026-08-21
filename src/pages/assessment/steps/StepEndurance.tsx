@@ -1,7 +1,11 @@
 import type { Assessment, AerobicProtocol } from '../../../assessment/types';
 import CooperTimer from '../CooperTimer';
 
-type Props = { assessment: Assessment; update: (fn: (prev: Assessment) => Assessment) => void };
+type Props = {
+  assessment: Assessment;
+  update: (fn: (prev: Assessment) => Assessment) => void;
+  lockedProtocol?: AerobicProtocol | null;
+};
 
 const inputCls = 'w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-base text-brand-charcoal focus:outline-none focus:ring-[3px] focus:ring-brand-blue/15 focus:border-brand-blue transition-colors min-h-[52px]';
 const textareaCls = inputCls + ' min-h-[80px] resize-y';
@@ -44,7 +48,7 @@ const PROTOCOLS: {
   },
 ];
 
-export default function StepEndurance({ assessment, update }: Props) {
+export default function StepEndurance({ assessment, update, lockedProtocol }: Props) {
   const end = assessment.endurance;
   const proto = PROTOCOLS.find(p => p.key === end.protocol);
 
@@ -94,28 +98,40 @@ export default function StepEndurance({ assessment, update }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Protocol selector */}
-      <div className="space-y-2">
-        <p className="text-xs font-bold tracking-widest uppercase text-brand-blue">
-          Protocol — choose once per athlete, never change between test and retest
-        </p>
-        {PROTOCOLS.map(p => (
-          <button
-            key={p.key}
-            onClick={() => setProtocol(p.key)}
-            className={`w-full text-left px-4 py-3.5 rounded-xl border text-sm transition-colors min-h-[64px] ${
-              end.protocol === p.key
-                ? 'bg-brand-navy text-white border-brand-navy'
-                : 'bg-white text-brand-charcoal border-[#e9eef5] hover:border-brand-navy/30'
-            }`}
-          >
-            <p className="font-semibold">{p.label}</p>
-            <p className={`text-xs mt-0.5 ${end.protocol === p.key ? 'text-blue-200' : 'text-brand-slate'}`}>
-              {p.sport}
+      {/* Protocol selector — locked at retest */}
+      {lockedProtocol != null ? (
+        <div className="space-y-2">
+          <p className="text-xs font-bold tracking-widest uppercase text-brand-blue">Protocol — locked from initial assessment</p>
+          <div className="bg-brand-offWhite border border-[#e9eef5] rounded-xl px-4 py-3.5">
+            <p className="font-semibold text-brand-charcoal">
+              {PROTOCOLS.find(p => p.key === lockedProtocol)?.label ?? lockedProtocol}
             </p>
-          </button>
-        ))}
-      </div>
+            <p className="text-xs text-brand-slate mt-0.5">Non-negotiable — same protocol as initial session</p>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-xs font-bold tracking-widest uppercase text-brand-blue">
+            Protocol — choose once per athlete, never change between test and retest
+          </p>
+          {PROTOCOLS.map(p => (
+            <button
+              key={p.key}
+              onClick={() => setProtocol(p.key)}
+              className={`w-full text-left px-4 py-3.5 rounded-xl border text-sm transition-colors min-h-[64px] ${
+                end.protocol === p.key
+                  ? 'bg-brand-navy text-white border-brand-navy'
+                  : 'bg-white text-brand-charcoal border-[#e9eef5] hover:border-brand-navy/30'
+              }`}
+            >
+              <p className="font-semibold">{p.label}</p>
+              <p className={`text-xs mt-0.5 ${end.protocol === p.key ? 'text-blue-200' : 'text-brand-slate'}`}>
+                {p.sport}
+              </p>
+            </button>
+          ))}
+        </div>
+      )}
 
       {proto && (
         <>

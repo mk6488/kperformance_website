@@ -2,7 +2,11 @@ import { useState } from 'react';
 import type { Assessment, StrengthSide } from '../../../assessment/types';
 import { trialVariance } from '../../../assessment/calculations';
 
-type Props = { assessment: Assessment; update: (fn: (prev: Assessment) => Assessment) => void };
+type Props = {
+  assessment: Assessment;
+  update: (fn: (prev: Assessment) => Assessment) => void;
+  carriedPriorities?: string[];
+};
 
 const inputCls = 'w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-base text-brand-charcoal focus:outline-none focus:ring-[3px] focus:ring-brand-blue/15 focus:border-brand-blue transition-colors min-h-[52px] text-center';
 const textareaCls = 'w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-base text-brand-charcoal focus:outline-none focus:ring-[3px] focus:ring-brand-blue/15 focus:border-brand-blue transition-colors min-h-[80px] resize-y';
@@ -76,7 +80,7 @@ function StrengthSideInput({
   );
 }
 
-export default function StepStrength({ assessment, update }: Props) {
+export default function StepStrength({ assessment, update, carriedPriorities }: Props) {
   const [subStep, setSubStep] = useState(0);
   const str = assessment.strength;
   const mass = assessment.anthropometrics.bodyMass.value;
@@ -94,6 +98,14 @@ export default function StepStrength({ assessment, update }: Props) {
   if (subStep === SUMMARY) {
     return (
       <div className="space-y-5">
+        {carriedPriorities && carriedPriorities.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+            <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1.5">Carried priorities — retest regardless</p>
+            <ul className="space-y-0.5">
+              {carriedPriorities.map((p, i) => <li key={i} className="text-sm text-amber-800">· {p}</li>)}
+            </ul>
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <p className="text-xs font-bold tracking-widest uppercase text-brand-blue">Strength summary</p>
           <button onClick={() => setSubStep(TESTS.length - 1)} className="text-xs text-brand-slate underline">← Back to tests</button>
@@ -151,6 +163,15 @@ export default function StepStrength({ assessment, update }: Props) {
 
   return (
     <div className="space-y-5">
+      {carriedPriorities && carriedPriorities.length > 0 && subStep === 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+          <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1.5">Carried priorities — retest regardless</p>
+          <ul className="space-y-0.5">
+            {carriedPriorities.map((p, i) => <li key={i} className="text-sm text-amber-800">· {p}</li>)}
+          </ul>
+        </div>
+      )}
+
       {/* Test progress */}
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold tracking-widest uppercase text-brand-blue">

@@ -217,12 +217,41 @@ export interface Debrief {
   priorityMeasures: string[];
 }
 
+// --- Session type and retest-specific sections ---
+
+export type SessionType = 'initial' | 'retest';
+
+export interface RetestUpdate {
+  weeksSinceInitial: number | null;
+  injuriesSince: string | null;
+  illnessTimeOff: string | null;
+  trainingAdherence: string | null;
+  growthChange: string | null;
+  conditionsMatchInitial: boolean;
+  conditionsMismatchNote: string | null;
+}
+
+export interface RetestPriorityCaptureItem {
+  label: string;
+  outOfBattery: boolean;
+  observation: ObservationValue | null;
+}
+
+export interface RetestDiscussion {
+  improvements: string[];
+  stillNeedsWork: string[];
+  nextBlock: string | null;
+  nextRetestDate: string | null;
+}
+
 // --- Top-level assessment document ---
 
 export interface Assessment {
   id: string;
   athleteId: string;
   status: SessionStatus;
+  sessionType: SessionType;
+  previousAssessmentId: string | null;
   createdAt: string; // ISO timestamp
   updatedAt: string;
   sessionMeta: SessionMeta;
@@ -235,4 +264,7 @@ export interface Assessment {
   power: Power;
   endurance: Endurance;
   debrief: Debrief;
+  retestUpdate: RetestUpdate | null;
+  retestPriorityCapture: RetestPriorityCaptureItem[] | null;
+  retestDiscussion: RetestDiscussion | null;
 }

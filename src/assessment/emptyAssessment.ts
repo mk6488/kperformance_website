@@ -11,6 +11,14 @@ import type {
   StrengthSide,
 } from './types';
 
+export function getCarriedPriorities(previousAssessment: Assessment): string[] {
+  const prevType = previousAssessment.sessionType ?? 'initial';
+  if (prevType === 'initial') {
+    return previousAssessment.debrief?.priorityMeasures ?? [];
+  }
+  return previousAssessment.retestDiscussion?.stillNeedsWork ?? [];
+}
+
 function emptyMeasured(unit: string): MeasuredValue {
   return { value: null, unit, source: 'Manual', type: 'Measurement' };
 }
@@ -164,6 +172,55 @@ export function emptyAssessment(now: string): Assessment {
       packageSold: null,
       strengths: [],
       priorityMeasures: [],
+    },
+
+    sessionType: 'initial',
+    previousAssessmentId: null,
+    retestUpdate: null,
+    retestPriorityCapture: null,
+    retestDiscussion: null,
+  };
+}
+
+export function emptyRetestAssessment(now: string, previousAssessment: Assessment): Assessment {
+  const base = emptyAssessment(now);
+
+  const prevDate = new Date(previousAssessment.sessionMeta?.date ?? now);
+  const weeksSinceInitial = Math.round(
+    (new Date(now).getTime() - prevDate.getTime()) / (7 * 24 * 60 * 60 * 1000),
+  );
+
+  const rawPriorities = getCarriedPriorities(previousAssessment);
+
+  return {
+    ...base,
+    athleteId: previousAssessment.athleteId,
+    athleteSnapshot: { ...previousAssessment.athleteSnapshot },
+    sessionType: 'retest',
+    previousAssessmentId: previousAssessment.id,
+    endurance: {
+      ...base.endurance,
+      protocol: previousAssessment.endurance?.protocol ?? null,
+    },
+    retestUpdate: {
+      weeksSinceInitial,
+      injuriesSince: null,
+      illnessTimeOff: null,
+      trainingAdherence: null,
+      growthChange: null,
+      conditionsMatchInitial: true,
+      conditionsMismatchNote: null,
+    },
+    retestPriorityCapture: rawPriorities.map(label => ({
+      label,
+      outOfBattery: false,
+      observation: null,
+    })),
+    retestDiscussion: {
+      improvements: [],
+      stillNeedsWork: [],
+      nextBlock: null,
+      nextRetestDate: null,
     },
   };
 }

@@ -9,8 +9,12 @@ import StepStrength from './steps/StepStrength';
 import StepPower from './steps/StepPower';
 import StepEndurance from './steps/StepEndurance';
 import StepDebrief from './steps/StepDebrief';
+import StepRetestUpdate from './steps/StepRetestUpdate';
+import StepRetestPriorities from './steps/StepRetestPriorities';
+import StepRetestPower from './steps/StepRetestPower';
+import StepRetestDiscussion from './steps/StepRetestDiscussion';
 
-const STEPS = [
+const INITIAL_STEPS = [
   'Athlete & Session',
   'Screening',
   'Red Flag Screen',
@@ -20,6 +24,15 @@ const STEPS = [
   'Power & Speed',
   'Endurance',
   'Debrief',
+];
+
+const RETEST_STEPS = [
+  'Session & Update',
+  'Carried Priorities',
+  'Strength',
+  'Power & Speed',
+  'Endurance',
+  'Discussion',
 ];
 
 type Props = { assessmentId: string };
@@ -55,7 +68,37 @@ export default function AssessmentSessionPage({ assessmentId }: Props) {
     : saveState === 'error' ? 'Save failed'
     : '';
 
+  const isRetest = assessment.sessionType === 'retest';
+  const STEPS = isRetest ? RETEST_STEPS : INITIAL_STEPS;
+  const carriedPriorities = assessment.retestPriorityCapture?.map(p => p.label) ?? [];
+  const lockedProtocol = isRetest ? (assessment.endurance?.protocol ?? null) : undefined;
   const stepProps = { assessment, update };
+
+  function renderStep() {
+    if (isRetest) {
+      switch (step) {
+        case 0: return <StepRetestUpdate {...stepProps} />;
+        case 1: return <StepRetestPriorities {...stepProps} />;
+        case 2: return <StepStrength {...stepProps} carriedPriorities={carriedPriorities} />;
+        case 3: return <StepRetestPower {...stepProps} />;
+        case 4: return <StepEndurance {...stepProps} lockedProtocol={lockedProtocol} />;
+        case 5: return <StepRetestDiscussion {...stepProps} onComplete={() => { window.location.href = '/assessment'; }} />;
+        default: return null;
+      }
+    }
+    switch (step) {
+      case 0: return <StepAthleteSession {...stepProps} />;
+      case 1: return <StepScreening {...stepProps} />;
+      case 2: return <StepRedFlag {...stepProps} />;
+      case 3: return <StepAnthropometrics {...stepProps} />;
+      case 4: return <StepMovementRange {...stepProps} />;
+      case 5: return <StepStrength {...stepProps} />;
+      case 6: return <StepPower {...stepProps} />;
+      case 7: return <StepEndurance {...stepProps} />;
+      case 8: return <StepDebrief {...stepProps} onComplete={() => { window.location.href = '/assessment'; }} />;
+      default: return null;
+    }
+  }
 
   return (
     <div className="min-h-screen bg-brand-offWhite flex flex-col">
@@ -68,6 +111,7 @@ export default function AssessmentSessionPage({ assessmentId }: Props) {
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-brand-charcoal text-sm truncate">
               {assessment.athleteSnapshot?.name || 'New session'}
+              {isRetest && <span className="ml-2 text-xs font-normal text-brand-slate">Retest</span>}
             </p>
             <p className="text-xs text-brand-slate">{STEPS[step]}</p>
           </div>
@@ -97,15 +141,7 @@ export default function AssessmentSessionPage({ assessmentId }: Props) {
 
       {/* Step content */}
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-6">
-        {step === 0 && <StepAthleteSession {...stepProps} />}
-        {step === 1 && <StepScreening {...stepProps} />}
-        {step === 2 && <StepRedFlag {...stepProps} />}
-        {step === 3 && <StepAnthropometrics {...stepProps} />}
-        {step === 4 && <StepMovementRange {...stepProps} />}
-        {step === 5 && <StepStrength {...stepProps} />}
-        {step === 6 && <StepPower {...stepProps} />}
-        {step === 7 && <StepEndurance {...stepProps} />}
-        {step === 8 && <StepDebrief {...stepProps} onComplete={() => { window.location.href = '/assessment'; }} />}
+        {renderStep()}
       </main>
 
       {/* Bottom navigation */}
