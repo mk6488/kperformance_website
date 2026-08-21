@@ -39,6 +39,25 @@ service cloud.firestore {
       allow create, read, list: if isAdmin();
       allow update, delete: if false;
     }
+
+    // Assessment app — athlete profiles
+    // Ordinary deletion is blocked to protect data integrity. Legitimate erasure requests
+    // (UK GDPR Article 17) are honoured through a controlled, documented manual process via
+    // the Firebase console — not through the app. See 20_data_governance_and_retention.md.
+    // Routine mistyped-value corrections use the CorrectionRecord pattern in the schema,
+    // not silent field overwrites.
+    match /athletes/{athleteId} {
+      allow create, read, list, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Assessment app — session records
+    // Same deletion model as /athletes above — see 20_data_governance_and_retention.md.
+    // Direct client writes require Firebase Auth + adminUsers allowlist (isAdmin() check).
+    match /assessments/{assessmentId} {
+      allow create, read, list, update: if isAdmin();
+      allow delete: if false;
+    }
   }
 }
 

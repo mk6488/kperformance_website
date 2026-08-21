@@ -1,5 +1,8 @@
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
+import AssessmentRoute from './assessment/AssessmentRoute';
+import AssessmentHomePage from './pages/assessment/AssessmentHomePage';
+import AssessmentSessionPage from './pages/assessment/AssessmentSessionPage';
 import { HeroSection } from './components/sections/HeroSection';
 import { WhyItMattersSection } from './components/sections/WhyItMattersSection';
 import { WhatActuallyHappensSection } from './components/sections/WhatActuallyHappensSection';
@@ -117,6 +120,23 @@ function App() {
 
   if (pathname === '/calculator') {
     return <CalculatorPage />;
+  }
+
+  if (pathname === '/assessment') {
+    return (
+      <AssessmentRoute>
+        <AssessmentHomePage />
+      </AssessmentRoute>
+    );
+  }
+
+  if (pathname.startsWith('/assessment/')) {
+    const assessmentId = pathname.replace('/assessment/', '');
+    return (
+      <AssessmentRoute>
+        <AssessmentSessionPage assessmentId={assessmentId} />
+      </AssessmentRoute>
+    );
   }
 
   if (pathname === '/privacy') {
