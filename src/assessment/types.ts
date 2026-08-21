@@ -177,8 +177,6 @@ export interface Strength {
   kneeFlexion: BilateralStrengthTest;
   kneeExtension: BilateralStrengthTest;
   anklePlantarflexion: BilateralStrengthTest;
-  // Cross-test ratios — one value per ratio, matching the run sheet's single-blank format.
-  // Exact combining formula ported from Assessment_Calculator.xlsx in Phase 5.
   adductorAbductorRatio: DerivedValue;
   kneeFlexionExtensionRatio: DerivedValue;
   assessorComments: string | null;

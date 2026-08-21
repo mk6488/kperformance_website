@@ -163,7 +163,20 @@ export function applyDerivedValues(a: Assessment): Assessment {
     },
   };
 
-  return { ...a, anthropometrics: newAnthr, strength: newStr, power: newPower };
+  // Endurance derived values — auto-calculated for Cooper and critical speed only.
+  // Beep test VO2max requires a level-to-VO2max lookup and remains manually entered.
+  const end = a.endurance;
+  let newEnd = end;
+  const rawResult = end.result?.value ?? null;
+
+  if (end.protocol === 'cooper12min' && rawResult !== null) {
+    newEnd = { ...end, derived: derived(cooperVo2max(rawResult), 'ml/kg/min') };
+  }
+  // criticalSpeed3min: not auto-calculated — pending protocol clarification on whether
+  // the run sheet captures a final-segment distance (required for true CS) or total
+  // distance only (which is mean speed, not the same construct). Enter manually for now.
+
+  return { ...a, anthropometrics: newAnthr, strength: newStr, power: newPower, endurance: newEnd };
 }
 
 // Trial variance check — returns the % difference if > 10%, else null
@@ -171,4 +184,17 @@ export function trialVariance(t1: number | null, t2: number | null): number | nu
   if (t1 === null || t2 === null || t1 <= 0 || t2 <= 0) return null;
   const diff = (Math.abs(t1 - t2) / Math.max(t1, t2)) * 100;
   return diff > 10 ? diff : null;
+}
+
+// Cooper (1968): VO2max (ml/kg/min) from 12-minute run distance in metres
+export function cooperVo2max(distanceM: number): number | null {
+  if (distanceM <= 0) return null;
+  const v = (distanceM - 504.9) / 44.73;
+  return v > 0 ? Math.round(v * 10) / 10 : null;
+}
+
+// Critical speed (m/s) from 3-minute all-out distance in metres
+export function criticalSpeed(distanceM: number): number | null {
+  if (distanceM <= 0) return null;
+  return Math.round((distanceM / 180) * 100) / 100;
 }

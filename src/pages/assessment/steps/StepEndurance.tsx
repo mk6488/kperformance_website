@@ -149,13 +149,22 @@ export default function StepEndurance({ assessment, update }: Props) {
               <label className="block text-xs font-semibold text-brand-slate tracking-wide uppercase">
                 {proto.derivedLabel}
               </label>
-              <input
-                type="number" step="0.1" inputMode="decimal"
-                className={inputCls}
-                value={end.derived?.value ?? ''}
-                onChange={e => setDerived(e.target.value ? Number(e.target.value) : null)}
-                placeholder={proto.derivedPlaceholder}
-              />
+              {end.protocol === 'cooper12min' ? (
+                <div className="w-full rounded-lg border border-slate-200 bg-brand-offWhite px-3 py-3 min-h-[52px] flex items-center">
+                  {end.derived?.value != null
+                    ? <span className="text-base font-semibold text-brand-charcoal">{end.derived.value} {end.derived.unit}</span>
+                    : <span className="text-sm text-brand-slate italic">Enter result above to calculate</span>
+                  }
+                </div>
+              ) : (
+                <input
+                  type="number" step="0.1" inputMode="decimal"
+                  className={inputCls}
+                  value={end.derived?.value ?? ''}
+                  onChange={e => setDerived(e.target.value ? Number(e.target.value) : null)}
+                  placeholder={proto.derivedPlaceholder}
+                />
+              )}
             </div>
           </div>
         </>
