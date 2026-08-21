@@ -14,7 +14,7 @@ export default function AssessmentRoute({ children }: { children: ReactNode }) {
   }
 
   if (!user) {
-    window.location.replace('/admin/login');
+    window.location.replace(`/admin/login?redirect=${encodeURIComponent(window.location.pathname)}`);
     return null;
   }
 

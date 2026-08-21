@@ -5,6 +5,12 @@ import { Section } from '../../components/ui/Section';
 import { SectionHeading } from '../../components/ui/SectionHeading';
 import { adminSignIn, useAuthUser, useIsAdmin } from '../../lib/adminAuth';
 
+function getSafeRedirect(): string {
+  const r = new URLSearchParams(window.location.search).get('redirect');
+  // Only follow relative paths — reject external URLs and protocol-relative URLs.
+  return r && r.startsWith('/') && !r.startsWith('//') ? r : '/admin';
+}
+
 export default function AdminLogin() {
   const { user, loading } = useAuthUser();
   const { isAdmin, loading: adminLoading } = useIsAdmin(user?.uid);
@@ -14,7 +20,7 @@ export default function AdminLogin() {
   const [submitting, setSubmitting] = useState(false);
 
   if (!loading && !adminLoading && user && isAdmin) {
-    window.location.replace('/admin');
+    window.location.replace(getSafeRedirect());
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -23,7 +29,7 @@ export default function AdminLogin() {
     setSubmitting(true);
     try {
       await adminSignIn(email, password);
-      window.location.replace('/admin');
+      window.location.replace(getSafeRedirect());
     } catch (err: any) {
       setError(err?.message || 'Unable to sign in. Please check your details.');
     } finally {
